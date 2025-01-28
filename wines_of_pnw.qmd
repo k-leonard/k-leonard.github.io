@@ -1,0 +1,108 @@
+---
+title-block-banner: true
+title: "DATA 505: Homework #1"
+author: "Kendall Leonard"
+format: html
+editor: visual
+---
+
+# **Abstract:**
+
+This is a technical blog post of **both** an HTML file *and* [.qmd file](src/wine_of_pnw.qmd) hosted on GitHub pages.
+
+# Setup
+
+**Step Up Code:**
+
+```{r}
+library(tidyverse) 
+
+wine <- readRDS(gzcon(url("https://github.com/cd-public/DSLM-505/raw/master/dat/wine.rds"))) %>%
+  filter(province=="Oregon" | province=="California" | province=="New York") %>% 
+  mutate(cherry=as.integer(str_detect(description,"[Cc]herry"))) %>% 
+  mutate(lprice=log(price)) %>% 
+  select(lprice, points, cherry, province)
+```
+
+**Explanataion:**
+
+> [TODO]{style="color:red;font-weight:bold"}: \*The first line is grabbing the dataset from Calvin's github, and then piping it into a filter statement where were are sorting the data so we are only left with wines that have either Oregon, California or New York as their province. Next, we are creating a new column using other exisiting columns with the mutate command, and this new column, called 'cherry', contains a number, either 0 or 1, depending on if the description of the wine has Cherry in it (set up to allow both lower and uppercase 'C'). Next, another mutate statement, which is creating a column named 'lprice' and contains the log of the price column. The we select the columns we want to include in our data set, which includes 'lprice' (the log price), 'points', 'cherry', and 'province'.
+
+# Multiple Regression
+
+## Linear Models
+
+First run a linear regression model with log of price as the dependent variable and 'points' and 'cherry' as features (variables).
+
+```{r}
+# TODO: hint: m1 <- lm(lprice ~ points + cherry)
+m1 <- lm(lprice ~ points + cherry, data= wine)
+summary(m1)
+## RMSE
+sqrt(mean(m1$residuals^2))
+```
+
+**Explanataion:**
+
+> [TODO]{style="color:red;font-weight:bold"}: *used the lm() function for the linear model, which takes the form y\~x, so price on the left, and cherry and point on the right.*
+
+> [TODO]{style="color:red;font-weight:bold"}: *RMSE (standing for Root Mean Square Error) is used to tell us how well a regression model fits a dataset as it tells us the average distance between the predicted values that the model gives us and the actual values in the dataset. In our case, with an RMSE of \~0.46, each predicted price is about \$0.46 off the actual price.*
+
+## Interaction Models
+
+Add an interaction between 'points' and 'cherry'.
+
+```{r}
+m2<- lm(lprice~points * cherry, data = wine)
+summary(m2)
+
+sqrt(mean(m2$residuals^2))
+```
+
+> [TODO]{style="color:red;font-weight:bold"}: *I once again used the lm() function, and added an interaction (an asterisk) between points and cherry to indicate that we would like to see if having cherry notes (a yes or no) affects the points a wine gets, and if that affects the log price.*
+
+> [TODO]{style="color:red;font-weight:bold"}: *Very little change in RMSE from the linear model without interaction, with an RMSE of \~0.46, which in context means each predicted price is about \$0.46 off the actual price, even when considering how cherry notes may have affected the output.*
+
+### The Interaction Variable
+
+> [TODO]{style="color:red;font-weight:bold"}: *The coefficient in this context means that, depending on if cherry is present in the wine, the slope of the line that indicates the relationship between price and points changes.* <br>[Explain as you would to a non-technical manager.](https://youtube.com/clip/UgkxY7ohjoimIef6zpPLjgQHqJcJHeZptuVm?feature=shared)
+
+## Applications
+
+Determine which province (Oregon, California, or New York), does the 'cherry' feature in the data affect price most?
+
+```{r}
+m3<-lm(lprice~province*cherry, data=wine)
+summary(m3)
+```
+
+> [TODO]{style="color:red;font-weight:bold"}: *I used another lm() and included an interaction between province and cherry to see what province has the biggest influence. To note, I'm 98% sure that it used california as the base, which is why there isn't anything about in the output. But cherry notes do have a significant relationship to wines from Oregon, as we can see by the triple stars next to it.*
+
+# Scenarios
+
+## On Accuracy
+
+Imagine a model to distinguish New York wines from those in California and Oregon. After a few days of work, you take some measurements and note: "I've achieved 91% accuracy on my model!"
+
+Should you be impressed? Why or why not?
+
+```{r}
+# TODO: Use simple descriptive statistics from the data to justify your answer.
+
+baseline_accuracy <- max(table(wine$province)) / nrow(wine)
+baseline_accuracy
+```
+
+> [TODO]{style="color:red;font-weight:bold"}: *This is kinda impressive, since the baseline accuracy would be about 71% (meaning the model correctly predicts the correct state 71 out 100 times.)*
+
+## On Ethics
+
+Why is understanding this vignette important to use machine learning in an ethical manner?
+
+> [TODO]{style="color:red;font-weight:bold"}: *Understanding how machine learning can be used in multiple contexts, in this example we can see how bias can influence machine learning. Because we have more wines from some locations than others, we can get caught up in making a model that is good at predicting that one thing, not taking into account how biased data may influence how our model works in other contexts.*
+
+## Ignorance is no excuse
+
+Imagine you are working on a model to predict the likelihood that an individual loses their job as the result of the changing federal policy under new presidential administrations. You have a very large dataset with many hundreds of features, but you are worried that including indicators like age, income or gender might pose some ethical problems. When you discuss these concerns with your boss, she tells you to simply drop those features from the model. Does this solve the ethical issue? Why or why not?
+
+> [TODO]{style="color:red;font-weight:bold"}: *No, simply dropping the features doesn't fix the problem as there are many other things that can become a proxy for those features. Also, by removing these features we are ignoring potential issues that might exist in those features. But if we never look at them, we would never find it.*
