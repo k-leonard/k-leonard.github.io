@@ -6,3 +6,6 @@
 
 
 [Homework 2](https://k-leonard.github.io/wine_features.html)
+
+
+[Homework 3](https://k-leonard.github.io/knn.html)
