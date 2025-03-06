@@ -2,13 +2,12 @@
 <html>
 <head>
   <style>
-    /* Apply the background to the body */
     body {
       background-image: url('https://k-leonard.github.io/Untitled%20design%20(1).png');
-      background-size: cover; /* Ensure background covers the entire viewport */
+      background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      height: 100vh; /* Full viewport height */
+      height: 100vh;
       margin: 0;
       display: flex;
       flex-direction: column;
@@ -16,7 +15,6 @@
       align-items: center;
     }
 
-    /* Navbar styling */
     .navbar {
       background-color: #333;
       width: 100%;
@@ -25,7 +23,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 1000; /* Ensure navbar is on top */
+      z-index: 1000;
       padding: 10px 0;
     }
 
@@ -42,14 +40,13 @@
       color: black;
     }
 
-    /* Content section styling */
     .content {
-      background-color: rgba(240, 240, 240, 0.9); /* Semi-transparent background */
+      background-color: rgba(240, 240, 240, 0.9);
       padding: 20px;
       text-align: center;
       width: 80%;
       border-radius: 10px;
-      margin-top: 80px; /* Adjust space for navbar */
+      margin-top: 80px;
     }
 
     a {
@@ -84,7 +81,7 @@
 
   <script>
     // JavaScript to load the navbar
-    fetch('navbar.html')
+    fetch('navbar.html')  // Adjust path if necessary
       .then(response => response.text())
       .then(data => {
         document.getElementById('navbar-container').innerHTML = data;
