@@ -13,6 +13,11 @@
       margin: 0;
       font-family: "Century Schoolbook", serif; /* Ensures the same font as the rest of the site */
       color: #333;
+      display: flex;
+      justify-content: center;  /* Centers content horizontally */
+      align-items: center;      /* Centers content vertically */
+      height: 100vh;            /* Full viewport height */
+      flex-direction: column;   /* Stack elements vertically */
     }
 
     /* Navbar styling */
@@ -46,8 +51,12 @@
       padding: 20px;
       text-align: center;
       width: 80%;
+      max-width: 1200px; /* Prevents content from becoming too wide */
       border-radius: 10px;
       margin-top: 80px; /* Adjust space for navbar */
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center the content inside the content div */
     }
 
     .projects-container {
