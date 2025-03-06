@@ -12,6 +12,33 @@
       display: flex; /* Enables flexbox for centering */
       justify-content: center; /* Centers horizontally */
       align-items: center; /* Centers vertically */
+      flex-direction: column; /* Makes content stack vertically */
+    }
+
+    /* Navigation Bar Styling */
+    .navbar {
+      background-color: #333; /* Dark background for the navbar */
+      overflow: hidden;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000; /* Ensures the navbar stays on top */
+    }
+
+    .navbar a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd; /* Light background on hover */
+      color: black; /* Change text color on hover */
     }
 
     .content {
@@ -20,6 +47,7 @@
       text-align: center;
       width: 80%; /* Adjust the width as needed */
       border-radius: 10px; /* Optional, to round the corners */
+      margin-top: 60px; /* Ensures the content starts below the navbar */
     }
 
     a {
@@ -36,6 +64,16 @@
   </style>
 </head>
 <body>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <a href="https://k-leonard.github.io/index.html">Home</a>
+    <a href="https://k-leonard.github.io/wine_features.html">Homework 2</a>
+    <a href="https://k-leonard.github.io/knn.html">Homework 3</a>
+    <a href="https://k-leonard.github.io/conditional_probability.html">Homework 4</a>
+    <a href="https://k-leonard.github.io/classification.html">Homework 5</a>
+  </div>
+
+  <!-- Content Section -->
   <div class="content">
     <h1>DATA 505: Applied Machine Learning</h1>
     <p>Below are links to my homework from my graduate machine learning course, taken in spring 2025</p>
