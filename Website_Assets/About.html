@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About</title>
+  <style>
+    body {
+      background-image: url('https://k-leonard.github.io/Untitled%20design%20(1).png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      font-family: "Century Schoolbook", serif; /* Ensures the same font as the rest of the site */
+      color: #333;
+      display: flex;
+      justify-content: center;  /* Centers content horizontally */
+      align-items: center;      /* Centers content vertically */
+      height: 100vh;            /* Full viewport height */
+      flex-direction: column;   /* Stack elements vertically */
+    }
+
+    /* Navbar styling */
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
+
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    /* Content section styling */
+    .content {
+      background-color: rgba(240, 240, 240, 0.8); /* Semi-transparent background */
+      padding: 20px;
+      text-align: center;
+      width: 80%;
+      max-width: 1200px; /* Prevents content from becoming too wide */
+      border-radius: 10px;
+      margin-top: 80px; /* Adjust space for navbar */
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center the content inside the content div */
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .about-container {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div id="navbar-container"></div> <!-- This will load the navbar -->
+
+  <!-- Content Section -->
+  <div class="content">
+    <h1>About Me</h1>
+    <p>Welcome to my about page! Here's a brief introduction to who I am and what I do.</p>
+
+    <div class="about-container">
+      <h2>Who Am I?</h2>
+      <p>Information to come soon!</p>
+
+      <h2>What I Do</h2>
+      <p>Information to come soon!</p>
+      <h2>My Goals</h2>
+      <p>Information to come soon!</p>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript to load the navbar
+    fetch('https://k-leonard.github.io/navbar.html')  // Adjust path if needed
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading the navbar:', error));
+  </script>
+</body>
+</html>
