@@ -24,10 +24,20 @@
   </style>
 </head>
 <body>
+   <div id="navbar-container"></div>
   <div class="content">
     <h1>Kendall Leonard's Github Page</h1>
     <p>This site is currently being used to host my course work! #d3c8bb</p>
     <p><a href="Website_Assets/Data505page.html">Go to DATA 505 Class Page</a></p>
   </div>
+   <script>
+    // JavaScript to load the navbar
+    fetch('navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading the navbar:', error));
+  </script>
 </body>
 </html>
