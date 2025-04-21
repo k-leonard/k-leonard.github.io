@@ -1,0 +1,301 @@
+---
+title: "Final Project"
+authors: "Tatum Good, Jace Higa, Kendall Leonard"
+format: 
+  revealjs:
+      embed-resources: true
+      mainfont: Century Schoolbook
+      slide-number: true
+editor: visual
+---
+
+```{r echo=FALSE}
+set.seed(1)
+library(tidyverse)
+library(patchwork)  # Add this to enable patchwork
+library(caret)
+
+fast <- readRDS(gzcon(url("https://github.com/cd-public/D505/raw/refs/heads/master/dat/craven_train.rds")))
+percent_cols <- sapply(fast, function(col) any(grepl("%", col)))
+profit <- fast["Revenue 2019 to present"] - fast["BOM Cost"] * fast["Units Sold"]
+fast["Profit"] = profit
+
+percent_colnames <- names(fast)[percent_cols]
+
+fast[ , percent_colnames] <- lapply(fast[ , percent_colnames], function(x) {
+  as.numeric(gsub("%", "", x))
+})
+
+fast <- fast[ , !sapply(fast, function(x) is.factor(x) && length(na.omit(unique(x))) < 2)]
+
+fast_features <- fast %>%
+  mutate(
+    bel_94_perc_BOM = `BOM Cost` < quantile(`BOM Cost`, 0.94),
+    high_revenue = `Revenue 2019 to present` > quantile(`Revenue 2019 to present`, 0.94),
+    log_revenue = log(`Revenue 2019 to present`),
+    interaction_cost_units = `BOM Cost` * `Units Sold`,
+    high_volume = `Units Sold` > quantile(`Units Sold`, 0.99),
+    src_www = src_www < 60,
+    direct = `pct_Direct Sales` > 90,
+    form = ifelse(`Main Component MFG Process` == "Form", 1, 0),
+    main_component = ifelse(`Main Component Material` == "Electronics", 1, 0),
+    june = June > 3
+  ) %>%
+  select(Profit, bel_94_perc_BOM, high_revenue, log_revenue, interaction_cost_units, high_volume, src_www, src_external, direct, form, main_component, june)
+
+fast_features_with_bom <- fast %>%
+  mutate(
+    bel_94_perc_BOM = `BOM Cost` < quantile(`BOM Cost`, 0.94),
+    high_revenue = `Revenue 2019 to present` > quantile(`Revenue 2019 to present`, 0.94),
+    log_revenue = log(`Revenue 2019 to present`),
+    interaction_cost_units = `BOM Cost` * `Units Sold`,
+    high_volume = `Units Sold` > quantile(`Units Sold`, 0.99),
+    src_www = src_www < 60,
+    direct = `pct_Direct Sales` > 90,
+    form = ifelse(`Main Component MFG Process` == "Form", 1, 0),
+    main_component = ifelse(`Main Component Material` == "Electronics", 1, 0),
+    june = June > 3
+  ) %>%
+  select(Profit, bel_94_perc_BOM, high_revenue, log_revenue, interaction_cost_units, high_volume, src_www, src_external, direct, form, main_component, june,`BOM Cost`)
+
+fast_features_clean <- na.omit(fast_features)
+for (i in 1:ncol(fast_features_clean)) {
+  fast_features_clean[[i]] <- ifelse(is.infinite(fast_features_clean[[i]]), 0, fast_features_clean[[i]])
+}
+
+fast_features_clean_w_bom <- na.omit(fast_features_with_bom)
+for (i in 1:ncol(fast_features_clean_w_bom)) {
+  fast_features_clean_w_bom[[i]] <- ifelse(is.infinite(fast_features_clean_w_bom[[i]]), 0, fast_features_clean_w_bom[[i]])
+}
+
+```
+
+## Scrub-a-dub-dub (AKA Cleaning the Data)
+
+-   A lot of percentages in this data
+    -   meaning that a lot of numeric data was being seen as textual, making any meaningful feature building next to impossible
+-   So we chopped off the percentages!
+    -   Yay! Workable data!
+
+## Features We Used {.smaller}
+
+-   bel_94_perc_BOM
+-   high_revenue
+-   log_revenue
+-   interaction_cost_units
+-   high_volume
+-   src_www
+-   direct
+-   form
+-   main_component
+-   june
+
+## A detailed look: bel_94_perc_BOM {.smaller .absolute}
+
+::: {.column width="40%"}
+-   Stands for 'Below the 94th Percentile BOM (Bill of Materials)'
+-   Bill of Materials: A price that consists of all materials needed to assemble a product.
+-   The less the materials cost, the more profit is possible.
+-   Why the 94th percentile?
+    -   Tested many percentiles but the 94th ended up lowering our RMSE the most.
+:::
+
+::: {.column width="60%"}
+
+
+```{r echo=FALSE, fig.height= 8, fig.width== 8}
+# Your plot code here
+ggplot(fast_features_clean_w_bom, aes(x=`BOM Cost`, y=Profit, color=bel_94_perc_BOM)) + 
+  geom_point() +
+  theme_minimal() +
+  labs(title = "BOM Cost vs Profit by Percentile")
+```
+:::
+## A detailed look: high_revenue_products
+
+-   Used the 94th percentile as well.
+    -   Figured that the more potential revenue you make off of a product the more profit is available.
+    -   Think selling a house vs. selling hotdogs
+
+## A detailed look: log_revenue {.smaller fig-align="center"}
+
+-   Revenue often has a skewed distribution, where some products generate much higher sales than others. By applying a logarithmic transformation, we make the distribution more symmetric and reduce the impact of extreme values, helping the model generalize better.
+
+```{r echo=FALSE}
+# Combine both ggplots side by side using patchwork
+p1 <- ggplot(fast, aes(`Revenue 2019 to present`)) +
+  geom_histogram()+labs(
+    title = "Unmodified Revenue Distribution",
+    subtitle = "2019",
+    caption = "CravenSpeed",
+    x = "Revenue"
+    
+  )
+
+p2 <- ggplot(fast_features_clean, aes(log_revenue)) +
+  geom_histogram()+
+  labs(
+    title = "Log of Revenue Distribution",
+    subtitle = "2019",
+    caption = "CravenSpeed",
+    x = "Log of Revenue"
+    
+  )
+
+p1 + p2  # This combines both plots side by side
+
+```
+
+## A detailed look: interaction_cost_units {.smaller}
+::: {.column width="50%"}
+-   This feature combines BOM Cost and Units Sold, essentially capturing the total cost of goods sold (COGS).
+-   Why it helps:
+    -   It reflects the scale of production and the cost burden for each product.
+    -   A product with high cost and high volume could eat into profits quickly.
+    -   Helps the model better understand how costs affect profit when scaled.
+:::
+
+::: {.column width="50%"}
+```{r echo= FALSE, fig.height= 8, fig.width= 8}
+ggplot(fast_features_clean, aes(x = interaction_cost_units, y = Profit)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Profit vs. Interaction of Cost and Units Sold",
+    x = "BOM Cost × Units Sold",
+    y = "Profit"
+  ) +
+  scale_x_continuous(labels = scales::comma)
+
+```
+:::
+## A detailed look: high_volume
+::: {.column width="50%"}
+```{r echo=FALSE, fig.height= 8, fig.width= 8}
+    ggplot(fast_features_clean, aes(x = as.factor(high_volume), y = Profit)) +
+      geom_boxplot(fill = "steelblue", alpha = 0.7) +
+      labs(
+        title = "Profit Distribution: High Volume vs. Others",
+        x = "High Volume (1 = Yes)",
+        y = "Profit"
+      )
+```
+:::
+::: {.column width="50%"}
+
+-   Used the 99th percentile as well.
+
+    -   Think back to the selling a house vs. selling hotdogs analogy
+    -   If you sell ten thousand hotdogs there is more room for profit which is where this idea came from
+
+:::
+## A detailed look: direct
+
+-   Indicates if a product had over 90% of its sales via Direct Sales.
+-   Why we chose it:
+    -   Selling direct often means higher profit margins (fewer middlemen).
+    -   This could significantly influence profit and help the model avoid underpredicting for high-margin products.
+
+
+## A detailed look: form {.smaller}
+::: {.column width="50%"}
+-   Binary flag for whether the main manufacturing process was "Form".
+-   Why this matters:
+    -   The manufacturing method likely affects production cost and complexity.
+    -   Certain methods might be more efficient or scalable, thus affecting profit margins.
+:::
+::: {.column width="50%"}
+```{r echo=FALSE, fig.height=8, fig.width=8}
+
+
+
+# Calculate average profit by manufacturing process
+avg_profit_form <- fast_features_clean %>%
+  group_by(form) %>%
+  summarize(avg_profit = mean(Profit, na.rm = TRUE))
+
+# Plot the bar chart
+ggplot(avg_profit_form, aes(x = as.factor(form), y = avg_profit, fill = form)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(title = "Average Profit by Manufacturing Process", 
+       x = "Manufacturing Process (1 = Yes, Form was used", y = "Average Profit") 
+
+```
+:::
+
+## A detailed look: main_component {.smaller}
+::: {.column width="50%"}
+```{r echo=FALSE, fig.height=8, fig.width=8}
+avg_profit_finish <- fast_features_clean %>%
+  group_by(main_component) %>%
+  summarize(avg_profit = mean(Profit, na.rm = TRUE))
+
+ggplot(avg_profit_finish, aes(x = as.factor(main_component), y = avg_profit, fill = main_component)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(title = "Average Profit by Manufacturing Process", 
+       x = "Main Component(1 = Electronics)", y = "Average Profit") 
+
+```
+:::
+::: {.column width="50%"}
+-   Binary flag for whether the main component material was "Electronics".
+-   Why we used it:
+    -   Electronics may indicate high-value or high-margin products, or more expensive components.
+    -   Including this helps the model distinguish material-based cost structures.
+:::
+
+
+## A detailed look: june
+::: {.column width="50%"}
+-   Flag for whether the product's June column was greater than 3 (likely a proxy for year of introduction or recency).
+-   Why we kept it:
+    -   Newer products might be in the early stages of the product life cycle, where profits vary widely.
+    -   Including this helps the model adjust for maturity or freshness of products in predicting profits.
+:::
+::: {.column width="50%"}
+```{r echo=FALSE, fig.height=8, fig.width=8}
+ggplot(fast_features_clean, aes(x = june, y = Profit, fill = june)) +
+  geom_boxplot() +
+  labs(title = "Profit Distribution by Product Recency", 
+       x = "Product Recency", y = "Profit") +
+  scale_fill_manual(values = c("lightblue", "orange")) +
+  theme_minimal()
+
+```
+:::
+
+## Putting it all together: Design of Model {.smaller}
+
+-   Created Profit column as Revenue - (BOM Cost × Units Sold).
+-   Converted percentage strings to numeric, removed low-variance columns, and handled missing/infinite values.
+-   Feature Engineering:
+    -   bel_94_perc_BOM, high_revenue: percentile-based flags
+    -   log_revenue: to reduce skew
+    -   interaction_cost_units: captures cost × volume effect
+    -   Binary flags for direct, form, finish, june, etc.
+-   Final cleaned dataset fast_features_clean was ready for modeling.
+
+## The Big Reveal: RMSE {.center .smaller .incremental}
+
+:::{.r-fit-text }
+
+```{r echo=FALSE}
+train(Profit ~ .,
+      data = fast_features_clean, 
+      method = "lm",
+      trControl = trainControl(method = "cv", number = 5))$results$RMSE
+```
+:::
+- In this context, an RMSE (Root Mean Squared Error) value of 887.6885 means that, on average, your model's predicted profit is off by about $887.69 compared to the actual profit.
+
+- Since we're predicting profit in dollars, RMSE is measured in the same units. So:
+  - If our model predicts a product will make $5,000 in profit, it’s typically off by around $887.69 in either direction
+  
+
+
+
+## 
+:::{.r-fit-text }
+Thank you!
+:::
+
