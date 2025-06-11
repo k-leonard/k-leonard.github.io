@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
+
+    .navbar a {
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .content {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      text-align: center;
+      width: 80%;
+      border-radius: 10px;
+      margin-top: 80px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007BFF;
+      font-size: 18px;
+      display: block;
+      margin: 10px;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Placeholder for Navbar -->
+  <div id="navbar-container"></div>
+
+  <!-- Content Section -->
+  <div class="content">
+    <h1>Undergraduate Classwork</h1>
+    <p>This page contains all relevent classes I took during my undergraduate education, with links to a more indepth page if you are curious about projects and  coursework I completed during that time.</p>
+    <p>Please see my  <a href="https://k-leonard.github.io/Website_Assets/Projects.html"> projects tab </a> for my most recent work and the ones I'm most proud of!</p>
+    <h1>Classes</h1>
+    <a href="https://k-leonard.github.io/index.html">Back to Main Page</a>
+  </div>
+
+  <script>
+    // JavaScript to load the navbar
+    fetch('https://k-leonard.github.io/navbar.html')  // Adjust path if necessary
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading the navbar:', error));
+  </script>
+</body>
+</html>
