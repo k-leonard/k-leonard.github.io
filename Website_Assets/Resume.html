@@ -147,7 +147,7 @@
       text-decoration: underline dotted;
     }
 
-    /* === PRINT OVERRIDES === */
+    /* === PRINT OVERRIDES FOR POLISHED LAYOUT === */
     @media print {
       body {
         font-family: Georgia, 'Times New Roman', serif;
@@ -159,7 +159,7 @@
 
       .container {
         margin: 0;
-        padding: 10px 30px;
+        padding: 10px 40px;
         box-shadow: none;
         border-radius: 0;
         width: 100%;
@@ -173,7 +173,7 @@
 
       .section {
         border-bottom: 0.5px dotted #aaa;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         padding-bottom: 6px;
       }
 
@@ -183,7 +183,8 @@
         margin: 10px 0 6px;
       }
 
-      p, li {
+      p,
+      li {
         font-size: 12pt;
         margin-bottom: 2px;
       }
@@ -209,12 +210,19 @@
         padding-left: 20px;
       }
 
+      .education-item {
+        margin-bottom: 8px;
+      }
+
+      .education-item p {
+        margin: 2px 0;
+      }
+
       .navbar,
       .print-btn,
       #navbar-container,
       .print-hide,
-      .last-updated,
-      .contact-info {
+      .last-updated {
         display: none !important;
       }
 
@@ -240,14 +248,6 @@
   <!-- Resume Content -->
   <div class="container">
     <h1>Kendall Leonard's Resume</h1>
-
-    <!-- Print-only inline contact row -->
-    <div class="print-contact-row">
-      kendall.f.leonard@gmail.com |
-      linkedin.com/in/kendall-leonard |
-      github.com/k-leonard
-    </div>
-
     <div style="text-align: center; margin: 10px 0 30px;" class="print-hide">
       <button onclick="window.print()" class="print-btn">
         <i class="fas fa-print"></i> Print to PDF
@@ -333,8 +333,8 @@
       <p><strong>TBD</strong>: TBD</p>
     </div>
 
-    <!-- Last Updated (hidden in print) -->
-    <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
+    <!-- Last Updated -->
+    <div class="last-updated print-hide">Last Updated: <span id="last-updated-date"></span></div>
   </div>
 
   <!-- Load Navbar -->
