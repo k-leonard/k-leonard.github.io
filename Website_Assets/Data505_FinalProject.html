@@ -79,13 +79,21 @@
   </div>
 
   <script>
-    // JavaScript to load the navbar
-    fetch('https://k-leonard.github.io/navbar.html')  // Adjust path if necessary
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('navbar-container').innerHTML = data;
-      })
-      .catch(error => console.error('Error loading the navbar:', error));
-  </script>
+  fetch('https://k-leonard.github.io/navbar.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('navbar-container').innerHTML = data;
+      // Wait until it's injected, then rebind the function
+      const script = document.createElement("script");
+      script.textContent = `
+        function toggleSidebar() {
+          const sidebar = document.getElementById("mySidebar");
+          sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
+        }
+      `;
+      document.body.appendChild(script);
+    })
+    .catch(error => console.error('Error loading the navbar:', error));
+</script>
 </body>
 </html>
