@@ -184,28 +184,35 @@
   </div>
 
   <script>
-    function toggleInfo(icon) {
-      const info = icon.nextElementSibling.nextElementSibling.nextElementSibling;
-      const allInfos = document.querySelectorAll('.more-info');
-      allInfos.forEach(i => { if (i !== info) i.style.display = 'none'; });
-      info.style.display = (info.style.display === 'block') ? 'none' : 'block';
-    }
+  function toggleInfo(icon) {
+    const card = icon.closest('.project-card');
+    const info = card.querySelector('.more-info');
 
-    fetch('https://k-leonard.github.io/navbar.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('navbar-container').innerHTML = data;
-        const script = document.createElement("script");
-        script.textContent = `
-          function toggleSidebar() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
-          }
-        `;
-        document.body.appendChild(script);
-      })
-      .catch(error => console.error('Error loading the navbar:', error));
-  </script>
+    // Close all others
+    document.querySelectorAll('.more-info').forEach(el => {
+      if (el !== info) el.style.display = 'none';
+    });
+
+    // Toggle current
+    info.style.display = (info.style.display === 'block') ? 'none' : 'block';
+  }
+
+  fetch('https://k-leonard.github.io/navbar.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('navbar-container').innerHTML = data;
+      const script = document.createElement("script");
+      script.textContent = `
+        function toggleSidebar() {
+          const sidebar = document.getElementById("mySidebar");
+          sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
+        }
+      `;
+      document.body.appendChild(script);
+    })
+    .catch(error => console.error('Error loading the navbar:', error));
+</script>
+
 
 </body>
 </html>
