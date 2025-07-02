@@ -6,39 +6,58 @@
   <title>[Project Title]</title>
   <style>
     body {
-      font-family: Georgia, serif;
-      background-image: url('https://k-leonard.github.io/smallfloral.png'); /* Use the same floral image */
-      background-size: cover;
-      background-attachment: fixed;
+      font-family: "Century Schoolbook", serif;
       margin: 0;
       padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
     }
 
-    nav {
-      background-color: #333;
-      padding: 10px 20px;
-      text-align: center;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-    }
-
-    .content-box {
-      background-color: rgba(255, 255, 255, 0.95);
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 40px;
+    .container {
+      width: 80%;
+      max-width: 1000px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px 30px;
+      margin-top: 80px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Navbar styling (copied from resume) */
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
+
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
     }
 
     h1 {
       text-align: center;
-      font-size: 2em;
+      color: #333;
     }
 
     .project-subtitle {
@@ -53,9 +72,10 @@
     }
 
     h2 {
+      color: #000205;
+      margin-bottom: 10px;
       border-bottom: 1px solid #ccc;
       padding-bottom: 5px;
-      color: #333;
     }
 
     ul {
@@ -78,20 +98,17 @@
   </style>
 </head>
 <body>
-  <nav>
-    <a href="https://k-leonard.github.io/index.html">Home</a>
-    <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
-    <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
-    <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
-  </nav>
 
-  <div class="content-box">
+  <!-- Navbar will be injected here -->
+  <div id="navbar-container"></div>
+
+  <div class="container">
     <h1>[Project Title]</h1>
-    <p class="project-subtitle">[Short tagline or summary]</p>
+    <p class="project-subtitle">[Tagline or summary goes here]</p>
 
     <section class="project-section">
       <h2>Overview</h2>
-      <p>[What this project is and why you did it.]</p>
+      <p>[Brief overview of what this project is about and why it matters]</p>
     </section>
 
     <section class="project-section">
@@ -99,32 +116,41 @@
       <ul>
         <li>Python (pandas, scikit-learn)</li>
         <li>SQL (PostgreSQL)</li>
-        <li>R (ggplot2, caret)</li>
         <li>Airflow, Tableau</li>
       </ul>
     </section>
 
     <section class="project-section">
       <h2>Process</h2>
-      <p>[What you did – data collection, wrangling, modeling, visualization. Use bullet points if needed.]</p>
+      <p>[Explain your steps — from data collection to visualization. Break into substeps or bullets if needed.]</p>
     </section>
 
     <section class="project-section">
       <h2>Key Outcomes</h2>
       <ul>
-        <li>[Example: Achieved RMSE of 2.01 with engineered features]</li>
-        <li>[Example: Built real-time pipeline to update dashboard daily]</li>
+        <li>[Example: Achieved RMSE of 2.01]</li>
+        <li>[Example: Built real-time updating dashboard]</li>
       </ul>
     </section>
 
     <section class="project-section">
       <h2>Reflection</h2>
-      <p>[What you learned, what you'd do differently, or future improvements.]</p>
+      <p>[What you learned, challenges, future steps]</p>
     </section>
 
     <footer>
       <a class="back-link" href="projects.html">← Back to Projects</a>
     </footer>
   </div>
+
+  <script>
+    // Dynamically load the navbar
+    fetch('https://k-leonard.github.io/navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading navbar:', error));
+  </script>
 </body>
 </html>
