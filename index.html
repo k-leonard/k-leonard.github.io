@@ -4,24 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kendall Leonard's Portfolio</title>
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
   <style>
     body {
-      font-family: "Century Schoolbook", serif;
-      margin: 0;
-      padding: 0;
       background-image: url('https://k-leonard.github.io/smallfloral.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-      flex-direction: column;
+      margin: 0;
+      font-family: "Century Schoolbook", serif;
       color: #333;
     }
 
-    /* Navbar styling */
     .navbar {
       background-color: #333;
       width: 100%;
@@ -46,52 +43,125 @@
       color: black;
     }
 
-    /* Content styling */
     .content {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 30px;
-      text-align: center;
-      width: 80%;
+      background-color: rgba(255, 255, 255, 0.92);
+      width: 90%;
       max-width: 1000px;
+      margin: 120px auto 40px auto;
+      padding: 40px;
       border-radius: 10px;
-      margin: 100px auto 0 auto; /* Margin to account for fixed navbar */
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
     }
 
-    .content a {
-      color: #007BFF;
+    .profile-photo {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 20px auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-style: italic;
+      margin-bottom: 30px;
+      color: #444;
+    }
+
+    .blurb {
       font-size: 18px;
-      text-decoration: none;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .content a:hover {
-      text-decoration: underline;
+    .home-buttons a {
+      display: inline-block;
+      margin: 10px 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+
+    .home-buttons a:hover {
+      background-color: #0056b3;
+    }
+
+    .icon-links {
+      margin-top: 30px;
+    }
+
+    .icon-links a {
+      margin: 0 10px;
+      color: #333;
+      font-size: 28px;
+      transition: transform 0.2s;
+    }
+
+    .icon-links a:hover {
+      color: #0077b5;
+      transform: scale(1.2);
+    }
+
+    .last-updated {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #777;
     }
   </style>
 </head>
 <body>
 
-  <!-- Dynamic Navbar Container -->
+  <!-- Navbar -->
   <div id="navbar-container"></div>
 
-  <!-- Page Content -->
+  <!-- Main Content -->
   <div class="content">
-    <h1>Kendall Leonard's Page</h1>
-    <p>Welcome to my page! This website showcases examples of my work, including both passion projects and class assignments from my undergraduate and graduate studies.</p>
-    <p><strong>NOTE:</strong> This website is currently being edited for ease of access and adding more information.</p>
-    <p><a href="Website_Assets/Data505page.html">Go to DATA 505 Class Page</a></p>
-    <p>Last Updated: June 10th, 2025</p>
+    <img src="https://via.placeholder.com/150" alt="Kendall Leonard" class="profile-photo" />
+    <h1>Kendall Leonard</h1>
+    <p class="tagline">Aspiring Data Scientist | Communicator | Lifelong Learner</p>
+
+    <p class="blurb">
+      Welcome! I’m Kendall, a passionate data scientist with a love for transforming messy data into meaningful stories.
+      I'm currently pursuing my M.S. in Data Science at Willamette University (after completing my B.S. there too!).
+      Explore my site to see projects I’ve built, papers I’ve written, and code I’m proud of.
+    </p>
+
+    <div class="home-buttons">
+      <a href="projects.html">View My Projects</a>
+      <a href="resume.html">See My Resume</a>
+      <a href="about.html">About Me</a>
+    </div>
+
+    <div class="icon-links">
+      <a href="mailto:kendall.f.leonard@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+      <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+      <a href="https://github.com/k-leonard" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+    </div>
+
+    <div class="last-updated">Last Updated: June 10th, 2025</div>
   </div>
 
-  <!-- JavaScript to load navbar -->
+  <!-- Load Navbar -->
   <script>
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
       .then(data => {
         document.getElementById('navbar-container').innerHTML = data;
       })
-      .catch(error => console.error('Error loading the navbar:', error));
+      .catch(error => console.error('Error loading navbar:', error));
   </script>
-
 </body>
 </html>
