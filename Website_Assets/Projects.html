@@ -49,7 +49,7 @@
       background-color: rgba(255, 255, 255, 0.9);
       padding: 30px;
       text-align: center;
-      width: 80%;
+      width: 90%;
       max-width: 1200px;
       border-radius: 10px;
       margin: 0 auto 40px auto;
@@ -60,15 +60,15 @@
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 30px;
       margin-top: 30px;
     }
 
     .project-card {
       background-color: #333333;
       border-radius: 8px;
-      width: 250px;
-      height: 300px;
+      width: 240px;
+      height: 280px;
       perspective: 1000px;
       position: relative;
     }
@@ -101,6 +101,13 @@
       text-align: center;
     }
 
+    .card-front img {
+      max-width: 100%;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
     .card-back {
       background: white;
       color: #333;
@@ -118,6 +125,22 @@
       cursor: pointer;
     }
 
+    .card-back .view-project-btn {
+      display: block;
+      margin: 10px auto;
+      text-align: center;
+      background-color: #007BFF;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .card-back .view-project-btn:hover {
+      background-color: #0056b3;
+    }
+
     .more-icon {
       position: absolute;
       top: 10px;
@@ -128,42 +151,29 @@
     }
 
     .card-front h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
+      font-size: 16px;
+      margin-bottom: 8px;
     }
 
     .card-front p {
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-
-    .card-front a {
-      color: #84c3ff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .card-front a:hover {
-      text-decoration: underline;
+      font-size: 13px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
-
   <div id="navbar-container"></div>
-
   <div class="content">
     <h1>Projects</h1>
     <p>Welcome to my projects page! Below you'll find some of my work—click a card to explore further.</p>
-
     <div class="projects-container">
       <div class="project-card" onclick="flipCard(event, this)">
         <div class="card-inner">
           <div class="card-front">
+            <img src="https://k-leonard.github.io/Website_Assets/covid.png" alt="COVID viz">
             <div class="more-icon">⋮</div>
             <h3>COVID-19 and Data Visualizations</h3>
             <p>Exploring how pandemic graphics shaped perceptions.</p>
-            <a href="#">View Project</a>
           </div>
           <div class="card-back">
             <div class="close-btn" onclick="closeCard(event, this)">✕</div>
@@ -172,6 +182,7 @@
               <li>Designed interactive dashboards</li>
               <li>Studied user response to different chart styles</li>
             </ul>
+            <a class="view-project-btn" href="#">View Project</a>
           </div>
         </div>
       </div>
@@ -179,10 +190,10 @@
       <div class="project-card" onclick="flipCard(event, this)">
         <div class="card-inner">
           <div class="card-front">
+            <img src="https://k-leonard.github.io/Website_Assets/marvel.png" alt="Marvel">
             <div class="more-icon">⋮</div>
             <h3>Marvel Capstone</h3>
             <p>Data-driven insights into Marvel's heroes and plots.</p>
-            <a href="https://k-leonard.github.io/Website_Assets/capstone-project.html">View Project</a>
           </div>
           <div class="card-back">
             <div class="close-btn" onclick="closeCard(event, this)">✕</div>
@@ -191,6 +202,7 @@
               <li>Scraped 25k+ comics and character pages</li>
               <li>Built a warehouse with analysis-ready tables</li>
             </ul>
+            <a class="view-project-btn" href="https://k-leonard.github.io/Website_Assets/capstone-project.html">View Project</a>
           </div>
         </div>
       </div>
@@ -198,10 +210,10 @@
       <div class="project-card" onclick="flipCard(event, this)">
         <div class="card-inner">
           <div class="card-front">
+            <img src="https://k-leonard.github.io/Website_Assets/timeseries.png" alt="Viz Tool">
             <div class="more-icon">⋮</div>
             <h3>Dynamic Visualization Tool</h3>
             <p>A JavaScript-based time-series exploration app.</p>
-            <a href="#">View Project</a>
           </div>
           <div class="card-back">
             <div class="close-btn" onclick="closeCard(event, this)">✕</div>
@@ -210,6 +222,7 @@
               <li>Interactive filtering and brushing</li>
               <li>Real-time parameter tuning</li>
             </ul>
+            <a class="view-project-btn" href="#">View Project</a>
           </div>
         </div>
       </div>
@@ -258,6 +271,5 @@
       })
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
-
 </body>
 </html>
