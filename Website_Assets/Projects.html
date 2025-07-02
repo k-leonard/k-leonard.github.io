@@ -60,17 +60,18 @@
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 30px;
+      gap: 40px;
       margin-top: 30px;
     }
 
     .project-card {
       background-color: #333333;
       border-radius: 8px;
-      width: 240px;
-      height: 280px;
+      width: 260px;
+      height: 320px;
       perspective: 1000px;
       position: relative;
+      cursor: pointer;
     }
 
     .card-inner {
@@ -99,13 +100,26 @@
       background-color: #333;
       color: white;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
 
     .card-front img {
-      max-width: 100%;
-      height: 100px;
+      width: 60px;
+      height: 60px;
       object-fit: contain;
       margin-bottom: 10px;
+    }
+
+    .three-dots {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 20px;
+      color: white;
     }
 
     .card-back {
@@ -141,15 +155,6 @@
       background-color: #0056b3;
     }
 
-    .more-icon {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      cursor: pointer;
-      color: white;
-      font-size: 20px;
-    }
-
     .card-front h3 {
       font-size: 16px;
       margin-bottom: 8px;
@@ -170,8 +175,8 @@
       <div class="project-card" onclick="flipCard(event, this)">
         <div class="card-inner">
           <div class="card-front">
+            <span class="three-dots">⋮</span>
             <img src="https://k-leonard.github.io/Website_Assets/covid.png" alt="COVID viz">
-            <div class="more-icon">⋮</div>
             <h3>COVID-19 and Data Visualizations</h3>
             <p>Exploring how pandemic graphics shaped perceptions.</p>
           </div>
@@ -190,8 +195,8 @@
       <div class="project-card" onclick="flipCard(event, this)">
         <div class="card-inner">
           <div class="card-front">
+            <span class="three-dots">⋮</span>
             <img src="https://k-leonard.github.io/Website_Assets/marvel.png" alt="Marvel">
-            <div class="more-icon">⋮</div>
             <h3>Marvel Capstone</h3>
             <p>Data-driven insights into Marvel's heroes and plots.</p>
           </div>
@@ -210,8 +215,8 @@
       <div class="project-card" onclick="flipCard(event, this)">
         <div class="card-inner">
           <div class="card-front">
+            <span class="three-dots">⋮</span>
             <img src="https://k-leonard.github.io/Website_Assets/timeseries.png" alt="Viz Tool">
-            <div class="more-icon">⋮</div>
             <h3>Dynamic Visualization Tool</h3>
             <p>A JavaScript-based time-series exploration app.</p>
           </div>
@@ -231,9 +236,6 @@
 
   <script>
     function flipCard(event, card) {
-      const isMoreIcon = event.target.classList.contains('more-icon');
-      const isInsideBack = event.target.closest('.card-back');
-      if (!isMoreIcon && !isInsideBack) return;
       event.stopPropagation();
       closeAllCards();
       card.classList.add('flipped');
