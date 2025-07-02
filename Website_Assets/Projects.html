@@ -62,14 +62,11 @@
     }
 
     .project-card {
-      background-color: #333333;
-      border-radius: 8px;
       width: 240px;
       height: 300px;
       perspective: 1000px;
       position: relative;
       cursor: pointer;
-      overflow: hidden;
     }
 
     .card-inner {
@@ -225,7 +222,7 @@
       card.className = 'project-card';
       card.innerHTML = `
         <div class="card-inner">
-          <div class="card-front" onclick="flipCard(event, this.parentElement.parentElement)">
+          <div class="card-front" onclick="flipCard(event, this.closest('.project-card'))">
             <div class="three-dots">⋮</div>
             <img src="${project.img}" alt="${project.title}">
             <h3>${project.title}</h3>
