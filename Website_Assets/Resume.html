@@ -147,19 +147,18 @@
       text-decoration: underline dotted;
     }
 
-    /* === PRINT OVERRIDES FOR POLISHED LAYOUT === */
+    /* === PRINT OVERRIDES === */
     @media print {
       body {
-        font-family: Georgia, 'Times New Roman', serif;
-        font-size: 12pt;
+        font-family: "Times New Roman", serif;
+        font-size: 11pt;
         background: white !important;
-        line-height: 1.1;
-        margin: 0;
+        color: black;
       }
 
       .container {
         margin: 0;
-        padding: 10px 40px;
+        padding: 12px 32px;
         box-shadow: none;
         border-radius: 0;
         width: 100%;
@@ -167,31 +166,35 @@
       }
 
       h1 {
-        font-size: 18pt;
-        margin-bottom: 20px;
+        font-size: 16pt;
+        margin-bottom: 12px;
       }
 
       .section {
-        border-bottom: 0.5px dotted #aaa;
-        margin-bottom: 14px;
-        padding-bottom: 6px;
+        margin-bottom: 18px;
       }
 
       .section h2 {
-        font-size: 14pt;
-        font-weight: bold;
-        margin: 10px 0 6px;
+        font-size: 13pt;
+        margin-bottom: 4px;
+        border-bottom: 1px dotted #888;
+        padding-bottom: 2px;
+      }
+
+      .education-item,
+      .experience-item {
+        margin-bottom: 10px;
       }
 
       p,
       li {
-        font-size: 12pt;
-        margin-bottom: 2px;
+        font-size: 11pt;
+        margin-bottom: 3px;
+        line-height: 1.25;
       }
 
       ul {
-        margin: 4px 0 8px 24px;
-        padding-left: 20px;
+        margin: 4px 0 8px 20px;
       }
 
       .skills li {
@@ -202,20 +205,16 @@
         padding: 0;
         margin: 0 0 2px 20px;
         border: none;
-        font-size: 12pt;
+        font-size: 11pt;
       }
 
       .skills ul {
         list-style-type: disc;
-        padding-left: 20px;
       }
 
-      .education-item {
-        margin-bottom: 8px;
-      }
-
-      .education-item p {
-        margin: 2px 0;
+      .contact-info p {
+        display: inline;
+        margin-right: 12px;
       }
 
       .navbar,
@@ -224,12 +223,6 @@
       .print-hide,
       .last-updated {
         display: none !important;
-      }
-
-      .print-contact-row {
-        text-align: center;
-        font-size: 11pt;
-        margin-bottom: 10px;
       }
 
       a {
@@ -241,11 +234,8 @@
   </style>
 </head>
 <body>
-
-  <!-- Navbar -->
   <div id="navbar-container" class="print-hide"></div>
 
-  <!-- Resume Content -->
   <div class="container">
     <h1>Kendall Leonard's Resume</h1>
     <div style="text-align: center; margin: 10px 0 30px;" class="print-hide">
@@ -254,7 +244,6 @@
       </button>
     </div>
 
-    <!-- Contact Info Section -->
     <div class="section contact-info">
       <h2><i class="fas fa-address-card print-hide"></i> Contact Information</h2>
       <p><i class="fas fa-envelope print-hide"></i> kendall.f.leonard@gmail.com</p>
@@ -262,7 +251,6 @@
       <p><i class="fab fa-github print-hide"></i> <a href="https://github.com/k-leonard" target="_blank">github.com/k-leonard</a></p>
     </div>
 
-    <!-- Skills Section -->
     <div class="section skills">
       <h2><i class="fas fa-code print-hide"></i> Skills</h2>
       <ul>
@@ -277,7 +265,6 @@
       </ul>
     </div>
 
-    <!-- Education Section -->
     <div class="section education">
       <h2>Education</h2>
       <div class="education-item">
@@ -290,10 +277,8 @@
       </div>
     </div>
 
-    <!-- Experience Section -->
     <div class="section experience">
       <h2>Experience</h2>
-
       <div class="experience-item">
         <p><strong>Programming and Analytics Tutor</strong> — <em>Willamette University Q.U.A.D Tutoring Center</em>, Salem, OR (Aug 2022–May 2025)</p>
         <ul>
@@ -304,7 +289,6 @@
           <li>Emphasized real-world application and problem-solving strategies.</li>
         </ul>
       </div>
-
       <div class="experience-item">
         <p><strong>Tutoring Center Manager</strong> — <em>Willamette University Q.U.A.D Tutoring Center</em>, Salem, OR (Aug 2023–Jan 2025)</p>
         <ul>
@@ -315,7 +299,6 @@
           <li>Coordinated agile team meetings, tracked attendance, and documented outcomes.</li>
         </ul>
       </div>
-
       <div class="experience-item">
         <p><strong>Teaching Assistant</strong> — <em>Willamette University Data Science Department</em>, Salem, OR (Aug 2022–May 2025)</p>
         <ul>
@@ -327,17 +310,14 @@
       </div>
     </div>
 
-    <!-- Projects Section -->
     <div class="section projects">
       <h2>Projects</h2>
       <p><strong>TBD</strong>: TBD</p>
     </div>
 
-    <!-- Last Updated -->
-    <div class="last-updated print-hide">Last Updated: <span id="last-updated-date"></span></div>
+    <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
   </div>
 
-  <!-- Load Navbar -->
   <script>
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
@@ -355,7 +335,6 @@
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
 
-  <!-- Auto-update Last Updated Date -->
   <script>
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const today = new Date().toLocaleDateString(undefined, options);
