@@ -1,108 +1,183 @@
-<!-- navbar.html -->
-<style>
-  /* Top navbar */
-  .navbar {
-    background-color: #333;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 999;
-    padding: 10px 0;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kendall Leonard's Portfolio</title>
 
-  .navbar a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-size: 18px;
-  }
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  .navbar a:hover {
-    background-color: #ddd;
-    color: black;
-  }
+  <style>
+    body {
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      font-family: "Century Schoolbook", serif;
+      color: #333;
+    }
 
-  /* Hamburger Button */
-  .hamburger-button {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 28px;
-    cursor: pointer;
-    z-index: 1001;
-    background-color: #333;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-  }
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
 
-  /* Sidebar menu */
-  .sidebar {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    background-color: #333;
-    overflow-x: hidden;
-    transition: 0.3s;
-    padding-top: 60px;
-  }
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
 
-  .sidebar a {
-    padding: 12px 24px;
-    text-decoration: none;
-    font-size: 20px;
-    color: white;
-    display: block;
-    transition: 0.2s;
-  }
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
 
-  .sidebar a:hover {
-    background-color: #575757;
-  }
+    .content {
+      background-color: rgba(255, 255, 255, 0.92);
+      width: 90%;
+      max-width: 1000px;
+      margin: 120px auto 40px auto;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
 
-  .sidebar .closebtn {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 36px;
-    color: white;
-    cursor: pointer;
-  }
-</style>
+    .profile-photo {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px double #555;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      margin: 20px auto;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
 
-<!-- Top navbar -->
-<div class="navbar">
-  <a href="https://k-leonard.github.io/index.html">Home</a>
-  <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
-  <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
-  <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
-</div>
+    .profile-photo:hover {
+      border-color: #007BFF;
+      box-shadow: 0 0 12px rgba(0, 123, 255, 0.5);
+    }
 
-<!-- Hamburger icon -->
-<button class="hamburger-button" onclick="toggleSidebar()">☰</button>
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
 
-<!-- Sidebar menu -->
-<div id="mySidebar" class="sidebar">
-  <span class="closebtn" onclick="toggleSidebar()">&times;</span>
-  <a href="https://k-leonard.github.io/index.html">Home</a>
-  <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
-  <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
-  <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
-  <a href="https://k-leonard.github.io/Website_Assets/graduate_class_page.html">Graduate Coursework</a>
-  <a href="https://k-leonard.github.io/Website_Assets/undergraduate_class_page.html">Undergraduate Coursework</a>
-</div>
+    .tagline {
+      font-style: italic;
+      margin-bottom: 30px;
+      color: #444;
+    }
 
-<!-- Sidebar toggle logic -->
-<script>
-  function toggleSidebar() {
-    const sidebar = document.getElementById("mySidebar");
-    sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
-  }
-</script>
+    .blurb {
+      font-size: 18px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .home-buttons a {
+      display: inline-block;
+      margin: 10px 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+
+    .home-buttons a:hover {
+      background-color: #0056b3;
+    }
+
+    .icon-links {
+      margin-top: 30px;
+    }
+
+    .icon-links a {
+      margin: 0 10px;
+      color: #333;
+      font-size: 28px;
+      transition: transform 0.2s;
+    }
+
+    .icon-links a:hover {
+      color: #0077b5;
+      transform: scale(1.2);
+    }
+
+    .last-updated {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+
+  <!-- Main Content -->
+  <div class="content">
+    <img src="https://k-leonard.github.io/kendall-cropped.png" alt="Kendall Leonard" class="profile-photo" />
+    <h1>Kendall Leonard</h1>
+    <p class="tagline">Aspiring Data Scientist | Communicator | Lifelong Learner</p>
+
+    <p class="blurb">
+      Welcome! I’m Kendall, a passionate data scientist with a love for transforming messy data into meaningful stories.
+      I'm currently pursuing my M.S. in Data Science at Willamette University (after completing my B.S. there too!).
+      Explore my site to see projects I’ve built, papers I’ve written, and code I’m proud of.
+    </p>
+
+    <div class="home-buttons">
+      <a href="projects.html">View My Projects</a>
+      <a href="resume.html">See My Resume</a>
+      <a href="about.html">About Me</a>
+    </div>
+
+    <div class="icon-links">
+      <a href="mailto:kendall.f.leonard@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+      <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+      <a href="https://github.com/k-leonard" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+    </div>
+
+    <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
+  </div>
+
+  <!-- Load Navbar -->
+  <script>
+    fetch('https://k-leonard.github.io/navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading navbar:', error));
+  </script>
+
+  <!-- Auto-update Last Updated Date -->
+  <script>
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const today = new Date().toLocaleDateString(undefined, options);
+    document.getElementById('last-updated-date').textContent = today;
+  </script>
+</body>
+</html>
