@@ -77,29 +77,24 @@
       margin-bottom: 10px;
     }
 
-    /* === Animated Tagline === */
-    .animated-tagline {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
+    /* Typewriter Effect */
+    .typewriter-container {
       font-style: italic;
       font-size: 1.2em;
-      flex-wrap: wrap;
       margin-bottom: 30px;
+      height: 1.4em;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid #333;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      animation: blink-caret 0.75s step-end infinite;
     }
 
-    .tag-part {
-      position: relative;
-      animation: fadeIn 3s ease-in-out infinite alternate;
-    }
-
-    .tag-part:nth-child(1) { animation-delay: 0s; }
-    .tag-part:nth-child(2) { animation-delay: 1s; }
-    .tag-part:nth-child(3) { animation-delay: 2s; }
-
-    @keyframes fadeIn {
-      0% { opacity: 0.2; transform: scale(0.95); }
-      100% { opacity: 1; transform: scale(1.05); }
+    @keyframes blink-caret {
+      0%, 100% { border-color: transparent; }
+      50% { border-color: #333; }
     }
 
     .blurb {
@@ -160,12 +155,8 @@
     <img src="https://k-leonard.github.io/kendall-cropped.png" alt="Kendall Leonard" class="profile-photo" />
     <h1>Kendall Leonard</h1>
 
-    <!-- New animated tagline -->
-    <p class="animated-tagline">
-      <span class="tag-part">Aspiring Data Scientist</span>
-      <span class="tag-part">Storyteller</span>
-      <span class="tag-part">Lifelong Learner</span>
-    </p>
+    <!-- Typewriter Tagline -->
+    <div class="typewriter-container" id="typewriter-text"></div>
 
     <p class="blurb">
       Welcome! I’m Kendall, a passionate data scientist with a love for transforming messy data into meaningful stories.
@@ -206,9 +197,67 @@
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
 
-  <!-- Auto-update Last Updated Date -->
+  <!-- Typewriter Effect Script -->
   <script>
-    document.getElementById("last-updated-date").textContent = new Date().toLocaleDateString();
+    const phrases = ["Aspiring Data Scientist", "Storyteller", "Lifelong Learner"];
+    let i = 0;
+    let j = 0;
+    let currentPhrase = [];
+    let isDeleting = false;
+    let isEnd = false;
+
+    function loopTypewriter() {
+      const display = document.getElementById('typewriter-text');
+      display.innerHTML = currentPhrase.join("");
+
+      if (i < phrases.length) {
+        if (!isDeleting && j <= phrases[i].length) {
+          currentPhrase.push(phrases[i][j]);
+          j++;
+        }
+
+        if (isDeleting && j <= phrases[i].length) {
+          currentPhrase.pop();
+          j--;
+        }
+
+        if (j === phrases[i].length) {
+          isEnd = true;
+          isDeleting = true;
+        }
+
+        if (isDeleting && j === 0) {
+          currentPhrase = [];
+          isDeleting = false;
+          i++;
+          if (i === phrases.length) i = 0;
+        }
+      }
+
+      const speed = isEnd ? 1000 : isDeleting ? 50 : 100;
+      setTimeout(loopTypewriter, speed);
+    }
+
+    loopTypewriter();
+  </script>
+
+  <!-- Last Updated Date Formatter -->
+  <script>
+    const dateSpan = document.getElementById("last-updated-date");
+    const now = new Date();
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    const formatted = now.toLocaleDateString("en-US", options);
+    const day = now.getDate();
+    const suffix = (day) => {
+      if (day > 3 && day < 21) return "th";
+      switch (day % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
+    };
+    dateSpan.textContent = formatted.replace(String(day), day + suffix(day));
   </script>
 </body>
 </html>
