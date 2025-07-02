@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
-      font-family: "Times New Roman", Times, serif;
+      font-family: "Century Schoolbook", serif;
       margin: 0;
       padding: 0;
       background-image: url('https://k-leonard.github.io/smallfloral.png');
@@ -150,6 +150,7 @@
     /* Print overrides */
     @media print {
       body {
+        font-family: "Times New Roman", Times, serif !important;
         background: white !important;
       }
 
@@ -180,10 +181,8 @@
 </head>
 <body>
 
-  <!-- Navbar -->
   <div id="navbar-container"></div>
 
-  <!-- Resume Content -->
   <div class="container">
     <h1>Kendall Leonard's Resume</h1>
     <div style="text-align: center; margin: 10px 0 30px;">
@@ -192,7 +191,7 @@
       </button>
     </div>
 
-    <!-- Contact Info Section -->
+    <!-- Contact Info -->
     <div class="section contact-info">
       <h2><i class="fas fa-address-card"></i> Contact Information</h2>
       <p><i class="fas fa-envelope"></i> kendall.f.leonard@gmail.com</p>
@@ -200,7 +199,7 @@
       <p><i class="fab fa-github"></i> <a href="https://github.com/k-leonard" target="_blank">github.com/k-leonard</a></p>
     </div>
 
-    <!-- Skills Section -->
+    <!-- Skills -->
     <div class="section skills">
       <h2><i class="fas fa-code"></i> Skills</h2>
       <ul>
@@ -215,7 +214,7 @@
       </ul>
     </div>
 
-    <!-- Education Section -->
+    <!-- Education -->
     <div class="section education">
       <h2>Education</h2>
       <div class="education-item">
@@ -228,7 +227,7 @@
       </div>
     </div>
 
-    <!-- Experience Section -->
+    <!-- Experience -->
     <div class="section experience">
       <h2>Experience</h2>
 
@@ -265,7 +264,7 @@
       </div>
     </div>
 
-    <!-- Projects Section -->
+    <!-- Projects -->
     <div class="section projects">
       <h2>Projects</h2>
       <p><strong>TBD</strong>: TBD</p>
@@ -275,7 +274,6 @@
     <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
   </div>
 
-  <!-- Load Navbar -->
   <script>
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
@@ -293,7 +291,6 @@
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
 
-  <!-- Auto-update Last Updated Date -->
   <script>
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const today = new Date().toLocaleDateString(undefined, options);
