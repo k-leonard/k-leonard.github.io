@@ -1,12 +1,11 @@
 <!-- navbar.html -->
 <style>
-  /* Top Navbar */
+  /* Top navbar */
   .navbar {
     background-color: #333;
     width: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
@@ -26,20 +25,19 @@
     color: black;
   }
 
-  /* Hamburger button */
+  /* Hamburger Button */
   .hamburger-button {
     position: fixed;
-    top: 15px;
-    left: 15px;
+    top: 20px;
+    left: 20px;
     font-size: 28px;
     cursor: pointer;
     z-index: 1001;
-    color: white;
     background-color: #333;
+    color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    display: block;
+    padding: 8px 12px;
+    border-radius: 5px;
   }
 
   /* Sidebar menu */
@@ -52,7 +50,7 @@
     left: 0;
     background-color: #333;
     overflow-x: hidden;
-    transition: 0.4s;
+    transition: 0.3s;
     padding-top: 60px;
   }
 
@@ -101,13 +99,10 @@
   <a href="https://k-leonard.github.io/Website_Assets/undergraduate_class_page.html">Undergraduate Coursework</a>
 </div>
 
+<!-- Sidebar toggle logic -->
 <script>
   function toggleSidebar() {
     const sidebar = document.getElementById("mySidebar");
-    if (sidebar.style.width === "250px") {
-      sidebar.style.width = "0";
-    } else {
-      sidebar.style.width = "250px";
-    }
+    sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
   }
 </script>
