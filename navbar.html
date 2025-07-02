@@ -1,86 +1,78 @@
 <!-- navbar.html -->
 <style>
-  .navbar {
-    background-color: #333;
-    width: 100%;
-    padding: 10px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  /* Main navbar container for fixed button */
+  .hamburger-button {
     position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    z-index: 1001;
+    color: white;
+    background-color: #333;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+  }
+
+  /* Sidebar menu */
+  .sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1000;
     top: 0;
     left: 0;
-    z-index: 1000;
+    background-color: #333;
+    overflow-x: hidden;
+    transition: 0.4s;
+    padding-top: 60px;
   }
 
-  .navbar-content {
-    width: 100%;
-    max-width: 1000px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 10px;
-    transition: max-height 0.4s ease-out;
-  }
-
-  .nav-links a {
-    color: white;
-    padding: 14px 20px;
+  .sidebar a {
+    padding: 12px 24px;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 20px;
+    color: white;
+    display: block;
+    transition: 0.2s;
   }
 
-  .nav-links a:hover {
-    background-color: #ddd;
-    color: black;
+  .sidebar a:hover {
+    background-color: #575757;
   }
 
-  .hamburger {
-    font-size: 24px;
+  .sidebar .closebtn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 36px;
     color: white;
     cursor: pointer;
-    display: block;
-  }
-
-  /* Mobile behavior */
-  @media (max-width: 700px) {
-    .nav-links {
-      position: absolute;
-      top: 50px;
-      left: 0;
-      width: 100%;
-      flex-direction: column;
-      background-color: #333;
-      max-height: 0;
-      overflow: hidden;
-    }
-
-    .nav-links.show {
-      max-height: 300px;
-    }
   }
 </style>
 
-<div class="navbar">
-  <div class="navbar-content">
-    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
-    <div class="nav-links" id="navLinks">
-      <a href="https://k-leonard.github.io/index.html">Home</a>
-      <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
-      <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
-      <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
-    </div>
-  </div>
+<!-- Hamburger icon -->
+<button class="hamburger-button" onclick="toggleSidebar()">☰</button>
+
+<!-- Sidebar menu -->
+<div id="mySidebar" class="sidebar">
+  <span class="closebtn" onclick="toggleSidebar()">&times;</span>
+  <a href="https://k-leonard.github.io/index.html">Home</a>
+  <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
+  <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
+  <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
+  <a href="https://k-leonard.github.io/Website_Assets/graduate_class_page.html">Graduate Coursework</a>
+  <a href="https://k-leonard.github.io/Website_Assets/undergraduate_class_page.html">Undergraduate Coursework</a>
 </div>
 
 <script>
-  function toggleMenu() {
-    const navLinks = document.getElementById("navLinks");
-    navLinks.classList.toggle("show");
+  function toggleSidebar() {
+    const sidebar = document.getElementById("mySidebar");
+    if (sidebar.style.width === "250px") {
+      sidebar.style.width = "0";
+    } else {
+      sidebar.style.width = "250px";
+    }
   }
 </script>
