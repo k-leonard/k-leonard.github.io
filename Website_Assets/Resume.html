@@ -71,12 +71,13 @@
     }
 
     .section {
-      margin-bottom: 40px;
+      margin-bottom: 30px;
+      page-break-inside: avoid;
     }
 
     .section h2 {
       color: #000205;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       border-bottom: 1px solid #ccc;
       padding-bottom: 5px;
     }
@@ -92,26 +93,14 @@
       margin-bottom: 5px;
     }
 
-    .contact-info p i,
-    .contact-info h2 i,
-    .skills li i {
-      margin-right: 8px;
-      color: #444;
-    }
-
     .skills ul {
-      list-style-type: none;
-      padding: 0;
+      list-style-type: disc;
+      padding-left: 20px;
+      margin: 0;
     }
 
     .skills li {
-      background-color: #aaacad;
-      color: white;
-      margin: 5px 8px 5px 0;
-      padding: 6px 12px;
-      border-radius: 5px;
-      display: inline-block;
-      font-size: 15px;
+      margin-bottom: 5px;
     }
 
     .experience-item,
@@ -147,68 +136,59 @@
       text-decoration: underline dotted;
     }
 
-    /* === PRINT STYLES === */
+    /* PRINT STYLES */
     @media print {
       body {
         font-family: "Times New Roman", Times, serif !important;
-        background: white !important;
+        background: none !important;
         color: black !important;
       }
 
       .navbar,
       .print-btn,
-      .last-updated {
+      #navbar-container {
         display: none !important;
       }
 
       .container {
-        box-shadow: none !important;
-        margin: 0 auto !important;
-        padding: 20px 40px !important;
+        margin: 0 auto;
+        box-shadow: none;
         background: white !important;
-        border-radius: 0 !important;
-        width: 100% !important;
-        max-width: none !important;
-      }
-
-      h1 {
-        margin-top: 0 !important;
+        padding: 20px !important;
       }
 
       .skills ul {
         list-style-type: disc !important;
-        padding-left: 20px !important;
       }
 
-      .skills li {
-        background-color: transparent !important;
-        color: black !important;
-        padding: 0 !important;
-        margin: 4px 0 !important;
-        border-radius: 0 !important;
-        display: list-item !important;
-        font-style: normal !important;
-        font-size: 16px !important;
-      }
-
+      .skills li::before,
       .skills li i {
         display: none !important;
       }
 
-      .section {
-        margin-bottom: 25px !important;
+      .contact-info i,
+      .skills li i,
+      .section h2 i {
+        display: none !important;
       }
 
-      ul {
-        padding-left: 20px !important;
+      h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      .section {
+        page-break-inside: avoid;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- Navbar -->
   <div id="navbar-container"></div>
 
+  <!-- Resume Content -->
   <div class="container">
     <h1>Kendall Leonard's Resume</h1>
     <div style="text-align: center; margin: 10px 0 30px;">
@@ -217,6 +197,7 @@
       </button>
     </div>
 
+    <!-- Contact Info Section -->
     <div class="section contact-info">
       <h2><i class="fas fa-address-card"></i> Contact Information</h2>
       <p><i class="fas fa-envelope"></i> kendall.f.leonard@gmail.com</p>
@@ -224,20 +205,22 @@
       <p><i class="fab fa-github"></i> <a href="https://github.com/k-leonard" target="_blank">github.com/k-leonard</a></p>
     </div>
 
+    <!-- Skills Section -->
     <div class="section skills">
       <h2><i class="fas fa-code"></i> Skills</h2>
       <ul>
-        <li><i class="fas fa-chart-bar"></i> R & RStudio</li>
-        <li><i class="fab fa-js-square"></i> JavaScript</li>
-        <li><i class="fas fa-database"></i> SQL</li>
-        <li><i class="fab fa-python"></i> Python</li>
-        <li><i class="fab fa-html5"></i><i class="fab fa-css3-alt"></i> HTML & CSS</li>
-        <li><i class="fas fa-chart-line"></i> Data Analysis</li>
-        <li><i class="fas fa-robot"></i> Modeling & Machine Learning</li>
-        <li><i class="fas fa-globe"></i> Web Development</li>
+        <li>R & RStudio</li>
+        <li>JavaScript</li>
+        <li>SQL</li>
+        <li>Python</li>
+        <li>HTML & CSS</li>
+        <li>Data Analysis</li>
+        <li>Modeling & Machine Learning</li>
+        <li>Web Development</li>
       </ul>
     </div>
 
+    <!-- Education Section -->
     <div class="section education">
       <h2>Education</h2>
       <div class="education-item">
@@ -250,10 +233,12 @@
       </div>
     </div>
 
+    <!-- Experience Section -->
     <div class="section experience">
       <h2>Experience</h2>
+
       <div class="experience-item">
-        <p><strong>Programming and Analytics Tutor</strong> — <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2022–May 2025)</p>
+        <p><strong>Programming and Analytics Tutor</strong> —  <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2022–May 2025)</p>
         <ul>
           <li>Specialized in tutoring data analytics, R, SQL, and Python.</li>
           <li>Improved student performance through targeted instruction and hands-on help.</li>
@@ -264,7 +249,7 @@
       </div>
 
       <div class="experience-item">
-        <p><strong>Tutoring Center Manager</strong> — <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2023–Jan 2025)</p>
+        <p><strong>Tutoring Center Manager</strong> —  <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2023–Jan 2025)</p>
         <ul>
           <li>Led analysis of tutoring center data to identify engagement and improvement areas.</li>
           <li>Used Python and R for data wrangling, visualization, and report generation.</li>
@@ -285,14 +270,17 @@
       </div>
     </div>
 
+    <!-- Projects Section -->
     <div class="section projects">
       <h2>Projects</h2>
       <p><strong>TBD</strong>: TBD</p>
     </div>
 
+    <!-- Last Updated -->
     <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
   </div>
 
+  <!-- Load Navbar -->
   <script>
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
@@ -308,7 +296,10 @@
         document.body.appendChild(script);
       })
       .catch(error => console.error('Error loading the navbar:', error));
+  </script>
 
+  <!-- Auto-update Last Updated Date -->
+  <script>
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const today = new Date().toLocaleDateString(undefined, options);
     document.getElementById('last-updated-date').textContent = today;
