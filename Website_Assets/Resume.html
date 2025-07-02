@@ -147,11 +147,12 @@
       text-decoration: underline dotted;
     }
 
-    /* Print overrides */
+    /* === PRINT STYLES === */
     @media print {
       body {
         font-family: "Times New Roman", Times, serif !important;
         background: white !important;
+        color: black !important;
       }
 
       .navbar,
@@ -163,18 +164,43 @@
       .container {
         box-shadow: none !important;
         margin: 0 auto !important;
-        padding: 20px !important;
+        padding: 20px 40px !important;
         background: white !important;
         border-radius: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+      }
+
+      h1 {
+        margin-top: 0 !important;
+      }
+
+      .skills ul {
+        list-style-type: disc !important;
+        padding-left: 20px !important;
       }
 
       .skills li {
         background-color: transparent !important;
         color: black !important;
-        border-radius: 0 !important;
         padding: 0 !important;
+        margin: 4px 0 !important;
+        border-radius: 0 !important;
         display: list-item !important;
         font-style: normal !important;
+        font-size: 16px !important;
+      }
+
+      .skills li i {
+        display: none !important;
+      }
+
+      .section {
+        margin-bottom: 25px !important;
+      }
+
+      ul {
+        padding-left: 20px !important;
       }
     }
   </style>
@@ -191,7 +217,6 @@
       </button>
     </div>
 
-    <!-- Contact Info -->
     <div class="section contact-info">
       <h2><i class="fas fa-address-card"></i> Contact Information</h2>
       <p><i class="fas fa-envelope"></i> kendall.f.leonard@gmail.com</p>
@@ -199,7 +224,6 @@
       <p><i class="fab fa-github"></i> <a href="https://github.com/k-leonard" target="_blank">github.com/k-leonard</a></p>
     </div>
 
-    <!-- Skills -->
     <div class="section skills">
       <h2><i class="fas fa-code"></i> Skills</h2>
       <ul>
@@ -214,7 +238,6 @@
       </ul>
     </div>
 
-    <!-- Education -->
     <div class="section education">
       <h2>Education</h2>
       <div class="education-item">
@@ -227,10 +250,8 @@
       </div>
     </div>
 
-    <!-- Experience -->
     <div class="section experience">
       <h2>Experience</h2>
-
       <div class="experience-item">
         <p><strong>Programming and Analytics Tutor</strong> — <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2022–May 2025)</p>
         <ul>
@@ -264,13 +285,11 @@
       </div>
     </div>
 
-    <!-- Projects -->
     <div class="section projects">
       <h2>Projects</h2>
       <p><strong>TBD</strong>: TBD</p>
     </div>
 
-    <!-- Last Updated -->
     <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
   </div>
 
@@ -289,9 +308,7 @@
         document.body.appendChild(script);
       })
       .catch(error => console.error('Error loading the navbar:', error));
-  </script>
 
-  <script>
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const today = new Date().toLocaleDateString(undefined, options);
     document.getElementById('last-updated-date').textContent = today;
