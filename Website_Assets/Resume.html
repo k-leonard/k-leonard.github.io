@@ -71,13 +71,12 @@
     }
 
     .section {
-      margin-bottom: 30px;
-      page-break-inside: avoid;
+      margin-bottom: 40px;
     }
 
     .section h2 {
       color: #000205;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       border-bottom: 1px solid #ccc;
       padding-bottom: 5px;
     }
@@ -93,14 +92,26 @@
       margin-bottom: 5px;
     }
 
+    .contact-info p i,
+    .contact-info h2 i,
+    .skills li i {
+      margin-right: 8px;
+      color: #444;
+    }
+
     .skills ul {
-      list-style-type: disc;
-      padding-left: 20px;
-      margin: 0;
+      list-style-type: none;
+      padding: 0;
     }
 
     .skills li {
-      margin-bottom: 5px;
+      background-color: #aaacad;
+      color: white;
+      margin: 5px 8px 5px 0;
+      padding: 6px 12px;
+      border-radius: 5px;
+      display: inline-block;
+      font-size: 15px;
     }
 
     .experience-item,
@@ -136,12 +147,11 @@
       text-decoration: underline dotted;
     }
 
-    /* PRINT STYLES */
+    /* === Print styles === */
     @media print {
       body {
-        font-family: "Times New Roman", Times, serif !important;
-        background: none !important;
-        color: black !important;
+        font-family: "Times New Roman", serif !important;
+        background: white !important;
       }
 
       .navbar,
@@ -151,34 +161,43 @@
       }
 
       .container {
+        background-color: white !important;
         margin: 0 auto;
-        box-shadow: none;
-        background: white !important;
         padding: 20px !important;
+        box-shadow: none !important;
       }
 
-      .skills ul {
-        list-style-type: disc !important;
-      }
-
-      .skills li::before,
+      .section h2 i,
       .skills li i {
         display: none !important;
       }
 
-      .contact-info i,
-      .skills li i,
-      .section h2 i {
-        display: none !important;
+      .skills li {
+        background: none !important;
+        color: #000 !important;
+        display: list-item;
+        list-style-type: disc;
+        padding: 0;
+        margin-left: 20px;
+        border-radius: 0;
       }
 
-      h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
+      .skills ul {
+        padding-left: 20px;
       }
 
-      .section {
-        page-break-inside: avoid;
+      .container a {
+        font-style: normal !important;
+        text-decoration: none !important;
+      }
+
+      .last-updated {
+        display: none;
+      }
+
+      @page {
+        size: auto;
+        margin: 1in;
       }
     }
   </style>
@@ -209,14 +228,14 @@
     <div class="section skills">
       <h2><i class="fas fa-code"></i> Skills</h2>
       <ul>
-        <li>R & RStudio</li>
-        <li>JavaScript</li>
-        <li>SQL</li>
-        <li>Python</li>
-        <li>HTML & CSS</li>
-        <li>Data Analysis</li>
-        <li>Modeling & Machine Learning</li>
-        <li>Web Development</li>
+        <li><i class="fas fa-chart-bar"></i> R & RStudio</li>
+        <li><i class="fab fa-js-square"></i> JavaScript</li>
+        <li><i class="fas fa-database"></i> SQL</li>
+        <li><i class="fab fa-python"></i> Python</li>
+        <li><i class="fab fa-html5"></i><i class="fab fa-css3-alt"></i> HTML & CSS</li>
+        <li><i class="fas fa-chart-line"></i> Data Analysis</li>
+        <li><i class="fas fa-robot"></i> Modeling & Machine Learning</li>
+        <li><i class="fas fa-globe"></i> Web Development</li>
       </ul>
     </div>
 
