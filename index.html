@@ -1,38 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kendall Leonard's Portfolio</title>
   <style>
-    /* Apply the background to the body */
     body {
+      font-family: "Century Schoolbook", serif;
+      margin: 0;
+      padding: 0;
       background-image: url('https://k-leonard.github.io/smallfloral.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      margin: 0;
-      font-family: "Century Schoolbook", serif; /* Ensures the same font as the rest of the site */
-      color: #333;
       display: flex;
-      justify-content: center;  /* Centers content horizontally */
-      align-items: center;      /* Centers content vertically */
-      height: 100vh;            /* Full viewport height */
-      flex-direction: column;   /* Stack elements vertically */
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      flex-direction: column;
+      color: #333;
     }
+
     /* Navbar styling */
     .navbar {
       background-color: #333;
       width: 100%;
-      display: flex; /* Use flexbox for horizontal alignment */
-      justify-content: center; /* Center navbar items */
+      display: flex;
+      justify-content: center;
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 1000; /* Ensure navbar is on top */
-      padding: 10px 0; /* Padding for better appearance */
+      z-index: 1000;
+      padding: 10px 0;
     }
 
     .navbar a {
       color: white;
-      text-align: center;
       padding: 14px 20px;
       text-decoration: none;
       font-size: 18px;
@@ -43,53 +46,45 @@
       color: black;
     }
 
-    /* Content section styling */
+    /* Content styling */
     .content {
-      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
-      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
       text-align: center;
       width: 80%;
-      max-width: 1200px; /* Prevents content from becoming too wide */
+      max-width: 1000px;
       border-radius: 10px;
-      margin-top: 80px; /* Adjust space for navbar */
-      display: flex;
-      flex-direction: column;
-      align-items: center; /* Center the content inside the content div */
-       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin: 100px auto 0 auto; /* Margin to account for fixed navbar */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Link styling */
-    a {
-      text-decoration: none;
+    .content a {
       color: #007BFF;
       font-size: 18px;
-      display: block;
-      margin: 10px;
+      text-decoration: none;
     }
 
-    a:hover {
+    .content a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <!-- Placeholder for Navbar -->
+
+  <!-- Dynamic Navbar Container -->
   <div id="navbar-container"></div>
 
-  <!-- Content Section -->
+  <!-- Page Content -->
   <div class="content">
     <h1>Kendall Leonard's Page</h1>
     <p>Welcome to my page! This website showcases examples of my work, including both passion projects and class assignments from my undergraduate and graduate studies.</p>
-    <p>NOTE: This website is currently being edited for ease of access and adding more information. </p>
+    <p><strong>NOTE:</strong> This website is currently being edited for ease of access and adding more information.</p>
     <p><a href="Website_Assets/Data505page.html">Go to DATA 505 Class Page</a></p>
-    <p></p>
-    <p></p>
-    <p></p>
-    <p> Last Updated: June 10th, 2025</p>
+    <p>Last Updated: June 10th, 2025</p>
   </div>
 
+  <!-- JavaScript to load navbar -->
   <script>
-    // JavaScript to load the navbar
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
       .then(data => {
@@ -97,5 +92,6 @@
       })
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
+
 </body>
 </html>
