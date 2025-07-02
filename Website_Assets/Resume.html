@@ -147,87 +147,93 @@
       text-decoration: underline dotted;
     }
 
-/* === PRINT OVERRIDES FOR CONDENSED LAYOUT === */
-  @media print {
-    body {
-      font-family: "Times New Roman", serif;
-      font-size: 12pt;
-      background: white !important;
-      line-height: 1.2;
-    }
+    /* === PRINT OVERRIDES FOR CONDENSED ONE-PAGE LAYOUT === */
+    @media print {
+      body {
+        font-family: "Times New Roman", serif !important;
+        font-size: 12pt !important;
+        background: white !important;
+        color: black !important;
+        line-height: 1.2 !important;
+      }
 
-    .container {
-      margin: 0;
-      padding: 10px 30px;
-      box-shadow: none;
-      border-radius: 0;
-      width: 100%;
-      max-width: none;
-    }
+      .container {
+        margin: 0 !important;
+        padding: 10px 30px !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        background: white !important;
+      }
 
-    .section {
-      margin-bottom: 16px;
-    }
+      .section {
+        margin-bottom: 12px !important;
+      }
 
-    .section h2 {
-      font-size: 13pt;
-      margin-bottom: 4px;
-    }
+      .section h2,
+      h2 {
+        font-size: 13pt !important;
+        margin-bottom: 4px !important;
+        border: none !important;
+        padding: 0 !important;
+      }
 
-    h1 {
-      font-size: 18pt;
-      margin-bottom: 18px;
-    }
+      h1 {
+        font-size: 18pt !important;
+        margin-bottom: 12px !important;
+      }
 
-    p, li {
-      font-size: 12pt;
-      margin-bottom: 3px;
-    }
+      p, li {
+        font-size: 12pt !important;
+        margin-bottom: 2px !important;
+      }
 
-    ul {
-      margin: 4px 0 8px 20px;
-      padding-left: 20px;
-    }
+      ul {
+        margin: 4px 0 8px 20px !important;
+        padding-left: 20px !important;
+      }
 
-    .experience-item,
-    .education-item {
-      margin-bottom: 10px;
-    }
+      .experience-item,
+      .education-item {
+        margin-bottom: 8px !important;
+      }
 
-    .skills li {
-      display: list-item;
-      list-style: disc;
-      background: none;
-      color: black;
-      padding: 0;
-      margin: 0 0 2px 20px;
-      border: none;
-      font-size: 12pt;
-    }
+      .skills li {
+        display: list-item !important;
+        list-style: disc !important;
+        background: none !important;
+        color: black !important;
+        padding: 0 !important;
+        margin: 0 0 2px 20px !important;
+        border: none !important;
+        font-size: 12pt !important;
+      }
 
-    .skills ul {
-      list-style-type: disc;
-    }
+      .skills ul {
+        list-style-type: disc !important;
+      }
 
-    .navbar,
-    .print-btn,
-    #navbar-container,
-    .print-hide {
-      display: none !important;
-    }
+      .navbar,
+      .print-btn,
+      #navbar-container,
+      .print-hide,
+      i.print-hide {
+        display: none !important;
+      }
 
-    a {
-      font-style: normal;
-      text-decoration: none;
-      color: black;
-    }
+      a {
+        font-style: normal !important;
+        text-decoration: none !important;
+        color: black !important;
+      }
 
-    .last-updated {
-      font-size: 10pt;
-      color: #555;
-      margin-top: 20px;
+      .last-updated {
+        font-size: 10pt !important;
+        color: #555 !important;
+        margin-top: 20px !important;
+      }
     }
-  }
   </style>
 </head>
 <body>
