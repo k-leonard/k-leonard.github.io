@@ -72,6 +72,7 @@
       perspective: 1000px;
       position: relative;
       cursor: pointer;
+      transition: transform 0.6s ease-in-out;
     }
 
     .card-inner {
@@ -171,12 +172,64 @@
   <div class="content">
     <h1>Projects</h1>
     <p>Welcome to my projects page! Below you'll find some of my work—click a card to explore further.</p>
-    <div class="projects-container">
-      <!-- Project cards will go here (unchanged) -->
+    <div class="projects-container" id="projects-container">
+      <!-- Cards will be injected here -->
     </div>
   </div>
 
   <script>
+    const projects = [
+      {
+        title: "COVID-19 and Data Visualizations",
+        summary: "Exploring how pandemic graphics shaped perceptions.",
+        tools: "R, ggplot2, Shiny, HTML/CSS",
+        bullets: ["Designed interactive dashboards", "Studied user response to different chart styles"],
+        img: "https://k-leonard.github.io/Website_Assets/covid.png",
+        link: "#"
+      },
+      {
+        title: "Marvel Capstone",
+        summary: "Data-driven insights into Marvel's heroes and plots.",
+        tools: "Python, SQL, BeautifulSoup, HTML/CSS",
+        bullets: ["Scraped and cleaned comic data", "Visualized character and team connections"],
+        img: "https://k-leonard.github.io/Website_Assets/marvel.png",
+        link: "#"
+      },
+      {
+        title: "Dynamic Visualization Tool",
+        summary: "A JavaScript-based time-series exploration app.",
+        tools: "JavaScript, D3.js, HTML/CSS",
+        bullets: ["Built interactive plots", "Implemented data filtering and zooming"],
+        img: "https://k-leonard.github.io/Website_Assets/viztool.png",
+        link: "#"
+      }
+    ];
+
+    const container = document.getElementById('projects-container');
+    projects.forEach((project, index) => {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-front" onclick="flipCard(event, this.parentElement.parentElement)">
+            <div class="three-dots">⋮</div>
+            <img src="${project.img}" alt="${project.title}">
+            <h3>${project.title}</h3>
+            <p>${project.summary}</p>
+          </div>
+          <div class="card-back">
+            <div class="close-btn" onclick="closeCard(event, this)">&times;</div>
+            <p><strong>Tools:</strong> ${project.tools}</p>
+            <ul>
+              ${project.bullets.map(b => `<li>${b}</li>`).join('')}
+            </ul>
+            <a href="${project.link}" class="view-project-btn">View Project</a>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
     function flipCard(event, card) {
       event.stopPropagation();
       closeAllCards();
