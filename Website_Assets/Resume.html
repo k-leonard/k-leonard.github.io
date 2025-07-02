@@ -147,69 +147,87 @@
       text-decoration: underline dotted;
     }
 
-    /* Hide on print */
-    @media print {
-      body {
-        font-family: "Times New Roman", serif;
-        font-size: 12pt;
-        background: white !important;
-      }
-
-      .print-hide {
-        display: none !important;
-      }
-
-      .container {
-        margin: 0;
-        padding: 20px;
-        box-shadow: none;
-        border-radius: 0;
-        width: 100%;
-        max-width: none;
-      }
-
-      .skills li {
-        display: list-item;
-        background: none;
-        color: #000;
-        padding: 0;
-        margin: 0 0 4px 20px;
-        border: none;
-      }
-
-      .skills ul {
-        list-style-type: disc;
-      }
-
-      h1 {
-        font-size: 20pt;
-        margin-bottom: 20px;
-      }
-
-      .section {
-        margin-bottom: 20px;
-      }
-
-      .section h2 {
-        font-size: 14pt;
-      }
-
-      .section p, .section li {
-        font-size: 12pt;
-      }
-
-      .navbar,
-      .print-btn,
-      #navbar-container {
-        display: none !important;
-      }
-
-      a {
-        font-style: normal;
-        text-decoration: none;
-        color: black;
-      }
+/* === PRINT OVERRIDES FOR CONDENSED LAYOUT === */
+  @media print {
+    body {
+      font-family: "Times New Roman", serif;
+      font-size: 12pt;
+      background: white !important;
+      line-height: 1.2;
     }
+
+    .container {
+      margin: 0;
+      padding: 10px 30px;
+      box-shadow: none;
+      border-radius: 0;
+      width: 100%;
+      max-width: none;
+    }
+
+    .section {
+      margin-bottom: 16px;
+    }
+
+    .section h2 {
+      font-size: 13pt;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 18pt;
+      margin-bottom: 18px;
+    }
+
+    p, li {
+      font-size: 12pt;
+      margin-bottom: 3px;
+    }
+
+    ul {
+      margin: 4px 0 8px 20px;
+      padding-left: 20px;
+    }
+
+    .experience-item,
+    .education-item {
+      margin-bottom: 10px;
+    }
+
+    .skills li {
+      display: list-item;
+      list-style: disc;
+      background: none;
+      color: black;
+      padding: 0;
+      margin: 0 0 2px 20px;
+      border: none;
+      font-size: 12pt;
+    }
+
+    .skills ul {
+      list-style-type: disc;
+    }
+
+    .navbar,
+    .print-btn,
+    #navbar-container,
+    .print-hide {
+      display: none !important;
+    }
+
+    a {
+      font-style: normal;
+      text-decoration: none;
+      color: black;
+    }
+
+    .last-updated {
+      font-size: 10pt;
+      color: #555;
+      margin-top: 20px;
+    }
+  }
   </style>
 </head>
 <body>
