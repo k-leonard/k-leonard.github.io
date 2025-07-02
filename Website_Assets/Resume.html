@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
-      font-family: "Century Schoolbook", serif;
+      font-family: "Times New Roman", Times, serif;
       margin: 0;
       padding: 0;
       background-image: url('https://k-leonard.github.io/smallfloral.png');
@@ -96,7 +96,7 @@
     .contact-info h2 i,
     .skills li i {
       margin-right: 8px;
-      color: #444; /* dark gray icons */
+      color: #444;
     }
 
     .skills ul {
@@ -136,15 +136,46 @@
       color: #777;
       margin-top: 30px;
     }
-    .container a {
-  color: inherit;
-  text-decoration: none;
-  font-style: italic;
-}
 
-.container a:hover {
-  text-decoration: underline dotted;
-}
+    .container a {
+      color: inherit;
+      text-decoration: none;
+      font-style: italic;
+    }
+
+    .container a:hover {
+      text-decoration: underline dotted;
+    }
+
+    /* Print overrides */
+    @media print {
+      body {
+        background: white !important;
+      }
+
+      .navbar,
+      .print-btn,
+      .last-updated {
+        display: none !important;
+      }
+
+      .container {
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        padding: 20px !important;
+        background: white !important;
+        border-radius: 0 !important;
+      }
+
+      .skills li {
+        background-color: transparent !important;
+        color: black !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        display: list-item !important;
+        font-style: normal !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -202,7 +233,7 @@
       <h2>Experience</h2>
 
       <div class="experience-item">
-        <p><strong>Programming and Analytics Tutor</strong> —  <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2022–May 2025)</p>
+        <p><strong>Programming and Analytics Tutor</strong> — <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2022–May 2025)</p>
         <ul>
           <li>Specialized in tutoring data analytics, R, SQL, and Python.</li>
           <li>Improved student performance through targeted instruction and hands-on help.</li>
@@ -213,7 +244,7 @@
       </div>
 
       <div class="experience-item">
-        <p><strong>Tutoring Center Manager</strong> —  <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2023–Jan 2025)</p>
+        <p><strong>Tutoring Center Manager</strong> — <a href="https://my.willamette.edu/site/quad">Willamette University Q.U.A.D Tutoring Center</a>, Salem, OR (Aug 2023–Jan 2025)</p>
         <ul>
           <li>Led analysis of tutoring center data to identify engagement and improvement areas.</li>
           <li>Used Python and R for data wrangling, visualization, and report generation.</li>
