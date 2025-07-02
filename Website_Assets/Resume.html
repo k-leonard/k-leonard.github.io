@@ -60,7 +60,10 @@
       font-size: 14px;
       cursor: pointer;
     }
-    .print-btn i { margin-right: 8px; }
+
+    .print-btn i {
+      margin-right: 8px;
+    }
 
     h1 {
       text-align: center;
@@ -90,9 +93,10 @@
     }
 
     .contact-info p i,
-    .contact-info h2 i {
+    .contact-info h2 i,
+    .skills li i {
       margin-right: 8px;
-      color: #007BFF;
+      color: #444; /* dark gray icons */
     }
 
     .skills ul {
@@ -108,11 +112,6 @@
       border-radius: 5px;
       display: inline-block;
       font-size: 15px;
-    }
-
-    .skills li i {
-      margin-right: 8px;
-      color: #007BFF;
     }
 
     .experience-item,
@@ -146,13 +145,12 @@
 
   <!-- Resume Content -->
   <div class="container">
-   <h1>Kendall Leonard's Resume</h1>
-<div style="text-align: center; margin: 10px 0 30px;">
-  <button onclick="window.print()" class="print-btn">
-    <i class="fas fa-print"></i> Print to PDF
-  </button>
-</div>
-
+    <h1>Kendall Leonard's Resume</h1>
+    <div style="text-align: center; margin: 10px 0 30px;">
+      <button onclick="window.print()" class="print-btn">
+        <i class="fas fa-print"></i> Print to PDF
+      </button>
+    </div>
 
     <!-- Contact Info Section -->
     <div class="section contact-info">
