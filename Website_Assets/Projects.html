@@ -100,6 +100,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      z-index: 2;
     }
 
     .card-front img {
@@ -126,7 +127,8 @@
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
-      padding-top: 40px;
+      padding: 15px;
+      z-index: 1;
     }
 
     .card-back-content {
@@ -146,7 +148,7 @@
 
     .card-back .view-project-btn {
       display: block;
-      margin: 10px auto;
+      margin: 10px auto 0 auto;
       text-align: center;
       background-color: #007BFF;
       color: white;
@@ -183,9 +185,7 @@
   <div class="content">
     <h1>Projects</h1>
     <p>Welcome to my projects page! Below you'll find some of my work—click a card to explore further.</p>
-    <div class="projects-container" id="projects-container">
-      <!-- Cards will be injected here -->
-    </div>
+    <div class="projects-container" id="projects-container"></div>
   </div>
 
   <script>
@@ -217,7 +217,7 @@
     ];
 
     const container = document.getElementById('projects-container');
-    projects.forEach((project, index) => {
+    projects.forEach((project) => {
       const card = document.createElement('div');
       card.className = 'project-card';
       card.innerHTML = `
@@ -246,7 +246,7 @@
     function flipCard(event, card) {
       event.stopPropagation();
       closeAllCards();
-      setTimeout(() => card.classList.add('flipped'), 50);
+      card.classList.add('flipped');
     }
 
     function closeCard(event, btn) {
