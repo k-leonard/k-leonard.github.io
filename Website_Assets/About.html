@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Me</title>
   <style>
     body {
       background-image: url('https://k-leonard.github.io/smallfloral.png');
@@ -11,13 +11,8 @@
       background-position: center;
       background-repeat: no-repeat;
       margin: 0;
-      font-family: "Century Schoolbook", serif; /* Ensures the same font as the rest of the site */
+      font-family: "Century Schoolbook", serif;
       color: #333;
-      display: flex;
-      justify-content: center;  /* Centers content horizontally */
-      align-items: center;      /* Centers content vertically */
-      height: 100vh;            /* Full viewport height */
-      flex-direction: column;   /* Stack elements vertically */
     }
 
     /* Navbar styling */
@@ -45,68 +40,94 @@
       color: black;
     }
 
-    /* Content section styling */
+    /* Content box */
     .content {
-     background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
-      padding: 20px;
-      text-align: center;
-      width: 80%;
-      max-width: 1200px; /* Prevents content from becoming too wide */
+      background-color: rgba(255, 255, 255, 0.92);
+      width: 85%;
+      max-width: 1000px;
+      margin: 120px auto 40px auto;
+      padding: 40px;
       border-radius: 10px;
-      margin-top: 80px; /* Adjust space for navbar */
-      display: flex;
-      flex-direction: column;
-      align-items: center; /* Center the content inside the content div */
-       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
-      margin-bottom: 20px;
+      text-align: center;
+      margin-bottom: 10px;
     }
 
-    p {
-      font-size: 18px;
-      line-height: 1.6;
+    .intro {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 30px;
     }
 
-    .about-container {
+    .about-container h2 {
       margin-top: 30px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .about-container p {
+      font-size: 18px;
+      line-height: 1.7;
+      text-align: justify;
+      margin: 0 auto 20px auto;
+      max-width: 90%;
+    }
+
+    .contact-links {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .contact-links a {
+      color: #007BFF;
+      text-decoration: none;
+      font-size: 18px;
+      display: inline-block;
+      margin: 8px;
+    }
+
+    .contact-links a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <div id="navbar-container"></div> <!-- This will load the navbar -->
+  <!-- Navbar placeholder -->
+  <div id="navbar-container"></div>
 
-  <!-- Content Section -->
+  <!-- Content -->
   <div class="content">
     <h1>About Me</h1>
-    <p>Welcome to what I call the best page, the one all about me!</p>
+    <p class="intro">Welcome to what I call the best page — the one all about me!</p>
 
     <div class="about-container">
       <h2>Who Am I?</h2>
-      <p>I am an aspiring data analyst with big dreams to create meaningful changes with my work! 
-        I am currently completing my M.S. in Data Science at Willamette University, where I also 
-        earned my B.S. in Data Science and Computer Science with minors in Economics and Mathematics.</p>
+      <p>I am an aspiring data analyst with big dreams to create meaningful change with my work! I am currently completing my M.S. in Data Science at Willamette University, where I also earned my B.S. in Data Science and Computer Science, along with minors in Economics and Mathematics.</p>
+      <p>In my free time, I enjoy reading science fiction and fantasy books, binge-watching incredibly inaccurate medical dramas, and cuddling with my two cats.</p>
 
-      <p> In my free time, I enjoy reading science fiction and fantasy books, binge-watching incredibly 
-        inaccurate medical dramas, and cuddling with my two cats!</p>
-      
       <h2>What I Do</h2>
-      <p>While I am currently in graduate school, I am working on building connections with people, improving my skills, and enjoying life.
-      I'm focusing the majority of my energy on my capstone project and my research. </p>
+      <p>While I am currently in graduate school, I’m focused on building connections, honing my skills, and enjoying the process. Much of my energy is currently dedicated to my capstone project and academic research.</p>
+
       <h2>My Goals</h2>
-      <p>My goals include finishing my graduate degree in August, getting to use my skills in a meaningful way to help people, and going to Disney World at some point in my life.</p>
+      <p>My goals include finishing my graduate degree in August, using my skills to help others in meaningful ways, and (hopefully) going to Disney World at some point in the near future.</p>
+
       <h2>Want to get in touch?</h2>
-      <p>Connect with me via email!</p>
-      <p>Connect with me on LinkedIn!</p>
+      <p>If you'd like to connect or collaborate, feel free to reach out:</p>
+
+      <div class="contact-links">
+        <a href="mailto:kendall.f.leonard@gmail.com">Email Me</a>
+        <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank">My LinkedIn</a>
+      </div>
     </div>
   </div>
 
+  <!-- Load Navbar -->
   <script>
-    // JavaScript to load the navbar
-    fetch('https://k-leonard.github.io/navbar.html')  // Adjust path if needed
+    fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
       .then(data => {
         document.getElementById('navbar-container').innerHTML = data;
