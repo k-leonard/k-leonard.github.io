@@ -1,18 +1,45 @@
 <!-- navbar.html -->
 <style>
-  /* Main navbar container for fixed button */
+  /* Top Navbar */
+  .navbar {
+    background-color: #333;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    padding: 10px 0;
+  }
+
+  .navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 18px;
+  }
+
+  .navbar a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+
+  /* Hamburger button */
   .hamburger-button {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 30px;
+    top: 15px;
+    left: 15px;
+    font-size: 28px;
     cursor: pointer;
     z-index: 1001;
     color: white;
     background-color: #333;
     border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: block;
   }
 
   /* Sidebar menu */
@@ -51,6 +78,14 @@
     cursor: pointer;
   }
 </style>
+
+<!-- Top navbar -->
+<div class="navbar">
+  <a href="https://k-leonard.github.io/index.html">Home</a>
+  <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
+  <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
+  <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
+</div>
 
 <!-- Hamburger icon -->
 <button class="hamburger-button" onclick="toggleSidebar()">☰</button>
