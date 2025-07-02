@@ -249,7 +249,7 @@
     function flipCard(event, card) {
       event.stopPropagation();
       closeAllCards();
-      card.classList.add('flipped');
+      setTimeout(() => card.classList.add('flipped'), 50);
     }
 
     function closeCard(event, btn) {
