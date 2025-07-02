@@ -1,36 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kendall Leonard's Resume</title>
   <style>
-     body {
+    body {
       font-family: "Century Schoolbook", serif;
-      margin: 2;
+      margin: 0;
       padding: 0;
-      background-color: #f4f4f4;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
       background-image: url('https://k-leonard.github.io/smallfloral.png');
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
+      color: #333;
     }
 
-
-    .container {
-      width: 80%;
-      max-width: 1000px;
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      margin-top: 80px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    /* Navbar styling */
     .navbar {
       background-color: #333;
       width: 100%;
@@ -55,36 +40,41 @@
       color: black;
     }
 
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      margin: 120px auto 40px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
     h1 {
       text-align: center;
-      color: #333;
+      margin-bottom: 30px;
     }
 
     .section {
-  margin-top: 20px;
-  margin-left: 20px; /* Adds indentation to all sections */
-}
-
-
-    .section h2 {
-      color:#000205;
-      margin-bottom: 10px;
+      margin-bottom: 40px;
     }
 
-    .section p {
-      margin-bottom: 5px;
+    .section h2 {
+      color: #000205;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    .section p,
+    .section li {
+      font-size: 16px;
+      line-height: 1.6;
     }
 
     .contact-info p {
       font-style: italic;
-    }
-
-    .experience, .education {
-      margin-left: 20px;
-    }
-
-    .experience-item, .education-item {
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
     .skills ul {
@@ -95,18 +85,43 @@
     .skills li {
       background-color: #aaacad;
       color: white;
-      margin: 5px;
-      padding: 5px 10px;
+      margin: 5px 8px 5px 0;
+      padding: 6px 12px;
       border-radius: 5px;
       display: inline-block;
+      font-size: 15px;
+    }
+
+    .experience-item,
+    .education-item {
+      margin-bottom: 20px;
+    }
+
+    .experience-item p,
+    .education-item p {
+      margin-bottom: 8px;
+    }
+
+    ul {
+      margin-top: 0;
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    .last-updated {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar Container -->
+  <!-- Navbar -->
   <div id="navbar-container"></div>
 
+  <!-- Resume Content -->
   <div class="container">
     <h1>Kendall Leonard's Resume</h1>
 
@@ -114,8 +129,8 @@
     <div class="section contact-info">
       <h2>Contact Information</h2>
       <p>Email: kendall.f.leonard@gmail.com</p>
-      <p>LinkedIn: <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank">https://www.linkedin.com/in/kendall-leonard/</a></p>
-      <p>GitHub: <a href="https://k-leonard.github.io/index.html"> k-leonard.github.io</a></p>
+      <p>LinkedIn: <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank">linkedin.com/in/kendall-leonard</a></p>
+      <p>GitHub: <a href="https://k-leonard.github.io/index.html" target="_blank">k-leonard.github.io</a></p>
     </div>
 
     <!-- Skills Section -->
@@ -126,9 +141,9 @@
         <li>JavaScript</li>
         <li>SQL</li>
         <li>Python</li>
-         <li>HTML & CSS</li>
+        <li>HTML & CSS</li>
         <li>Data Analysis</li>
-        <li>Modelling & Machine Learning</li>
+        <li>Modeling & Machine Learning</li>
         <li>Web Development</li>
       </ul>
     </div>
@@ -136,75 +151,78 @@
     <!-- Education Section -->
     <div class="section education">
       <h2>Education</h2>
-        <div class="education-item">
-        <p><strong>Willamette University</strong> — Masters of Science in Data Science (2025)</p>
+      <div class="education-item">
+        <p><strong>Willamette University</strong> — M.S. in Data Science (2025)</p>
         <p>Relevant Courses: Data Visualization, Data Structures, Machine Learning, Database Management</p>
-       
       </div>
       <div class="education-item">
-        <p><strong>Willamette University</strong> — Bachelor of Science in Computer Science and Data Science (2025)</p>
+        <p><strong>Willamette University</strong> — B.S. in Computer Science and Data Science (2025)</p>
         <p>Relevant Courses: Data Structures, Machine Learning, Database Management</p>
-      
       </div>
     </div>
 
     <!-- Experience Section -->
     <div class="section experience">
       <h2>Experience</h2>
-       <!-- Programming Tutor Experience -->
+
       <div class="experience-item">
-        <p><strong>Programming and Analytics Tutor</strong> —  Willamette University Q.U.A.D Tutoring Center, Salem, OR (August 2022– May 2025)</p>
+        <p><strong>Programming and Analytics Tutor</strong> — Willamette University Q.U.A.D Tutoring Center, Salem, OR (Aug 2022–May 2025)</p>
         <ul>
-          <li>Specializing in imparting expertise in data analytics, R programming, SQL, and Python programming.</li>
-          <li>Achieved measurable improvements in students' academic performance through targeted tutoring sessions, demonstrating a commitment to fostering practical skills relevant to real-world scenarios.</li>
-          <li>Delivered personalized one-on-one tutoring across diverse subjects, including data analytics, computer science, mathematics, economics, and statistics.</li>
-          <li>Customized tutoring sessions to cater to individual student requirements, covering comprehension of lesson materials, homework assistance, and provision of supplementary information.</li>
-          <li>Cultivated a hands-on learning environment, emphasizing the practical application of knowledge and problem-solving techniques.</li>
+          <li>Specialized in tutoring data analytics, R, SQL, and Python.</li>
+          <li>Improved student performance through targeted instruction and hands-on help.</li>
+          <li>Provided personalized tutoring across CS, math, econ, stats, and data science.</li>
+          <li>Adapted sessions to student needs, offering conceptual and practical support.</li>
+          <li>Emphasized real-world application and problem-solving strategies.</li>
         </ul>
       </div>
 
-      <!-- Academic Support Coordinator at Willamette Q.U.A.D Tutoring Center -->
       <div class="experience-item">
-        <p><strong>Tutoring Center Manager</strong> — Willamette University Q.U.A.D Tutoring Center, Salem, OR (August 2023 – January 2025)</p>
+        <p><strong>Tutoring Center Manager</strong> — Willamette University Q.U.A.D Tutoring Center, Salem, OR (Aug 2023–Jan 2025)</p>
         <ul>
-          <li>Applied advanced data analysis techniques in Python and R to evaluate student usage data, guaranteeing data integrity and pinpointing opportunities for enhancing academic support processes.</li>
-          <li>Implemented data wrangling methods in Python and R to clean and integrate intricate datasets, utilizing compelling visualizations to articulate insights and uncover patterns and trends effectively.</li>
-          <li>Produced bi-weekly reports on QUAD Center usage, presenting key findings and offering data-driven recommendations for continuous process improvement.</li>
-          <li>Coordinated logistics for diverse events, applying agile development principles and adept speaker coordination to devise adaptive solutions.</li>
-          <li>Acted as a liaison between faculty and student staff, ensuring seamless operations and collaborating with a diverse team to optimize QUAD Center functions.</li>
-          <li>Orchestrated weekly faculty meetings, overseeing attendance and fostering an agile mindset to improve communication and documentation processes.</li>
-          <li>Made significant contributions to QUAD Center operations through proactive planning, hosting events, conducting surveys, and actively participating in improvement projects.</li>
+          <li>Led analysis of tutoring center data to identify engagement and improvement areas.</li>
+          <li>Used Python and R for data wrangling, visualization, and report generation.</li>
+          <li>Produced bi-weekly reports with actionable insights for process optimization.</li>
+          <li>Managed logistics for events and faculty communications.</li>
+          <li>Coordinated agile team meetings, tracked attendance, and documented outcomes.</li>
         </ul>
-    </div>
+      </div>
 
-    <div class="experience-item">
-        <p><strong>Teacher's Assistant </strong> — Willamette University Data Science Department, Salem, OR (August 2022 – May 2025)</p>
+      <div class="experience-item">
+        <p><strong>Teaching Assistant</strong> — Willamette University Data Science Department (Aug 2022–May 2025)</p>
         <ul>
-          <li>Graded and provided comprehensive feedback on theoretical and practical coding assignments to enhance student learning and comprehension.</li>
-          <li>Assisted with classroom management, fostering a productive and engaging learning environment.</li>
-          <li>Conducted regular office hours, offering individualized support and clarification on course material.</li>
-          <li>Maintained consistent communication with professors to convey student needs and progress, contributing to an effective teaching strategy.</li>
-          <li>Articulated introductory data science concepts using diverse pedagogical approaches to accommodate various learning styles and ensure widespread understanding.</li>
-          <li>Assisted with teaching students R coding in RStudio, utilizing packages such as Tidyverse and others.</li>
+          <li>Graded and gave feedback on data science assignments and coding exercises.</li>
+          <li>Held regular office hours for student support and clarification.</li>
+          <li>Assisted in teaching R and RStudio, including Tidyverse and other packages.</li>
+          <li>Collaborated with professors to improve course delivery and student outcomes.</li>
         </ul>
+      </div>
     </div>
-    
 
     <!-- Projects Section -->
     <div class="section projects">
       <h2>Projects</h2>
       <p><strong>TBD</strong>: TBD</p>
     </div>
+
+    <!-- Last Updated -->
+    <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
   </div>
 
+  <!-- Load Navbar -->
   <script>
-    // JavaScript to load the navbar
-    fetch('https://k-leonard.github.io/navbar.html')  // Adjust path if needed
+    fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
       .then(data => {
         document.getElementById('navbar-container').innerHTML = data;
       })
       .catch(error => console.error('Error loading the navbar:', error));
+  </script>
+
+  <!-- Auto-update Last Updated Date -->
+  <script>
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const today = new Date().toLocaleDateString(undefined, options);
+    document.getElementById('last-updated-date').textContent = today;
   </script>
 </body>
 </html>
