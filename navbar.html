@@ -13,26 +13,13 @@
     z-index: 1000;
   }
 
-  .navbar a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-size: 18px;
-  }
-
-  .navbar a:hover {
-    background-color: #ddd;
-    color: black;
-  }
-
-  .hamburger {
-    display: none;
-    font-size: 24px;
-    color: white;
-    cursor: pointer;
-    margin-left: 20px;
-    position: absolute;
-    right: 20px;
+  .navbar-content {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
   }
 
   .nav-links {
@@ -41,41 +28,54 @@
     transition: max-height 0.4s ease-out;
   }
 
+  .nav-links a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 18px;
+  }
+
+  .nav-links a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+
+  .hamburger {
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    display: block;
+  }
+
+  /* Mobile behavior */
   @media (max-width: 700px) {
     .nav-links {
-      flex-direction: column;
       position: absolute;
       top: 50px;
-      background-color: #333;
-      width: 100%;
       left: 0;
-      text-align: center;
-      overflow: hidden;
+      width: 100%;
+      flex-direction: column;
+      background-color: #333;
       max-height: 0;
-    }
-
-    .nav-links a {
-      padding: 12px 0;
+      overflow: hidden;
     }
 
     .nav-links.show {
-      max-height: 300px; /* enough to show all links */
-    }
-
-    .hamburger {
-      display: block;
+      max-height: 300px;
     }
   }
 </style>
 
 <div class="navbar">
-  <div class="nav-links" id="navLinks">
-    <a href="https://k-leonard.github.io/index.html">Home</a>
-    <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
-    <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
-    <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
+  <div class="navbar-content">
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <div class="nav-links" id="navLinks">
+      <a href="https://k-leonard.github.io/index.html">Home</a>
+      <a href="https://k-leonard.github.io/Website_Assets/Resume.html">Resume</a>
+      <a href="https://k-leonard.github.io/Website_Assets/Projects.html">Projects</a>
+      <a href="https://k-leonard.github.io/Website_Assets/About.html">About Me</a>
+    </div>
   </div>
-  <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
 </div>
 
 <script>
