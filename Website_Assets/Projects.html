@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Projects</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
       background-image: url('https://k-leonard.github.io/smallfloral.png');
@@ -11,16 +12,10 @@
       background-position: center;
       background-repeat: no-repeat;
       margin: 0;
-      font-family: "Century Schoolbook", serif; /* Ensures the same font as the rest of the site */
+      font-family: "Century Schoolbook", serif;
       color: #333;
-      display: flex;
-      justify-content: center;  /* Centers content horizontally */
-      align-items: center;      /* Centers content vertically */
-      height: 100vh;            /* Full viewport height */
-      flex-direction: column;   /* Stack elements vertically */
     }
 
-    /* Navbar styling */
     .navbar {
       background-color: #333;
       width: 100%;
@@ -45,116 +40,173 @@
       color: black;
     }
 
-    /* Content section styling */
     .content {
-      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
-      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
       text-align: center;
-      width: 80%;
-      max-width: 1200px; /* Prevents content from becoming too wide */
+      width: 90%;
+      max-width: 1200px;
       border-radius: 10px;
-      margin-top: 80px; /* Adjust space for navbar */
-      display: flex;
-      flex-direction: column;
-      align-items: center; /* Center the content inside the content div */
-       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin: 100px auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     .projects-container {
       display: flex;
-      justify-content: space-around;
       flex-wrap: wrap;
-      gap: 20px;
+      justify-content: center;
+      gap: 30px;
       margin-top: 30px;
     }
 
     .project-card {
-      background-color: #333333;
-      border-radius: 8px;
-      width: 200px;
-      padding: 15px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      background-color: #f9f9f9;
+      width: 300px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      position: relative;
     }
 
-    /* Make text inside project cards white */
-    .project-card h3, 
-    .project-card p, 
-    .project-card a {
+    .project-card:hover {
+      transform: scale(1.03);
+    }
+
+    .project-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .project-content {
+      padding: 20px;
+    }
+
+    .project-title {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    .project-description {
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .project-link {
+      background-color: #007BFF;
       color: white;
-    }
-
-    .project-card h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .project-card p {
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-
-    .project-card a {
-      color: #007BFF;
+      padding: 8px 16px;
+      border-radius: 5px;
       text-decoration: none;
       font-size: 14px;
     }
 
-    .project-card a:hover {
-      text-decoration: underline;
+    .project-link:hover {
+      background-color: #0056b3;
+    }
+
+    .menu-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #888;
+      font-size: 20px;
+    }
+
+    .tooltip-box {
+      display: none;
+      position: absolute;
+      top: 35px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      width: 250px;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .tooltip-box.show {
+      display: block;
     }
   </style>
 </head>
 <body>
+  <div id="navbar-container"></div>
 
-  <!-- Navbar -->
-  <div id="navbar-container"></div> <!-- This will load the navbar -->
-
-  <!-- Content Section -->
   <div class="content">
     <h1>Projects</h1>
-    <p>Welcome to my projects page! Below you'll find some placeholders for my ongoing and completed projects. More details coming soon.</p>
-
+    <p>Explore my featured data projects below!</p>
     <div class="projects-container">
-      <!-- Project 1 -->
+
       <div class="project-card">
-        <h3>COVID-19 and Data Visualizations</h3>
-        <p>My master's research project into how COVID-19 and data visualizations affected each other.</p>
-        <a href="#">View Project</a>
+        <img src="https://k-leonard.github.io/Website_Assets/covidprojimage.png" alt="COVID Project" class="project-image">
+        <div class="project-content">
+          <h3 class="project-title">COVID-19 and Data Visualizations</h3>
+          <p class="project-description">My master's research into how COVID-19 and data visualizations affected each other.</p>
+          <a class="project-link" href="#">View Project</a>
+          <button class="menu-button" onclick="toggleTooltip(this)"><i class="fas fa-ellipsis-v"></i></button>
+          <div class="tooltip-box">
+            <strong>Tools:</strong> R, ggplot2, tidymodels, Quarto<br>
+            <strong>Highlights:</strong> Temporal storytelling, visual bias analysis.
+          </div>
+        </div>
       </div>
 
-      <!-- Project 2 -->
       <div class="project-card">
-        <h3>Marvel Capstone Title</h3>
-        <p>My master's capstone project</p>
-        <a href="https://k-leonard.github.io/Website_Assets/capstone-project.html">View Project</a>
+        <img src="https://k-leonard.github.io/Website_Assets/capstone-thumbnail.png" alt="Capstone Project" class="project-image">
+        <div class="project-content">
+          <h3 class="project-title">Marvel Metadata Capstone</h3>
+          <p class="project-description">My master's capstone exploring character and comic classification via web scraping + SQL.</p>
+          <a class="project-link" href="https://k-leonard.github.io/Website_Assets/capstone-project.html">View Project</a>
+          <button class="menu-button" onclick="toggleTooltip(this)"><i class="fas fa-ellipsis-v"></i></button>
+          <div class="tooltip-box">
+            <strong>Tools:</strong> Python, SQL, Pandas, BeautifulSoup, PostgreSQL<br>
+            <strong>Highlights:</strong> Web scraping, ER design, fact/dim modeling, keyword classifiers.
+          </div>
+        </div>
       </div>
 
-      <!-- Project 3 -->
       <div class="project-card">
-        <h3>Project Title 3</h3>
-        <p>A short description of the project goes here.</p>
-        <a href="#">View Project</a>
+        <img src="https://k-leonard.github.io/Website_Assets/placeholder.png" alt="Placeholder Project" class="project-image">
+        <div class="project-content">
+          <h3 class="project-title">More Projects Coming Soon</h3>
+          <p class="project-description">Stay tuned for my ongoing coursework, data stories, and creative dashboards!</p>
+          <a class="project-link" href="#">Check Back Later</a>
+        </div>
       </div>
+
     </div>
   </div>
 
   <script>
-  fetch('https://k-leonard.github.io/navbar.html')
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById('navbar-container').innerHTML = data;
-      // Wait until it's injected, then rebind the function
-      const script = document.createElement("script");
-      script.textContent = `
-        function toggleSidebar() {
+    function toggleTooltip(btn) {
+      const tooltip = btn.nextElementSibling;
+      document.querySelectorAll('.tooltip-box').forEach(box => {
+        if (box !== tooltip) box.classList.remove('show');
+      });
+      tooltip.classList.toggle('show');
+    }
+
+    fetch('https://k-leonard.github.io/navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+        const script = document.createElement('script');
+        script.textContent = `function toggleSidebar() {
           const sidebar = document.getElementById("mySidebar");
           sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
-        }
-      `;
-      document.body.appendChild(script);
-    })
-    .catch(error => console.error('Error loading the navbar:', error));
-</script>
+        }`;
+        document.body.appendChild(script);
+      });
+  </script>
 </body>
 </html>
