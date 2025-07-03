@@ -164,6 +164,14 @@
       color: #777;
       margin-top: 30px;
     }
+    :target::before {
+  content: "";
+  display: block;
+  height: 80px; /* Adjust to match your navbar height */
+  margin-top: -80px;
+  visibility: hidden;
+}
+
 
     @media print {
   .navbar,
@@ -211,7 +219,6 @@
     <a href="#top">Top</a>
     <a href="#contact">Contact</a>
     <a href="#skills">Skills</a>
-    <a href="#visual-icons">Icons</a>
     <a href="#education">Education</a>
     <a href="#experience">Experience</a>
     <a href="#projects">Projects</a>
