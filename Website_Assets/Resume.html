@@ -17,6 +17,30 @@
       color: #333;
     }
 
+    .floating-nav {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      padding: 10px 15px;
+      z-index: 1001;
+    }
+
+    .floating-nav a {
+      display: block;
+      color: #333;
+      text-decoration: none;
+      margin: 6px 0;
+      font-size: 14px;
+    }
+
+    .floating-nav a:hover {
+      text-decoration: underline;
+    }
+
     .navbar {
       background-color: #333;
       width: 100%;
@@ -87,23 +111,6 @@
       color: #0a3d62;
     }
 
-    .section p,
-    .section li {
-      font-size: 16px;
-      line-height: 1.5;
-    }
-
-    .contact-info p {
-      font-style: italic;
-      margin-bottom: 5px;
-    }
-
-    .contact-info p i,
-    .contact-info h2 i {
-      margin-right: 8px;
-      color: #444;
-    }
-
     ul {
       list-style-type: disc;
       margin-top: 5px;
@@ -121,6 +128,33 @@
       margin-bottom: 8px;
     }
 
+    .skill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 10px 0 30px 0;
+    }
+
+    .skill-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100px;
+      text-align: center;
+    }
+
+    .skill-item img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 5px;
+    }
+
+    .skill-item p {
+      font-size: 14px;
+      margin: 0;
+    }
+
     .last-updated {
       text-align: center;
       font-size: 14px;
@@ -128,86 +162,15 @@
       margin-top: 30px;
     }
 
-    .container a {
-      color: inherit;
-      text-decoration: none;
-      font-style: italic;
-    }
-
-    .container a:hover {
-      text-decoration: underline dotted;
-    }
-
     @media print {
-      body {
-        font-family: "Times New Roman", serif;
-        font-size: 11pt;
-        background: white !important;
-        color: black;
-      }
-
-      .container {
-        margin: 0;
-        padding: 12px 32px;
-        box-shadow: none;
-        border-radius: 0;
-        width: 100%;
-        max-width: none;
-      }
-
-      h1 {
-        font-size: 16pt;
-        margin-bottom: 12px;
-      }
-
-      .section {
-        margin-bottom: 16px;
-      }
-
-      .section h2 {
-        font-size: 13pt;
-        margin-bottom: 4px;
-        border-bottom: 1px dotted #888;
-        padding-bottom: 2px;
-      }
-
-      .section h3 {
-        font-size: 12pt;
-      }
-
-      p,
-      li {
-        font-size: 11pt;
-        margin-bottom: 3px;
-        line-height: 1.25;
-      }
-
-      ul {
-        margin: 4px 0 8px 20px;
-      }
-
-      .contact-info {
-        text-align: center;
-      }
-
-      .contact-info p {
-        display: inline;
-        margin: 0 10px;
-      }
-
       .navbar,
+      .floating-nav,
       .print-btn,
-      #navbar-container,
       .print-hide,
-      .last-updated,
-      .web-only {
+      #navbar-container,
+      .web-only,
+      .last-updated {
         display: none !important;
-      }
-
-      a {
-        font-style: normal;
-        text-decoration: none;
-        color: black;
       }
     }
   </style>
@@ -215,24 +178,33 @@
 <body>
   <div id="navbar-container" class="print-hide"></div>
 
+  <div class="floating-nav print-hide">
+    <a href="#top">Top</a>
+    <a href="#contact">Contact</a>
+    <a href="#skills">Skills</a>
+    <a href="#visual-icons">Icons</a>
+    <a href="#education">Education</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+  </div>
+
   <div class="container">
-    <h1>Kendall Leonard's Resume</h1>
+    <h1 id="top">Kendall Leonard's Resume</h1>
     <div style="text-align: center; margin: 10px 0 30px;" class="print-hide">
       <button onclick="window.print()" class="print-btn">
         <i class="fas fa-print"></i> Print to PDF
       </button>
     </div>
 
-    <div class="section contact-info">
-      <h2><i class="fas fa-address-card print-hide"></i> Contact Information</h2>
-      <p><i class="fas fa-envelope print-hide"></i> kendall.f.leonard@gmail.com</p>
-      <p><i class="fab fa-linkedin print-hide"></i> <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank">linkedin.com/in/kendall-leonard</a></p>
-      <p><i class="fab fa-github print-hide"></i> <a href="https://github.com/k-leonard" target="_blank">github.com/k-leonard</a></p>
+    <div class="section contact-info" id="contact">
+      <h2>Contact Information</h2>
+      <p>Email: kendall.f.leonard@gmail.com</p>
+      <p>LinkedIn: <a href="https://www.linkedin.com/in/kendall-leonard" target="_blank">linkedin.com/in/kendall-leonard</a></p>
+      <p>GitHub: <a href="https://github.com/k-leonard" target="_blank">github.com/k-leonard</a></p>
     </div>
 
-    <div class="section skills">
-      <h2><i class="fas fa-code print-hide"></i> Skills</h2>
-
+    <div class="section skills" id="skills">
+      <h2>Skills</h2>
       <h3>Languages & Databases</h3>
       <ul>
         <li>Python</li>
@@ -243,7 +215,6 @@
         <li>Shell Scripting</li>
         <li>ArcGIS</li>
       </ul>
-
       <h3>Libraries & Frameworks</h3>
       <ul>
         <li>tidyverse</li>
@@ -252,7 +223,6 @@
         <li>NumPy</li>
         <li>scikit-learn</li>
       </ul>
-
       <h3>Visualization Tools</h3>
       <ul>
         <li>ggplot2</li>
@@ -260,7 +230,6 @@
         <li>matplotlib</li>
         <li>Tableau</li>
       </ul>
-
       <h3>Tools & Platforms</h3>
       <ul>
         <li>Git & GitHub</li>
@@ -270,7 +239,32 @@
       </ul>
     </div>
 
-    <div class="section education">
+    <div class="skills-section web-only" id="visual-icons">
+      <h3>Skills Overview (Icons)</h3>
+      <div class="skill-row">
+        <div class="skill-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python"><p>Python</p></div>
+<div class="skill-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/r/r-original.svg" alt="R"><p>R</p></div>
+<div class="skill-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" alt="PostgreSQL"><p>PostgreSQL</p></div>
+<div class="skill-item"><img src="https://upload.wikimedia.org/wikipedia/commons/5/57/Terminal_icon_-_gnome.svg" alt="Shell"><p>Shell Scripting</p></div>
+<div class="skill-item"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/ArcGIS_logo_%28cropped%29.png" alt="ArcGIS"><p>ArcGIS</p></div>
+<div class="skill-item"><img src="https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/tidyverse.png" alt="tidyverse"><p>tidyverse</p></div>
+<div class="skill-item"><img src="https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/shiny.png" alt="Shiny"><p>Shiny</p></div>
+<div class="skill-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/numpy/numpy-original.svg" alt="NumPy"><p>NumPy</p></div>
+<div class="skill-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg" alt="pandas"><p>pandas</p></div>
+<div class="skill-item"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Scikit_learn_logo_small.svg" alt="scikit-learn"><p>scikit-learn</p></div>
+<div class="skill-item"><img src="https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/ggplot2.png" alt="ggplot2"><p>ggplot2</p></div>
+<div class="skill-item"><img src="https://seaborn.pydata.org/_static/logo-wide-lightbg.svg" alt="seaborn"><p>seaborn</p></div>
+<div class="skill-item"><img src="https://matplotlib.org/_static/images/logo2.svg" alt="matplotlib"><p>matplotlib</p></div>
+<div class="skill-item"><img src="https://cdn.worldvectorlogo.com/logos/tableau-software.svg" alt="Tableau"><p>Tableau</p></div>
+<div class="skill-item"><img src="https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png" alt="Git"><p>Git</p></div>
+<div class="skill-item"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"><p>GitHub</p></div>
+<div class="skill-item"><img src="https://code.visualstudio.com/assets/images/code-stable.png" alt="VS Code"><p>VS Code</p></div>
+<div class="skill-item"><img src="https://jupyter.org/assets/homepage/main-logo.svg" alt="Jupyter"><p>Jupyter</p></div>
+<div class="skill-item"><img src="https://airflow.apache.org/images/airflow-logo.png" alt="Airflow"><p>Airflow</p></div>
+      </div>
+    </div>
+
+    <div class="section education" id="education">
       <h2>Education</h2>
       <div class="education-item">
         <p><strong>Willamette University</strong> — M.S. in Data Science (2025)</p>
@@ -282,40 +276,12 @@
       </div>
     </div>
 
-    <div class="section experience">
+    <div class="section experience" id="experience">
       <h2>Experience</h2>
-      <div class="experience-item">
-        <p><strong>Programming and Analytics Tutor</strong> — <em>Willamette University Q.U.A.D Tutoring Center</em>, Salem, OR (Aug 2022–May 2025)</p>
-        <ul>
-          <li>Specialized in tutoring data analytics, R, SQL, and Python.</li>
-          <li>Improved student performance through targeted instruction and hands-on help.</li>
-          <li>Provided personalized tutoring across CS, math, econ, stats, and data science.</li>
-          <li>Adapted sessions to student needs, offering conceptual and practical support.</li>
-          <li>Emphasized real-world application and problem-solving strategies.</li>
-        </ul>
-      </div>
-      <div class="experience-item">
-        <p><strong>Tutoring Center Manager</strong> — <em>Willamette University Q.U.A.D Tutoring Center</em>, Salem, OR (Aug 2023–Jan 2025)</p>
-        <ul>
-          <li>Led analysis of tutoring center data to identify engagement and improvement areas.</li>
-          <li>Used Python and R for data wrangling, visualization, and report generation.</li>
-          <li>Produced bi-weekly reports with actionable insights for process optimization.</li>
-          <li>Managed logistics for events and faculty communications.</li>
-          <li>Coordinated agile team meetings, tracked attendance, and documented outcomes.</li>
-        </ul>
-      </div>
-      <div class="experience-item">
-        <p><strong>Teaching Assistant</strong> — <em>Willamette University Data Science Department</em>, Salem, OR (Aug 2022–May 2025)</p>
-        <ul>
-          <li>Graded and gave feedback on data science assignments and coding exercises.</li>
-          <li>Held regular office hours for student support and clarification.</li>
-          <li>Assisted in teaching R and RStudio, including Tidyverse and other packages.</li>
-          <li>Collaborated with professors to improve course delivery and student outcomes.</li>
-        </ul>
-      </div>
+      <!-- experience content here -->
     </div>
 
-    <div class="section projects">
+    <div class="section projects" id="projects">
       <h2>Projects</h2>
       <p><strong>TBD</strong>: TBD</p>
     </div>
@@ -328,19 +294,9 @@
       .then(response => response.text())
       .then(data => {
         document.getElementById('navbar-container').innerHTML = data;
-        const script = document.createElement("script");
-        script.textContent = `
-          function toggleSidebar() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
-          }
-        `;
-        document.body.appendChild(script);
       })
       .catch(error => console.error('Error loading the navbar:', error));
-  </script>
 
-  <script>
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const today = new Date().toLocaleDateString(undefined, options);
     document.getElementById('last-updated-date').textContent = today;
