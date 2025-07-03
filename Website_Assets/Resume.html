@@ -148,89 +148,100 @@
     }
 
     /* === PRINT OVERRIDES === */
-    @media print {
-      body {
-        font-family: "Times New Roman", serif;
-        font-size: 11pt;
-        background: white !important;
-        color: black;
-      }
+@media print {
+  body {
+    font-family: "Times New Roman", serif;
+    font-size: 11pt;
+    background: white !important;
+    color: black;
+  }
 
-      .container {
-        margin: 0;
-        padding: 12px 32px;
-        box-shadow: none;
-        border-radius: 0;
-        width: 100%;
-        max-width: none;
-      }
+  .container {
+    margin: 0;
+    padding: 12px 32px;
+    box-shadow: none;
+    border-radius: 0;
+    width: 100%;
+    max-width: none;
+  }
 
-      h1 {
-        font-size: 16pt;
-        margin-bottom: 12px;
-      }
+  h1 {
+    font-size: 16pt;
+    margin-bottom: 12px;
+  }
 
-      .section {
-        margin-bottom: 18px;
-      }
+  .section {
+    margin-bottom: 16px;
+  }
 
-      .section h2 {
-        font-size: 13pt;
-        margin-bottom: 4px;
-        border-bottom: 1px dotted #888;
-        padding-bottom: 2px;
-      }
+  .section h2 {
+    font-size: 13pt;
+    margin-bottom: 4px;
+    border-bottom: 1px dotted #888;
+    padding-bottom: 2px;
+  }
 
-      .education-item,
-      .experience-item {
-        margin-bottom: 10px;
-      }
+  .education-item {
+    margin-bottom: 8px;
+  }
 
-      p,
-      li {
-        font-size: 11pt;
-        margin-bottom: 3px;
-        line-height: 1.25;
-      }
+  .education-item p {
+    margin-bottom: 4px;
+  }
 
-      ul {
-        margin: 4px 0 8px 20px;
-      }
+  .experience-item {
+    margin-bottom: 10px;
+  }
 
-      .skills li {
-        display: list-item;
-        list-style: disc;
-        background: none;
-        color: black;
-        padding: 0;
-        margin: 0 0 2px 20px;
-        border: none;
-        font-size: 11pt;
-      }
+  p,
+  li {
+    font-size: 11pt;
+    margin-bottom: 3px;
+    line-height: 1.25;
+  }
 
-      .skills ul {
-        list-style-type: disc;
-      }
+  ul {
+    margin: 4px 0 8px 20px;
+  }
 
-      .contact-info p {
-        display: inline;
-        margin-right: 12px;
-      }
+  .skills li {
+    display: list-item;
+    list-style: disc;
+    background: none;
+    color: black;
+    padding: 0;
+    margin: 0 0 2px 20px;
+    border: none;
+    font-size: 11pt;
+  }
 
-      .navbar,
-      .print-btn,
-      #navbar-container,
-      .print-hide,
-      .last-updated {
-        display: none !important;
-      }
+  .skills ul {
+    list-style-type: disc;
+  }
 
-      a {
-        font-style: normal;
-        text-decoration: none;
-        color: black;
-      }
-    }
+  .contact-info {
+    text-align: center;
+  }
+
+  .contact-info p {
+    display: inline;
+    margin: 0 10px;
+  }
+
+  .navbar,
+  .print-btn,
+  #navbar-container,
+  .print-hide,
+  .last-updated {
+    display: none !important;
+  }
+
+  a {
+    font-style: normal;
+    text-decoration: none;
+    color: black;
+  }
+}
   </style>
 </head>
 <body>
