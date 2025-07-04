@@ -491,24 +491,39 @@
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
 
-  <!-- LAST UPDATED DATE -->
-  <script>
-    const dateSpan = document.getElementById("last-updated-date");
-    const now = new Date();
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    const formatted = now.toLocaleDateString("en-US", options);
-    const day = now.getDate();
-    const suffix = (day) => {
-      if (day > 3 && day < 21) return "th";
-      switch (day % 10) {
-        case 1: return "st";
-        case 2: return "nd";
-        case 3: return "rd";
-        default: return "th";
+ <!-- LAST UPDATED via GitHub API -->
+<script>
+  const resumeAPI = "https://api.github.com/repos/k-leonard/k-leonard.github.io/commits?path=Website_Assets/Resume.html&per_page=1";
+
+  fetch(resumeAPI)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data[0]) {
+        const dateString = data[0].commit.committer.date;
+        const date = new Date(dateString);
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        const formatted = date.toLocaleDateString("en-US", options);
+        const day = date.getDate();
+        const suffix = (d) => {
+          if (d > 3 && d < 21) return "th";
+          switch (d % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+          }
+        };
+        document.getElementById("last-updated-date").textContent = formatted.replace(String(day), day + suffix(day));
+      } else {
+        document.getElementById("last-updated-date").textContent = "Unavailable";
       }
-    };
-    dateSpan.textContent = formatted.replace(String(day), day + suffix(day));
-  </script>
+    })
+    .catch(error => {
+      console.error("GitHub API error:", error);
+      document.getElementById("last-updated-date").textContent = "Unavailable";
+    });
+</script>
+
 
 </body>
 </html>
