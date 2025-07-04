@@ -80,6 +80,35 @@
     a.inline-link:hover {
       text-decoration: underline;
     }
+
+    .collapsible {
+      cursor: pointer;
+      background-color: #f0f0f0;
+      border: none;
+      outline: none;
+      padding: 12px;
+      width: 100%;
+      text-align: left;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+      border-radius: 5px;
+      transition: background-color 0.2s ease;
+    }
+
+    .collapsible:hover {
+      background-color: #e2e2e2;
+    }
+
+    .content-section {
+      display: none;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+    }
+
+    .active + .content-section {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -91,51 +120,71 @@
   <div class="content">
     <h1>Undergraduate Classwork</h1>
     <p>This page contains all relevant classes I took during my undergraduate education, grouped by academic focus. If you're curious about specific projects or work from these classes, feel free to check the <a href="https://k-leonard.github.io/Website_Assets/Projects.html" class="inline-link">projects tab</a> for highlights.</p>
-    <p><m>Due to some courses counting for multiple areas, there are some repeats.</m></p>
-    <h2>Data Science</h2>
-    <ul>
-      <li>Introduction to Programming with Python</li>
-      <li>Statistics</li>
-      <li>Fundementals of Data Science with Python</li>
-      <li>Statistical Learning with R</li>
-      <li>Data Structures</li>
-      <li>Data in the Cosmos</li>
-      <li>Models and Machine Learning in R</li>
-      <li>Data Management with SQL</li>
-      <li>Math For Data Science</li>
-    </ul>
+    <p><em>Due to some courses counting for multiple areas, there are some repeats.</em></p>
 
-    <h2>Computer Science</h2>
-    <ul>
-      <li>Introduction to Programming with Python</li>
-      <li>Foundations of Advanced Mathematics</li>
-      <li>Data Structures</li>
-      <li>Software Development</li>
-      <li>Database Management</li>
-      <li>Networks and Systems</li>
-      <li>Analysis of Algorithms</li>
-    </ul>
+    <button class="collapsible">Data Science</button>
+    <div class="content-section">
+      <ul>
+        <li>Introduction to Programming with Python</li>
+        <li>Statistics</li>
+        <li>Fundamentals of Data Science with Python</li>
+        <li>Statistical Learning with R</li>
+        <li>Data Structures</li>
+        <li>Data in the Cosmos</li>
+        <li>Models and Machine Learning in R</li>
+        <li>Data Management with SQL</li>
+        <li>Math For Data Science</li>
+      </ul>
+    </div>
 
-    <h2>Math Minor</h2>
-    <ul>
-      <li>Linear Algebra</li>
-      <li>Calculus I & II</li>
-      <li>Foundations of Advanced Mathematics</li>
-      <li>Statistics</li>
-      <li>Math For Data Science</li>
-    </ul>
+    <button class="collapsible">Computer Science</button>
+    <div class="content-section">
+      <ul>
+        <li>Introduction to Programming with Python</li>
+        <li>Foundations of Advanced Mathematics</li>
+        <li>Data Structures</li>
+        <li>Software Development</li>
+        <li>Database Management</li>
+        <li>Networks and Systems</li>
+        <li>Analysis of Algorithms</li>
+      </ul>
+    </div>
 
-    <h2>Economics Minor</h2>
-    <ul>
-      <li>Introduction to Economic Inquiry</li>
-      <li>Microeconomic Theory</li>
-      <li>Statistics</li>
-      <li>Models and Machine Learning in R</li>
-      <li>The Rise of Capitalism</li>
-    </ul>
+    <button class="collapsible">Math Minor</button>
+    <div class="content-section">
+      <ul>
+        <li>Linear Algebra</li>
+        <li>Calculus I & II</li>
+        <li>Foundations of Advanced Mathematics</li>
+        <li>Statistics</li>
+        <li>Math For Data Science</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Economics Minor</button>
+    <div class="content-section">
+      <ul>
+        <li>Introduction to Economic Inquiry</li>
+        <li>Microeconomic Theory</li>
+        <li>Statistics</li>
+        <li>Models and Machine Learning in R</li>
+        <li>The Rise of Capitalism</li>
+      </ul>
+    </div>
 
     <a href="https://k-leonard.github.io/index.html" class="back-link">← Back to Main Page</a>
   </div>
+
+  <!-- Collapsible Script -->
+  <script>
+    document.querySelectorAll(".collapsible").forEach(button => {
+      button.addEventListener("click", function () {
+        this.classList.toggle("active");
+        const content = this.nextElementSibling;
+        content.style.display = (content.style.display === "block") ? "none" : "block";
+      });
+    });
+  </script>
 
   <!-- Navbar Loader -->
   <script>
