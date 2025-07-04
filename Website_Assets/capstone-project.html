@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Capstone Project</title>
+  <title>Marvel Metadata Capstone</title>
   <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png">
+
   <style>
     body {
       font-family: "Century Schoolbook", serif;
@@ -22,16 +23,16 @@
     }
 
     .container {
-      width: 80%;
+      width: 85%;
       max-width: 1000px;
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px 30px;
-      margin-top: 80px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      background-color: rgba(255, 255, 255, 0.92);
+      padding: 30px 40px;
+      margin-top: 100px;
+      margin-bottom: 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    /* Navbar styling (copied from resume) */
     .navbar {
       background-color: #333;
       width: 100%;
@@ -58,18 +59,19 @@
 
     h1 {
       text-align: center;
-      color: #333;
+      color: #222;
+      font-size: 2.5em;
     }
 
     .project-subtitle {
       text-align: center;
       font-style: italic;
-      color: #555;
+      color: #666;
       margin-bottom: 30px;
     }
 
     .project-section {
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
 
     h2 {
@@ -77,10 +79,20 @@
       margin-bottom: 10px;
       border-bottom: 1px solid #ccc;
       padding-bottom: 5px;
+      font-size: 1.6em;
     }
 
     ul {
       padding-left: 20px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      margin-top: 15px;
+      margin-bottom: 15px;
     }
 
     footer {
@@ -100,43 +112,68 @@
 </head>
 <body>
 
-  <!-- Navbar will be injected here -->
+  <!-- Navbar Loader -->
   <div id="navbar-container"></div>
 
   <div class="container">
-    <h1>A Catchy Title</h1>
+    <h1>Marvel Metadata: Unmasking Heroes with Data</h1>
     <p class="project-subtitle">Master's of Data Science Capstone Project</p>
 
     <section class="project-section">
       <h2>Overview</h2>
-      <p>[Brief overview of what this project is about and why it matters]</p>
+      <p>
+        This project explores the metadata of Marvel comic characters through large-scale web scraping, text classification,
+        and relational database design. By extracting and analyzing biographies and descriptions from Marvel’s character pages,
+        the goal was to build a structured and searchable database of hero names, powers, affiliations, and thematic elements.
+        The project also surfaces underrepresented characters and storylines through keyword-based tagging and classification.
+      </p>
+      <!-- Placeholder for ERD or scraped character profile graphic -->
+      <p><em>[Insert ERD or example character metadata graphic here]</em></p>
     </section>
 
     <section class="project-section">
       <h2>Skills & Tools Used</h2>
       <ul>
-        <li>Python (pandas, scikit-learn)</li>
-        <li>SQL (PostgreSQL)</li>
-        <li>Airflow, Tableau</li>
+        <li>Python (BeautifulSoup, requests, pandas, regex)</li>
+        <li>PostgreSQL (database schema, joins, indexing)</li>
+        <li>SQL (queries, classification tables, foreign keys)</li>
+        <li>Regex-based NLP techniques for text classification</li>
+        <li>GitHub for project tracking and iterative refinement</li>
       </ul>
     </section>
 
     <section class="project-section">
       <h2>Process</h2>
-      <p>[Explain your steps — from data collection to visualization. Break into substeps or bullets if needed.]</p>
+      <ul>
+        <li><strong>Scraping:</strong> Collected all character URLs from Marvel’s site and scraped each profile’s name, aliases, powers, biography, and affiliations.</li>
+        <li><strong>Parsing:</strong> Cleaned and parsed structured and unstructured data using regular expressions and conditional logic.</li>
+        <li><strong>Classification:</strong> Tagged comics and characters with attributes like theme, threat level, and event involvement using curated keyword dictionaries.</li>
+        <li><strong>Database Design:</strong> Created normalized tables for characters, comics, teams, threats, and themes using PostgreSQL with primary/foreign key integrity.</li>
+        <li><strong>Expansion:</strong> Iteratively improved keyword lists and classification coverage, reaching over 90% theme-tag coverage on the dataset.</li>
+      </ul>
+      <!-- Placeholder for scraping flowchart or schema diagram -->
+      <p><em>[Insert scraping flow or classification table diagram here]</em></p>
     </section>
 
     <section class="project-section">
       <h2>Key Outcomes</h2>
       <ul>
-        <li>[Example: Achieved RMSE of 2.01]</li>
-        <li>[Example: Built real-time updating dashboard]</li>
+        <li>Scraped and structured data for over 27,000 Marvel comics and hundreds of character profiles</li>
+        <li>Built SQL tables for teams, powers, aliases, themes, and threats, supporting fast lookup and filtering</li>
+        <li>Used regex-based keyword classification to tag comics with major themes and threat levels</li>
+        <li>Identified gaps in Marvel’s character representation and uneven metadata across character profiles</li>
+        <li>Achieved over 90% coverage of themes across the comic dataset</li>
       </ul>
     </section>
 
     <section class="project-section">
       <h2>Reflection</h2>
-      <p>[What you learned, challenges, future steps]</p>
+      <p>
+        This project was a challenging and rewarding deep dive into messy real-world text data and the power of structured storage.
+        I learned how to combine scraping, regex, and SQL to extract meaning from unstructured HTML. The iterative keyword design
+        taught me a lot about classification tradeoffs and maintaining reproducibility. If extended, I’d love to add visualizations
+        for character connections, theme evolution over time, or integrate sentiment analysis on story arcs.
+      </p>
     </section>
 
     <footer>
@@ -144,22 +181,22 @@
     </footer>
   </div>
 
+  <!-- Load Navbar -->
   <script>
-  fetch('https://k-leonard.github.io/navbar.html')
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById('navbar-container').innerHTML = data;
-      // Wait until it's injected, then rebind the function
-      const script = document.createElement("script");
-      script.textContent = `
-        function toggleSidebar() {
-          const sidebar = document.getElementById("mySidebar");
-          sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
-        }
-      `;
-      document.body.appendChild(script);
-    })
-    .catch(error => console.error('Error loading the navbar:', error));
-</script>
+    fetch('https://k-leonard.github.io/navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+        const script = document.createElement("script");
+        script.textContent = `
+          function toggleSidebar() {
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
+          }
+        `;
+        document.body.appendChild(script);
+      })
+      .catch(error => console.error('Error loading the navbar:', error));
+  </script>
 </body>
 </html>
