@@ -98,6 +98,25 @@
     .contact-links a:hover {
       text-decoration: underline;
     }
+    .profile-photo {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px double #555;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  margin: 20px auto;
+  display: block;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-photo:hover {
+  border-color: #000000;
+  box-shadow: 0 0 12px rgba(0, 123, 255, 0.5);
+}
+
   </style>
 </head>
 <body>
@@ -106,6 +125,8 @@
   <div id="navbar-container"></div>
 
   <div class="content">
+    <img src="https://k-leonard.github.io/Kendall.png" alt="Kendall Leonard Logo" class="profile-photo" />
+
     <h1>About Me</h1>
     <p class="intro">Welcome to what I call the best page — the one all about me!</p>
 
