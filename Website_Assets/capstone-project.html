@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Marvel Metadata Capstone</title>
+  <title>Marvel Capstone</title>
   <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png">
-
   <style>
     body {
       font-family: "Century Schoolbook", serif;
@@ -57,6 +56,20 @@
       color: black;
     }
 
+    .progress-badge {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      background-color: #ffcc00;
+      color: #333;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      font-size: 14px;
+    }
+
     h1 {
       text-align: center;
       color: #222;
@@ -95,6 +108,13 @@
       margin-bottom: 15px;
     }
 
+    .last-updated {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 20px;
+    }
+
     footer {
       text-align: center;
       margin-top: 40px;
@@ -112,76 +132,87 @@
 </head>
 <body>
 
-  <!-- Navbar Loader -->
   <div id="navbar-container"></div>
+  <div class="progress-badge">🚧 In Progress – Expected August 2025</div>
 
   <div class="container">
-    <h1>Marvel Metadata: Unmasking Heroes with Data</h1>
-    <p class="project-subtitle">Master's of Data Science Capstone Project</p>
+    <h1>Avengers: Data Assembled</h1>
+    <p class="project-subtitle">Master's of Data Science Capstone Project – Kendall Leonard & Joshue Fuentes-Ventura</p>
 
     <section class="project-section">
       <h2>Overview</h2>
       <p>
-        This project explores the metadata of Marvel comic characters through large-scale web scraping, text classification,
-        and relational database design. By extracting and analyzing biographies and descriptions from Marvel’s character pages,
-        the goal was to build a structured and searchable database of hero names, powers, affiliations, and thematic elements.
-        The project also surfaces underrepresented characters and storylines through keyword-based tagging and classification.
+        This capstone project investigates the question: <strong>“How do specific aspects of comic metadata (such as issue counts, character popularity, story arcs, team-ups, and power levels) influence the likelihood of a Marvel character or storyline achieving commercial and critical success when adapted into the MCU?”</strong>
       </p>
-      <!-- Placeholder for ERD or scraped character profile graphic -->
-      <p><em>[Insert ERD or example character metadata graphic here]</em></p>
+      <p>
+        Our analysis brings together comic book descriptions, character traits, and adaptation metrics from the Marvel Cinematic Universe. This project is actively in progress and will be finalized in August 2025, with updates continuing in the meantime.
+      </p>
     </section>
 
     <section class="project-section">
-      <h2>Skills & Tools Used</h2>
-      <ul>
-        <li>Python (BeautifulSoup, requests, pandas, regex)</li>
-        <li>PostgreSQL (database schema, joins, indexing)</li>
-        <li>SQL (queries, classification tables, foreign keys)</li>
-        <li>Regex-based NLP techniques for text classification</li>
-        <li>GitHub for project tracking and iterative refinement</li>
-      </ul>
+      <h2>Data Ingestion</h2>
+      <p><strong>Comics:</strong> After encountering issues with the Marvel API, we built a custom scraper to extract metadata from all issues and descriptions. We inferred themes, threats, and events using regex and keyword classification.</p>
+      <p><strong>Characters:</strong> Starting with a Kaggle dataset, we expanded coverage by scraping every Marvel.com character profile. We extracted powers, aliases, and team affiliations from free-text bios and identified on-screen MCU appearances using IMDb cast pages.</p>
+      <p><strong>Ratings:</strong> We scraped Rotten Tomatoes to collect both critic and audience scores (Tomatometer and Popcornmeter) for MCU movies and shows. This allowed us to tie character presence to performance.</p>
     </section>
 
     <section class="project-section">
-      <h2>Process</h2>
-      <ul>
-        <li><strong>Scraping:</strong> Collected all character URLs from Marvel’s site and scraped each profile’s name, aliases, powers, biography, and affiliations.</li>
-        <li><strong>Parsing:</strong> Cleaned and parsed structured and unstructured data using regular expressions and conditional logic.</li>
-        <li><strong>Classification:</strong> Tagged comics and characters with attributes like theme, threat level, and event involvement using curated keyword dictionaries.</li>
-        <li><strong>Database Design:</strong> Created normalized tables for characters, comics, teams, threats, and themes using PostgreSQL with primary/foreign key integrity.</li>
-        <li><strong>Expansion:</strong> Iteratively improved keyword lists and classification coverage, reaching over 90% theme-tag coverage on the dataset.</li>
-      </ul>
-      <!-- Placeholder for scraping flowchart or schema diagram -->
-      <p><em>[Insert scraping flow or classification table diagram here]</em></p>
+      <h2>Data Organization</h2>
+      <p>
+        Our relational schema connects comics, characters, powers, teams, and movies using bridge tables and foreign keys. This allows us to ask flexible questions like “What powers are most common among MCU-adapted characters?” or “Which team affiliations are associated with screen success?”
+      </p>
+      <p><em>[Insert ER diagram here]</em></p>
     </section>
 
     <section class="project-section">
-      <h2>Key Outcomes</h2>
+      <h2>Data Compilation & Early Visualizations</h2>
+      <p>
+        Our first round of visualizations explores how comic traits relate to adaptation. Below, we highlight two areas: common powers and team structures.
+      </p>
+
+      <p><strong>Power Analysis:</strong> Using joins across our characters and powers tables, we identified the 15 most common superpowers in Marvel’s universe.</p>
+      <p><em>[Insert bar chart for Figure 2 here]</em></p>
+      <p>
+        Interestingly, practical and defensive powers dominate—like telepathy resistance, enhanced vision, and immortality—over flashy offensive traits. This suggests that the MCU often favors grounded, screen-friendly abilities.
+      </p>
+
+      <p><strong>Team Analysis:</strong> We extracted team affiliations using regex on scraped bios, linking phrases like "joined the Avengers" to a reference list. The characters_in_teams table captures formal and informal associations.</p>
+      <p><em>[Insert bar chart for Figure 3 here]</em></p>
+      <p>
+        The Avengers dominate as the most connected team, followed by Asgardians and Avengers Academy. These early results support our hypothesis that narrative centrality (e.g., team-up frequency) may signal adaptation potential.
+      </p>
+    </section>
+
+    <section class="project-section">
+      <h2>Key Outcomes (So Far)</h2>
       <ul>
-        <li>Scraped and structured data for over 27,000 Marvel comics and hundreds of character profiles</li>
-        <li>Built SQL tables for teams, powers, aliases, themes, and threats, supporting fast lookup and filtering</li>
-        <li>Used regex-based keyword classification to tag comics with major themes and threat levels</li>
-        <li>Identified gaps in Marvel’s character representation and uneven metadata across character profiles</li>
-        <li>Achieved over 90% coverage of themes across the comic dataset</li>
+        <li>Scraped and structured 27,000+ comics and 380+ character profiles</li>
+        <li>Built a relational database with classification fields for themes, threats, and powers</li>
+        <li>Mapped character metadata to MCU adaptation status using IMDb</li>
+        <li>Developed visualizations that reveal trends in powers and team networks</li>
+        <li>Established groundwork for modeling adaptation likelihood</li>
       </ul>
     </section>
 
     <section class="project-section">
       <h2>Reflection</h2>
       <p>
-        This project was a challenging and rewarding deep dive into messy real-world text data and the power of structured storage.
-        I learned how to combine scraping, regex, and SQL to extract meaning from unstructured HTML. The iterative keyword design
-        taught me a lot about classification tradeoffs and maintaining reproducibility. If extended, I’d love to add visualizations
-        for character connections, theme evolution over time, or integrate sentiment analysis on story arcs.
+        This project brings together everything we love: narrative analysis, text mining, database design, and pop culture. We've learned to navigate real-world messiness in scraping, build meaningful schemas, and refine keyword-based classification.
+      </p>
+      <p>
+        Our next steps include modeling predictive features of MCU adaptation using logistic regression or clustering, refining affiliation parsing, and incorporating sentiment or tone-based features from descriptions.
       </p>
     </section>
 
     <footer>
+      <div class="last-updated">
+        Last Updated: <span id="last-updated-date"></span>
+      </div>
+      <p><em>This page is updated periodically and reflects work in progress. Final version expected August 2025.</em></p>
       <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
     </footer>
   </div>
 
-  <!-- Load Navbar -->
   <script>
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
@@ -197,6 +228,22 @@
         document.body.appendChild(script);
       })
       .catch(error => console.error('Error loading the navbar:', error));
+
+    const dateSpan = document.getElementById("last-updated-date");
+    const now = new Date();
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    const formatted = now.toLocaleDateString("en-US", options);
+    const day = now.getDate();
+    const suffix = (day) => {
+      if (day > 3 && day < 21) return "th";
+      switch (day % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
+    };
+    dateSpan.textContent = formatted.replace(String(day), day + suffix(day));
   </script>
 </body>
 </html>
