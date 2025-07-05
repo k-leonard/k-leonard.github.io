@@ -4,120 +4,161 @@
   <meta charset="UTF-8" />
   <title>Undergraduate Classwork - Kendall Leonard</title>
   <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png">
-<style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    font-family: "Century Schoolbook", serif;
-    background-image: url('https://k-leonard.github.io/smallfloral.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-    background-repeat: no-repeat;
-    overflow-x: hidden;
-  }
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Century Schoolbook", serif;
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow-x: hidden;
+    }
 
-  .navbar {
-    background-color: #333;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    padding: 10px 0;
-  }
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
 
-  .navbar a {
-    color: white;
-    text-align: center;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-size: 18px;
-  }
+    .navbar a {
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
 
-  .navbar a:hover {
-    background-color: #ddd;
-    color: black;
-  }
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
 
-  .content {
-    background-color: rgba(255, 255, 255, 0.92);
-    padding: 40px;
-    width: 90%;
-    max-width: 900px;
-    margin: 120px auto 40px auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
+    .content {
+      background-color: rgba(255, 255, 255, 0.92);
+      padding: 40px;
+      width: 90%;
+      max-width: 900px;
+      margin: 120px auto 40px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-  h1 {
-    text-align: center;
-    margin-top: 0;
-  }
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
 
-  ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    margin-bottom: 20px;
-    text-align: left;
-  }
+    ul {
+      list-style-type: disc;
+      margin-left: 0;
+      padding-left: 50px;
+      text-align: left;
+    }
 
-  .back-link {
-    display: block;
-    text-align: center;
-    margin-top: 20px;
-    font-size: 18px;
-  }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 18px;
+    }
 
-  a.inline-link {
-    display: inline;
-    font-size: 16px;
-    color: #007BFF;
-  }
+    a.inline-link {
+      display: inline;
+      font-size: 16px;
+      color: #007BFF;
+    }
 
-  a.inline-link:hover {
-    text-decoration: underline;
-  }
+    a.inline-link:hover {
+      text-decoration: underline;
+    }
 
-  .collapsible {
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    width: 100%;
-    margin: 25px 0 10px 0;
-    position: relative;
-  }
+    .collapsible {
+      font-family: "Century Schoolbook", serif;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      margin: 25px 0 10px 0;
+      position: relative;
+      color: #333;
+    }
 
-  .collapsible::after {
-    content: "▼";
-    font-size: 16px;
-    margin-left: 10px;
-    display: inline-block;
-    transition: transform 0.3s ease;
-  }
+    .collapsible::after {
+      content: "▼";
+      font-size: 16px;
+      margin-left: 10px;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
 
-  .collapsible.active::after {
-    transform: rotate(180deg);
-  }
+    .collapsible.active::after {
+      transform: rotate(180deg);
+    }
 
-  .content-section {
-    display: none;
-    padding: 10px 30px;
-    animation: fadeIn 0.3s ease-in;
-  }
+    .content-section {
+      display: none;
+      padding: 10px 30px;
+      margin-bottom: 10px;
+      animation: fadeIn 0.3s ease-in;
+    }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-</style>
+    .collapsible.active + .content-section {
+      display: block;
+    }
 
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
+    /* Inner course toggle */
+    .course-toggle {
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: normal;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #333;
+      padding: 4px;
+      display: inline-block;
+    }
+
+    .course-toggle::after {
+      content: "▼";
+      margin-left: 8px;
+      font-size: 12px;
+      transition: transform 0.2s ease;
+    }
+
+    .course-toggle.active::after {
+      transform: rotate(180deg);
+    }
+
+    .course-detail {
+      display: none;
+      font-size: 14px;
+      margin-left: 10px;
+      margin-top: 5px;
+      color: #555;
+    }
+
+    .course-toggle.active + .course-detail {
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
@@ -134,7 +175,12 @@
     <div class="content-section">
       <ul>
         <li>Introduction to Programming with Python</li>
-        <li>Statistics</li>
+        <li>
+          <button class="course-toggle">Statistics</button>
+          <div class="course-detail">
+            Covered descriptive and inferential statistics, probability, sampling methods, and hypothesis testing. Built models in R for data analysis.
+          </div>
+        </li>
         <li>Fundamentals of Data Science with Python</li>
         <li>Statistical Learning with R</li>
         <li>Data Structures</li>
@@ -183,20 +229,20 @@
     <a href="https://k-leonard.github.io/index.html" class="back-link">← Back to Main Page</a>
   </div>
 
- <script>
-  document.querySelectorAll(".collapsible").forEach(button => {
-    button.addEventListener("click", function () {
-      this.classList.toggle("active");
-      const content = this.nextElementSibling;
-      if (content.style.display === "block") {
-        content.style.display = "none";
-      } else {
-        content.style.display = "block";
-      }
+  <!-- Toggle Scripts -->
+  <script>
+    document.querySelectorAll(".collapsible").forEach(button => {
+      button.addEventListener("click", function () {
+        this.classList.toggle("active");
+      });
     });
-  });
-</script>
 
+    document.querySelectorAll(".course-toggle").forEach(button => {
+      button.addEventListener("click", function () {
+        this.classList.toggle("active");
+      });
+    });
+  </script>
 
   <!-- Navbar Loader -->
   <script>
@@ -215,6 +261,5 @@
       })
       .catch(error => console.error('Error loading the navbar:', error));
   </script>
-
 </body>
 </html>
