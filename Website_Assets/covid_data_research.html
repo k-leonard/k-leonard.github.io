@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualizing a Pandemic: COVID-19 & the Evolution of Data Graphics</title>
+  <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png">
+  <style>
+    body {
+      font-family: "Century Schoolbook", serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 1000px;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 30px 40px;
+      margin-top: 80px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
+
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .authors {
+      text-align: center;
+      font-style: italic;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .project-subtitle {
+      text-align: center;
+      font-style: italic;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .project-section {
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #000205;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    a.back-link {
+      color: #337ab7;
+      text-decoration: none;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <div class="container">
+    <h1>Visualizing a Pandemic</h1>
+    <p class="authors">By Kendall Leonard, Tatum Good, and Dr. Heather Kitada Smalley</p>
+    <p class="project-subtitle">How COVID-19 Transformed Data Graphics in Media and Public Understanding</p>
+
+    <section class="project-section">
+      <h2>Overview</h2>
+      <p>During the COVID-19 pandemic, visualizations became one of the most important tools for understanding the world. From dashboards tracking cases to animated charts in the <em>New York Times</em>, these graphics became part of our daily lives—sometimes shaping behavior as much as the underlying data itself. This project explores how visual storytelling evolved under crisis conditions, and how that evolution is still influencing journalism today.</p>
+      <p>We analyze 173 data-driven articles from the “What’s Going On in This Graph?” series published between 2015 and 2024. Our goal was to explore how the urgency, complexity, and volume of pandemic data reshaped visual design practices—both in terms of graphic form (e.g., interactivity, color use, complexity) and thematic focus (e.g., health and risk communication). By combining historical analysis, literature review, and our own empirical study, we provide a timeline of this transformation and reflect on its broader implications.</p>
+    </section>
+
+    <section class="project-section">
+      <h2>Skills & Tools Used</h2>
+      <ul>
+        <li>R (ggplot2, dplyr, tidyverse, readr)</li>
+        <li>Qualitative coding of design principles and topics</li>
+        <li>Data visualization theory (Gestalt principles, perception tasks)</li>
+        <li>Literature review synthesis and academic writing</li>
+      </ul>
+    </section>
+
+    <section class="project-section">
+      <h2>Process</h2>
+      <p>We began by collecting all available “What’s Going On in This Graph?” articles published by the <em>New York Times</em> Learning Network in collaboration with the American Statistical Association. These weekly publications were designed to promote visual literacy in classrooms, but they also provide a consistent, publicly accessible record of data visualizations in media from 2015–2024.</p>
+      <p>After compiling 173 articles, we manually coded metadata for each graphic: type (bar, line, scatter, etc.), topic (e.g., health, economy, sports), presence of interactivity, design complexity, and use of Gestalt principles. Each graphic was also analyzed for its interpretive demands—such as number of perception tasks required and whether uncertainty (e.g., confidence intervals) was visually communicated.</p>
+      <p>To assess changes over time, we split the dataset into pre-COVID (before March 2020) and post-COVID subsets. We used R to compute trends and cross-tabulations—looking not only at which graphic forms became more common, but also how their design adapted in response to pandemic-related content. Finally, we matched these empirical findings to what scholars and journalists have written about visualization’s evolving role in public communication.</p>
+    </section>
+
+    <section class="project-section">
+      <h2>Key Outcomes</h2>
+      <ul>
+        <li><strong>Increased interactivity post-COVID:</strong> Visualizations after March 2020 were significantly more likely to feature hover states, animation, or interactive sliders. This shift aligned with a need for ongoing public engagement and up-to-date data.</li>
+        <li><strong>Health became a dominant theme:</strong> Graphics centered on public health, risk, and safety surged during the pandemic—and remained elevated even years later, suggesting a lasting change in editorial focus.</li>
+        <li><strong>Designs adapted to clarity and complexity:</strong> Early pandemic graphics favored simple visuals (e.g., bar charts) for clarity, while later ones reintroduced more complex formats as readers’ visual literacy improved.</li>
+        <li><strong>Uncertainty visualized inconsistently:</strong> Some graphics used ensemble plots or ribbons to communicate uncertainty, while others offered none—highlighting a gap between best practices and real-world implementation.</li>
+      </ul>
+    </section>
+
+    <section class="project-section">
+      <h2>Reflection</h2>
+      <p>This project highlighted how high-stakes, real-time reporting transformed visualization from an optional flourish to an ethical necessity. One of the biggest challenges was developing consistent, defensible coding criteria for such a wide variety of graphics. We also wrestled with how to classify something as complex as “uncertainty” or “interpretability.”</p>
+      <p>We found ourselves asking deeper questions: What does it mean for a chart to be ‘effective’? Who is the audience? How do trust and familiarity interact with visual literacy? This work opened the door to continued research into public understanding of graphics and the role journalists play in educating viewers, not just informing them.</p>
+    </section>
+
+    <footer>
+      <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
+    </footer>
+  </div>
+
+  <script>
+  fetch('https://k-leonard.github.io/navbar.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('navbar-container').innerHTML = data;
+      const script = document.createElement("script");
+      script.textContent = `
+        function toggleSidebar() {
+          const sidebar = document.getElementById("mySidebar");
+          sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
+        }
+      `;
+      document.body.appendChild(script);
+    })
+    .catch(error => console.error('Error loading the navbar:', error));
+  </script>
+</body>
+</html>
