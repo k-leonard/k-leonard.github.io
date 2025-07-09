@@ -7,21 +7,20 @@
   <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png"> 
   <style>
     body {
-  background-image: url('https://k-leonard.github.io/smallfloral.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  margin: 0;
-  font-family: "Century Schoolbook", serif;
-  color: #333;
-  min-height: 100vh;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;  /* This is what vertically centers it */
-  padding: 80px 0;          /* Keeps spacing from navbar */
-}
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      font-family: "Century Schoolbook", serif;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 0;
+    }
 
     .navbar {
       background-color: #333;
@@ -87,17 +86,17 @@
     }
 
     .card-front, .card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;              /* <-- add this */
-  left: 0;             /* <-- add this */
-  padding: 15px;
-  box-sizing: border-box; /* <-- add this to make padding not add to size */
-  border-radius: 8px;
-  backface-visibility: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      padding: 15px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      backface-visibility: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
     .card-front {
       background-color: #333;
@@ -179,6 +178,23 @@
       margin-bottom: 8px;
     }
 
+    .tool-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tool-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: white;
+      padding: 3px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    }
+
     @media (max-width: 600px) {
       .project-card {
         width: 90vw;
@@ -196,6 +212,18 @@
   </div>
 
   <script>
+    const iconMap = {
+      "R": { src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/r/r-original.svg", alt: "R" },
+      "ggplot2": { src: "https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/ggplot2.png", alt: "ggplot2" },
+      "Shiny": { src: "https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/shiny.png", alt: "Shiny" },
+      "HTML/CSS": { src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg", alt: "HTML & CSS" },
+      "Python": { src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg", alt: "Python" },
+      "SQL": { src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg", alt: "SQL" },
+      "BeautifulSoup": { src: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Beautiful_Soup_Logo.png", alt: "BeautifulSoup" },
+      "DuckDB": { src: "https://duckdb.org/images/logo-duckdb-text.svg", alt: "DuckDB" },
+      "Grafana": { src: "https://cdn.worldvectorlogo.com/logos/grafana.svg", alt: "Grafana" }
+    };
+
     const projects = [
       {
         title: "COVID-19 and Data Visualizations",
@@ -238,7 +266,15 @@
           <div class="card-back">
             <div class="close-btn" onclick="closeCard(event, this)">&times;</div>
             <div class="card-back-content">
-              <p><strong>Tools:</strong> ${project.tools}</p>
+              <div class="tool-icons">
+                ${project.tools.split(',').map(tool => {
+                  const t = tool.trim();
+                  const icon = iconMap[t];
+                  return icon 
+                    ? `<img src="${icon.src}" alt="${icon.alt}" title="${icon.alt}" class="tool-icon">`
+                    : `<span>${t}</span>`;
+                }).join('')}
+              </div>
               <ul>
                 ${project.bullets.map(b => `<li>${b}</li>`).join('')}
               </ul>
