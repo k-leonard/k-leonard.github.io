@@ -180,7 +180,9 @@
     <section class="project-section">
       <h2>Data Organization</h2>
       <p>
-        Our relational schema connects comics, characters, powers, teams, and movies using bridge tables and foreign keys. This allows us to ask flexible questions like “What powers are most common among MCU-adapted characters?” or “Which team affiliations are associated with screen success?”
+        Our relational schema, shown in Figure 1, connects comics, characters, powers, teams, and movies through bridge tables and foreign keys. This allows us to ask flexible questions like “What powers are most common among MCU-adapted characters?” or “Which team affiliations are associated with screen success?”
+        This is a large number of tables, which is due to numerous many-to-many relationships between our data. For example, a character can hold multiple aliases (Sam Wilson: The Falcon, Captain America) and appear in various movies, comics, teams, and possess multiple powers — and all of these characteristics can be shared by many characters.
+        We have prioritized keeping our data in 3rd Normal Form over readability. In total, we have 18 tables that can all connect in various ways.
      <figure style="text-align: center;">
   <img src="https://k-leonard.github.io/Editor _ Mermaid Chart-2025-06-30-214349.png"
        alt="ER Diagram"
