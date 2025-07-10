@@ -115,6 +115,32 @@
   z-index: 1001;
   font-size: 14px;
 }
+    .button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.button-group a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  text-decoration: none;
+  color: #333;
+  background-color: #f5f5f5;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.button-group a img {
+  width: 28px;
+  height: 28px;
+}
+
  /*  How COVID-19 Transformed Data Graphics in Media and Public Understanding */
   </style>
 </head>
@@ -178,14 +204,19 @@
     </section>
 
     <section class="project-section">
-      <h2>View on GitHub and Read Full Report</h2>
-      <a href="https://github.com/k-leonard/Kitada-Smalley_Good_Leonard_Research" target="_blank" style="display: inline-flex; align-items: center; gap: 20px; font-size: 16px; text-decoration: none; color: #333; background-color: #f5f5f5; padding: 10px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" style="width: 28px; height: 28px;"> View Repository
-      </a>
-      <a href="#"  target="_blank" style="display: inline-flex; align-items: center; gap: 20px; font-size: 16px; text-decoration: none; color: #333; background-color: #f5f5f5; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <img src="https://freesvg.org/img/pdf17.png" alt="PDF"style="width: 28px; height: 28px;"> Read Full Paper Here (Not Yet Available)
-      </a>
-    </section>
+  <h2>View on GitHub and Read Full Report</h2>
+  <div class="button-group">
+    <a href="https://github.com/k-leonard/Kitada-Smalley_Good_Leonard_Research" target="_blank">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" />
+      View Repository
+    </a>
+    <a href="#" target="_blank">
+      <img src="https://freesvg.org/img/pdf17.png" alt="PDF" />
+      Read Full Paper Here (Not Yet Available)
+    </a>
+  </div>
+</section>
+
 
     <footer>
       <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
