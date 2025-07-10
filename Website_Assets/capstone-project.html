@@ -128,6 +128,27 @@
     a.back-link:hover {
       text-decoration: underline;
     }
+    .lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.lightbox-overlay img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  cursor: zoom-out;
+}
+
   </style>
 </head>
 <body>
@@ -160,10 +181,14 @@
       <h2>Data Organization</h2>
       <p>
         Our relational schema connects comics, characters, powers, teams, and movies using bridge tables and foreign keys. This allows us to ask flexible questions like “What powers are most common among MCU-adapted characters?” or “Which team affiliations are associated with screen success?”
-      <figure style="text-align: center;">
-  <img src="https://k-leonard.github.io/Editor _ Mermaid Chart-2025-06-30-214349.png" alt="ER Diagram" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);">
-  <figcaption style="font-size: 14px; color: #555; margin-top: 8px;">Figure 1. Entity-relationship diagram showing key tables and relationships in our schema.</figcaption>
-</figure>
+     <figure style="text-align: center;">
+  <img src="https://k-leonard.github.io/Website_Assets/erd_diagram.png"
+       alt="ER Diagram"
+       class="zoomable"
+       style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); cursor: zoom-in;">
+ <figcaption style="font-size: 14px; color: #555; margin-top: 8px;">Figure 1. Entity-relationship diagram showing key tables and relationships in our schema.</figcaption>
+
+</figure> 
 
     </section>
 
@@ -272,5 +297,27 @@
         document.getElementById("last-updated-date").textContent = "Unavailable";
       });
   </script>
+  <div class="lightbox-overlay" id="lightbox">
+  <img src="" alt="Enlarged view">
+</div>
+
+<script>
+  const lightbox = document.getElementById('lightbox');
+  const zoomables = document.querySelectorAll('.zoomable');
+  const lightboxImg = lightbox.querySelector('img');
+
+  zoomables.forEach(img => {
+    img.addEventListener('click', () => {
+      lightboxImg.src = img.src;
+      lightbox.style.display = 'flex';
+    });
+  });
+
+  lightbox.addEventListener('click', () => {
+    lightbox.style.display = 'none';
+    lightboxImg.src = '';
+  });
+</script>
+
 </body>
 </html>
