@@ -1,63 +1,216 @@
-<div class="container">
-  <h1>Riding the Data Pipeline</h1>
-  <p class="project-subtitle">Master's of Data Science Capstone Project</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Riding the Data Pipeline</title>
+  <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png" />
+  <style>
+    body {
+      font-family: "Century Schoolbook", serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+    }
 
-  <section class="project-section">
-    <h2>Overview</h2>
-    <p>
-      This project delivers an end-to-end data pipeline for analyzing public transportation ridership and fare data.
-      The system ingests, processes, and visualizes daily rider behavior and fare usage trends using Airflow, PostgreSQL, and Grafana. Our goal was to support data-driven decisions around fare policy, rider equity, and system performance.
-    </p>
-    <!-- Placeholder for a diagram or high-level pipeline image -->
-    <p><em>[Insert system diagram or architecture graphic here]</em></p>
-  </section>
+    .container {
+      width: 80%;
+      max-width: 1000px;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 30px 40px;
+      margin: 80px auto 40px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-  <section class="project-section">
-    <h2>Skills & Tools Used</h2>
-    <ul>
-      <li>Python (pandas, psycopg2)</li>
-      <li>SQL (PostgreSQL)</li>
-      <li>Apache Airflow (DAG scheduling, timezone handling)</li>
-      <li>Grafana (dashboarding, time-series plots)</li>
-      <li>Cloud storage (S3 buckets)</li>
-      <li>Team collaboration with GitHub and Slack</li>
-    </ul>
-  </section>
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
 
-  <section class="project-section">
-    <h2>Process</h2>
-    <ul>
-      <li><strong>Data Ingestion:</strong> Created Airflow DAGs to scrape and export rider and fare data from APIs into S3 as JSON.</li>
-      <li><strong>Data Organization:</strong> Designed and maintained dimension and fact tables in a PostgreSQL warehouse.</li>
-      <li><strong>Data Loading:</strong> Used Airflow to transform and insert data from S3 into structured warehouse tables with timestamp handling.</li>
-      <li><strong>Dashboarding:</strong> Built Grafana dashboards to track daily ridership, fare type usage, and performance over time.</li>
-      <li><strong>Team Workflow:</strong> Iterated with teammates using GitHub issues, milestone reviews, and feedback-based revisions.</li>
-    </ul>
-    <!-- Placeholder for screenshots of DAGs or Grafana dashboards -->
-    <p><em>[Insert DAG screenshot or Grafana dashboard snippet here]</em></p>
-  </section>
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
 
-  <section class="project-section">
-    <h2>Key Outcomes</h2>
-    <ul>
-      <li>Automated daily ingestion and transformation of ridership and fare data using custom Airflow DAGs</li>
-      <li>Created robust fact and dimension tables that support flexible filtering and analysis</li>
-      <li>Visualized key KPIs in Grafana, including peak ridership times and equity breakdowns by fare type</li>
-      <li>Handled complex timezone issues and ensured timestamp accuracy across systems</li>
-      <li>Produced clean, well-documented code and reproducible workflows</li>
-    </ul>
-  </section>
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
 
-  <section class="project-section">
-    <h2>Reflection</h2>
-    <p>
-      This project taught me how to build reliable data infrastructure and collaborate on a complex technical workflow.
-      The biggest challenge was debugging timezone misalignments across ingestion and warehouse stages — but solving it deepened my understanding of both Python and PostgreSQL datetime behavior.
-      I'm proud of how our team handled feedback loops and iterated on dashboard design. In the future, I'd like to expand the system to support multi-year trends and machine learning-driven forecasting.
-    </p>
-  </section>
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
-  <footer>
-    <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
-  </footer>
-</div>
+    .project-subtitle {
+      text-align: center;
+      font-style: italic;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .project-section {
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #000205;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    a.back-link {
+      color: #337ab7;
+      text-decoration: none;
+    }
+
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+
+    .github-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .github-link a {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      text-decoration: none;
+      color: #333;
+      background-color: #f5f5f5;
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .github-link img {
+      width: 28px;
+      height: 28px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="navbar-container"></div>
+
+  <!-- 🚧 Work In Progress Banner -->
+  <div style="background-color: #fff8dc; color: #333; text-align: center; padding: 10px 0; font-weight: bold; border-bottom: 2px solid #e0c97f;">
+    🚧 This project is a work in progress. Some sections or results may be incomplete. Anticipated completion date: August 2025
+  </div>
+
+  <div class="container">
+    <h1>Riding the Data Pipeline</h1>
+    <p class="project-subtitle">Master's of Data Science Capstone Project</p>
+
+    <section class="project-section">
+      <h2>Overview</h2>
+      <p>
+        This project delivers an end-to-end data pipeline for analyzing public transportation ridership and fare data.
+        The system ingests, processes, and visualizes daily rider behavior and fare usage trends using Airflow, PostgreSQL, and Grafana. Our goal was to support data-driven decisions around fare policy, rider equity, and system performance.
+      </p>
+      <p><em>[Insert system diagram or architecture graphic here]</em></p>
+    </section>
+
+    <section class="project-section">
+      <h2>Skills & Tools Used</h2>
+      <ul>
+        <li>Python (pandas, psycopg2)</li>
+        <li>SQL (PostgreSQL)</li>
+        <li>Apache Airflow (DAG scheduling, timezone handling)</li>
+        <li>Grafana (dashboarding, time-series plots)</li>
+        <li>Cloud storage (S3 buckets)</li>
+        <li>Team collaboration with GitHub and Slack</li>
+      </ul>
+    </section>
+
+    <section class="project-section">
+      <h2>Process</h2>
+      <ul>
+        <li><strong>Data Ingestion:</strong> Created Airflow DAGs to scrape and export rider and fare data from APIs into S3 as JSON.</li>
+        <li><strong>Data Organization:</strong> Designed and maintained dimension and fact tables in a PostgreSQL warehouse.</li>
+        <li><strong>Data Loading:</strong> Used Airflow to transform and insert data from S3 into structured warehouse tables with timestamp handling.</li>
+        <li><strong>Dashboarding:</strong> Built Grafana dashboards to track daily ridership, fare type usage, and performance over time.</li>
+        <li><strong>Team Workflow:</strong> Iterated with teammates using GitHub issues, milestone reviews, and feedback-based revisions.</li>
+      </ul>
+      <p><em>[Insert DAG screenshot or Grafana dashboard snippet here]</em></p>
+    </section>
+
+    <section class="project-section">
+      <h2>Key Outcomes</h2>
+      <ul>
+        <li>Automated daily ingestion and transformation of ridership and fare data using custom Airflow DAGs</li>
+        <li>Created robust fact and dimension tables that support flexible filtering and analysis</li>
+        <li>Visualized key KPIs in Grafana, including peak ridership times and equity breakdowns by fare type</li>
+        <li>Handled complex timezone issues and ensured timestamp accuracy across systems</li>
+        <li>Produced clean, well-documented code and reproducible workflows</li>
+      </ul>
+    </section>
+
+    <section class="project-section">
+      <h2>Reflection</h2>
+      <p>
+        This project taught me how to build reliable data infrastructure and collaborate on a complex technical workflow.
+        The biggest challenge was debugging timezone misalignments across ingestion and warehouse stages — but solving it deepened my understanding of both Python and PostgreSQL datetime behavior.
+        I'm proud of how our team handled feedback loops and iterated on dashboard design. In the future, I'd like to expand the system to support multi-year trends and machine learning-driven forecasting.
+      </p>
+    </section>
+
+    <!-- ✅ GitHub Section -->
+    <section class="github-link">
+      <a href="https://github.com/k-leonard/DataPipeline-Capstone" target="_blank">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" />
+        View GitHub Repository
+      </a>
+    </section>
+
+    <footer>
+      <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
+    </footer>
+  </div>
+
+  <script>
+    fetch('https://k-leonard.github.io/navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+        const script = document.createElement("script");
+        script.textContent = `
+          function toggleSidebar() {
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
+          }
+        `;
+        document.body.appendChild(script);
+      })
+      .catch(error => console.error('Error loading the navbar:', error));
+  </script>
+</body>
+</html>
