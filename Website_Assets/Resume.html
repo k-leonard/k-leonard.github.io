@@ -197,7 +197,8 @@
       border-bottom: 1px dotted #666;
     }
 
-   @media print {
+ @media print {
+  /* Hide non-resume elements */
   .navbar,
   .floating-nav,
   .print-btn,
@@ -208,27 +209,9 @@
     display: none !important;
   }
 
-  .education {
-    display: none !important;
-  }
-
-  .print-contact {
-    display: block !important;
-    font-size: 12pt;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-
-  .print-contact i {
-    margin: 0 4px;
-  }
-
-  .print-only {
-    display: block !important;
-  }
-
+  /* Force simple fonts and readable size */
   body {
-    font-family: Georgia, "Times New Roman", Times, serif !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
     font-size: 11pt !important;
     background: white !important;
     color: black !important;
@@ -236,28 +219,54 @@
     padding: 0 !important;
   }
 
+  /* Clean layout for the resume container */
   .container {
     width: auto !important;
     max-width: 7in !important;
     padding: 0.75in !important;
     margin: 0 auto !important;
-    box-shadow: none !important;
     background: white !important;
+    box-shadow: none !important;
   }
 
-  .print-only ul {
-    columns: 2;
-    column-gap: 1.5em;
-    -webkit-columns: 2;
-    -moz-columns: 2;
+  /* Section headers: understated and aligned */
+  h1 {
+    font-size: 20pt;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10pt;
   }
 
-
-  h1, h2, h3 {
-    color: black !important;
-    page-break-after: avoid;
+  h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    border-bottom: 1px solid #666;
+    margin-top: 20pt;
+    margin-bottom: 6pt;
+    padding-bottom: 3pt;
   }
 
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 3pt;
+    margin-top: 12pt;
+  }
+
+  p {
+    margin: 2pt 0;
+  }
+
+  ul {
+    margin: 4pt 0 8pt 16pt;
+    padding-left: 0;
+  }
+
+  li {
+    margin-bottom: 2pt;
+  }
+
+  /* Ensure sections don't break awkwardly */
   .section {
     page-break-inside: avoid;
   }
@@ -266,7 +275,35 @@
     color: black !important;
     text-decoration: none !important;
   }
-    }
+
+  .print-contact {
+    display: block !important;
+    font-size: 10pt;
+    margin-bottom: 20pt;
+    text-align: center;
+  }
+
+  .print-contact i {
+    display: none;
+  }
+
+  /* Print-only skills layout: one column for clarity */
+  .print-only {
+    display: block !important;
+  }
+
+  .print-only ul {
+    columns: 1 !important;
+  }
+
+  /* Prevents awkward column breaks */
+  .project-item,
+  .experience-item,
+  .education-item {
+    page-break-inside: avoid;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -492,9 +529,6 @@
     <p><strong>Avengers: Data Assembled</strong> — Capstone collaboration analyzing over 1,800 Marvel characters. Built a relational database from scraped bios, classified character powers, affiliations, and screen presence, and used SQL/Python to explore predictors of MCU success.</p>
   </div>
 
-  <div class="project-item">
-    <p><strong>Customer Churn Prediction</strong> — Developed a binary classification model using `caret` in R and `scikit-learn` in Python. Conducted feature engineering, evaluated performance metrics, and tuned hyperparameters for optimized accuracy and interpretability.</p>
-  </div>
 
   <div class="project-item">
     <p><strong>Personal Portfolio Website</strong> — Built and maintain a responsive portfolio in HTML/CSS/JS hosted on GitHub Pages. Features a dynamic resume, project showcase, and print-friendly PDF export with cross-browser compatibility and accessibility considerations.</p>
