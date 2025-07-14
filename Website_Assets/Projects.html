@@ -83,9 +83,11 @@
     backface-visibility: hidden; /* Firefox fix */
   }
 
-  .project-card.flipped .card-inner {
-    transform: rotateY(180deg);
-  }
+  .project-card.flipped .card-front {
+  transform: rotateY(0deg) translateZ(-1px);
+  pointer-events: none;
+}
+
 
   .card-front, .card-back {
     position: absolute;
