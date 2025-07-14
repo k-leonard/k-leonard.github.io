@@ -1,214 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Projects</title>
-  <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png"> 
-
-<style>
-  body {
-    background-image: url('https://k-leonard.github.io/smallfloral.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    margin: 0;
-    font-family: "Century Schoolbook", serif;
-    color: #333;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 0;
-  }
-
-  .navbar {
-    background-color: #333;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    padding: 10px 0;
-  }
-
-  .navbar a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-size: 18px;
-  }
-
-  .navbar a:hover {
-    background-color: #ddd;
-    color: black;
-  }
-
-  .content {
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 30px;
-    text-align: center;
-    width: 90%;
-    max-width: 1200px;
-    border-radius: 10px;
-    margin: 0 auto 40px auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .projects-container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-top: 30px;
-  }
-
-  .project-card {
-    width: 240px;
-    height: 300px;
-    perspective: 1000px;
-    position: relative;
-    cursor: pointer;
-    transform-style: preserve-3d;
-  }
-
-  .card-inner {
-    width: 100%;
-    height: 100%;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-    position: relative;
-    backface-visibility: hidden;
-  }
-
-  .project-card.flipped .card-inner {
-    transform: rotateY(180deg);
-  }
-
-  .card-front, .card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    padding: 15px;
-    box-sizing: border-box;
-    border-radius: 8px;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .project-card.flipped .card-front {
-    pointer-events: none;
-  }
-
-  .card-front {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-  }
-
-  .card-front img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    margin-bottom: 10px;
-  }
-
-  .three-dots {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-size: 20px;
-    color: white;
-  }
-
-  .card-back {
-    background: white;
-    color: #333;
-    transform: rotateY(180deg);
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 15px;
-  }
-
-  .card-back-content {
-    overflow-y: auto;
-    max-height: 210px;
-    padding-right: 5px;
-  }
-
-  .card-back .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-weight: bold;
-    font-size: 18px;
-    cursor: pointer;
-  }
-
-  .card-back .view-project-btn {
-    display: block;
-    margin: 10px auto 0 auto;
-    text-align: center;
-    background-color: #007BFF;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 14px;
-  }
-
-  .card-back .view-project-btn:hover {
-    background-color: #0056b3;
-  }
-
-  .card-front h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-
-  .card-front p {
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  .tool-icons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .tool-icon {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    border-radius: 6px;
-    background: white;
-    padding: 3px;
-    box-shadow: 0 0 3px rgba(0,0,0,0.1);
-  }
-
-  @media (max-width: 600px) {
-    .project-card {
-      width: 90vw;
-      height: 320px;
+  <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png" />
+  <style>
+    body {
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      font-family: "Century Schoolbook", serif;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 0;
     }
-  }
-</style>
 
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
+
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .content {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      text-align: center;
+      width: 90%;
+      max-width: 1200px;
+      border-radius: 10px;
+      margin: 0 auto 40px auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .projects-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .project-card {
+      width: 240px;
+      height: 300px;
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .project-card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      padding: 15px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-front {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .card-back {
+      background: white;
+      color: #333;
+      transform: rotateY(180deg);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1;
+    }
+
+    .card-front img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .three-dots {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 20px;
+      color: white;
+    }
+
+    .card-back-content {
+      overflow-y: auto;
+      max-height: 210px;
+      padding-right: 5px;
+    }
+
+    .card-back .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .card-back .view-project-btn {
+      display: block;
+      margin: 10px auto 0 auto;
+      text-align: center;
+      background-color: #007BFF;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      z-index: 3;
+    }
+
+    .card-back .view-project-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .card-front h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .card-front p {
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .tool-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tool-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: white;
+      padding: 3px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 600px) {
+      .project-card {
+        width: 90vw;
+        height: 320px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="navbar-container"></div>
@@ -229,7 +221,7 @@
       "BeautifulSoup": { src: "https://k-leonard.github.io/beautifulsoup.png", alt: "BeautifulSoup" },
       "DuckDB": { src: "https://k-leonard.github.io/duckdb.png", alt: "DuckDB" },
       "Grafana": { src: "https://cdn.worldvectorlogo.com/logos/grafana.svg", alt: "Grafana" },
-      "Railway": { src: "https://railway.com/brand/logo-dark.png", alt: "Railway"} 
+      "Railway": { src: "https://railway.com/brand/logo-dark.png", alt: "Railway" }
     };
 
     const projects = [
@@ -287,7 +279,7 @@
                 ${project.bullets.map(b => `<li>${b}</li>`).join('')}
               </ul>
             </div>
-           <a href="${project.link}" class="view-project-btn" onclick="event.stopPropagation()">View More Information</a>
+            <a href="${project.link}" class="view-project-btn" onclick="event.stopPropagation()">View More Information</a>
           </div>
         </div>
       `;
