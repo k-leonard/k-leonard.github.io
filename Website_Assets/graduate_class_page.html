@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Undergraduate Classwork - Kendall Leonard</title>
+  <link rel="icon" href="https://k-leonard.github.io/Kendall.png" type="image/png">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Century Schoolbook", serif;
+      background-image: url('https://k-leonard.github.io/smallfloral.png');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background-color: #333;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 10px 0;
+    }
+
+    .navbar a {
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .content {
+      background-color: rgba(255, 255, 255, 0.92);
+      padding: 40px;
+      width: 90%;
+      max-width: 900px;
+      margin: 120px auto 40px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    ul {
+      list-style-type: disc;
+      margin-left: 0;
+      padding-left: 50px;
+      text-align: left;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    a.inline-link {
+      display: inline;
+      font-size: 16px;
+      color: #007BFF;
+    }
+
+    a.inline-link:hover {
+      text-decoration: underline;
+    }
+
+    .collapsible {
+      font-family: "Century Schoolbook", serif;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      margin: 25px 0 10px 0;
+      position: relative;
+      color: #333;
+    }
+
+    .collapsible::after {
+      content: "▼";
+      font-size: 16px;
+      margin-left: 10px;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+
+    .collapsible.active::after {
+      transform: rotate(180deg);
+    }
+
+    .content-section {
+      display: none;
+      padding: 10px 30px;
+      margin-bottom: 10px;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .collapsible.active + .content-section {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Inner course toggle */
+    .course-toggle {
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: normal;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #333;
+      padding: 4px;
+      display: inline-block;
+    }
+
+    .course-toggle::after {
+      content: "▼";
+      margin-left: 8px;
+      font-size: 12px;
+      transition: transform 0.2s ease;
+    }
+
+    .course-toggle.active::after {
+      transform: rotate(180deg);
+    }
+
+    .course-detail {
+      display: none;
+      font-size: 14px;
+      margin-left: 10px;
+      margin-top: 5px;
+      color: #555;
+    }
+
+    .course-toggle.active + .course-detail {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+
+  <!-- Page Content -->
+  <div class="content">
+    <h1>Undergraduate Classwork</h1>
+    <p>This page contains all relevant classes I took during my undergraduate education, grouped by academic focus. If you're curious about specific projects or work from these classes, feel free to check the <a href="https://k-leonard.github.io/Website_Assets/Projects.html" class="inline-link">projects tab</a> for highlights.</p>
+    <p><em>Due to some courses counting for multiple areas, there are some repeats.</em></p>
+
+    <button class="collapsible">Data Science</button>
+    <div class="content-section">
+      <ul>
+        <li>Introduction to Programming with Python</li>
+        <li>
+          <button class="course-toggle">Statistics</button>
+          <div class="course-detail">
+            Covered descriptive and inferential statistics, probability, sampling methods, and hypothesis testing. Built models in R for data analysis.
+          </div>
+        </li>
+        <li>Fundamentals of Data Science with Python</li>
+        <li>Statistical Learning with R</li>
+        <li>Data Structures</li>
+        <li>Data in the Cosmos</li>
+        <li>Models and Machine Learning in R</li>
+        <li>Data Management with SQL</li>
+        <li>Math For Data Science</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Computer Science</button>
+    <div class="content-section">
+      <ul>
+        <li>Introduction to Programming with Python</li>
+        <li>Foundations of Advanced Mathematics</li>
+        <li>Data Structures</li>
+        <li>Software Development</li>
+        <li>Database Management</li>
+        <li>Networks and Systems</li>
+        <li>Analysis of Algorithms</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Math Minor</button>
+    <div class="content-section">
+      <ul>
+        <li>Linear Algebra</li>
+        <li>Calculus I & II</li>
+        <li>Foundations of Advanced Mathematics</li>
+        <li>Statistics</li>
+        <li>Math For Data Science</li>
+      </ul>
+    </div>
+
+    <button class="collapsible">Economics Minor</button>
+    <div class="content-section">
+      <ul>
+        <li>Introduction to Economic Inquiry</li>
+        <li>Microeconomic Theory</li>
+        <li>Statistics</li>
+        <li>Models and Machine Learning in R</li>
+        <li>The Rise of Capitalism</li>
+      </ul>
+    </div>
+
+    <a href="https://k-leonard.github.io/index.html" class="back-link">← Back to Main Page</a>
+  </div>
+
+  <!-- Toggle Scripts -->
+  <script>
+    document.querySelectorAll(".collapsible").forEach(button => {
+      button.addEventListener("click", function () {
+        this.classList.toggle("active");
+      });
+    });
+
+    document.querySelectorAll(".course-toggle").forEach(button => {
+      button.addEventListener("click", function () {
+        this.classList.toggle("active");
+      });
+    });
+  </script>
+
+  <!-- Navbar Loader -->
+  <script>
+    fetch('https://k-leonard.github.io/navbar.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navbar-container').innerHTML = data;
+        const script = document.createElement("script");
+        script.textContent = `
+          function toggleSidebar() {
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
+          }
+        `;
+        document.body.appendChild(script);
+      })
+      .catch(error => console.error('Error loading the navbar:', error));
+  </script>
+</body>
+</html>
