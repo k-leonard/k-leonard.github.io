@@ -227,12 +227,6 @@
     display: block !important;
   }
 
-  .print-only ul {
-    columns: 2;
-    -webkit-columns: 2;
-    -moz-columns: 2;
-  }
-
   body {
     font-family: Georgia, "Times New Roman", Times, serif !important;
     font-size: 11pt !important;
@@ -243,12 +237,21 @@
   }
 
   .container {
-    width: 100% !important;
+    width: auto !important;
+    max-width: 7in !important;
     padding: 0.75in !important;
     margin: 0 auto !important;
     box-shadow: none !important;
     background: white !important;
   }
+
+  .print-only ul {
+    columns: 2;
+    column-gap: 1.5em;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+  }
+
 
   h1, h2, h3 {
     color: black !important;
