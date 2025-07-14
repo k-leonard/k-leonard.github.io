@@ -286,7 +286,7 @@
                 ${project.bullets.map(b => `<li>${b}</li>`).join('')}
               </ul>
             </div>
-            <a href="${project.link}" class="view-project-btn">View More Information</a>
+           <a href="${project.link}" class="view-project-btn" onclick="event.stopPropagation()">View More Information</a>
           </div>
         </div>
       `;
