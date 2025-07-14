@@ -83,6 +83,10 @@
       transform: rotateY(180deg);
     }
 
+    .project-card.flipped .card-front {
+      visibility: hidden;
+    }
+
     .card-front, .card-back {
       position: absolute;
       width: 100%;
@@ -200,13 +204,6 @@
         height: 320px;
       }
     }
-    @-moz-document url-prefix() {
-  .card-back img {
-    transform: scaleX(-1);
-  }
-}
-  
-
   </style>
 </head>
 <body>
