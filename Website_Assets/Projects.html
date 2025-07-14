@@ -71,16 +71,16 @@
     perspective: 1000px;
     position: relative;
     cursor: pointer;
-    transform-style: preserve-3d;
+    transform-style: preserve-3d; /* Firefox fix */
   }
 
   .card-inner {
     width: 100%;
     height: 100%;
     transition: transform 0.6s;
-    transform-style: preserve-3d;
+    transform-style: preserve-3d; /* Firefox fix */
     position: relative;
-    backface-visibility: hidden;
+    backface-visibility: hidden; /* Firefox fix */
   }
 
   .project-card.flipped .card-inner {
@@ -111,14 +111,6 @@
     justify-content: center;
     position: absolute;
     z-index: 2;
-    pointer-events: auto;
-    transition: opacity 0.3s ease;
-  }
-
-  .project-card.flipped .card-front {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
   }
 
   .card-front img {
@@ -146,7 +138,6 @@
     justify-content: space-between;
     padding: 15px;
     z-index: 1;
-    pointer-events: auto;
   }
 
   .card-back-content {
@@ -214,6 +205,7 @@
     }
   }
 </style>
+
 
 
 </head>
