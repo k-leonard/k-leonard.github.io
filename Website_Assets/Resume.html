@@ -197,48 +197,72 @@
       border-bottom: 1px dotted #666;
     }
 
-    @media print {
-      .navbar,
-      .floating-nav,
-      .print-btn,
-      .print-hide,
-      #navbar-container,
-      .web-only,
-      .last-updated {
-        display: none !important;
-      }
-      .education {
+   @media print {
+  .navbar,
+  .floating-nav,
+  .print-btn,
+  .print-hide,
+  #navbar-container,
+  .web-only,
+  .last-updated {
     display: none !important;
   }
 
-      .print-contact {
-        display: block !important;
-        font-size: 12pt;
-        margin-bottom: 20px;
-        text-align: center;
-      }
+  .education {
+    display: none !important;
+  }
 
-      .print-contact i {
-        margin: 0 4px;
-      }
+  .print-contact {
+    display: block !important;
+    font-size: 12pt;
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
-      .print-only {
-        display: block !important;
-      }
+  .print-contact i {
+    margin: 0 4px;
+  }
 
-      .print-only ul {
-        columns: 2;
-      }
+  .print-only {
+    display: block !important;
+  }
 
-      .container {
-        margin-top: 0 !important;
-        box-shadow: none !important;
-      }
+  .print-only ul {
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+  }
 
-      body {
-        font-family: "Times New Roman", Times, serif !important;
-        background: white !important;
-      }
+  body {
+    font-family: Georgia, "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .container {
+    width: 100% !important;
+    padding: 0.75in !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  h1, h2, h3 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  .section {
+    page-break-inside: avoid;
+  }
+
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
     }
   </style>
 </head>
@@ -450,25 +474,30 @@
         </ul>
       </div>
     </div>
-    <div class="section projects" id="projects">
-      <h2>Projects</h2>
+<div class="section projects" id="projects">
+  <h2>Projects</h2>
 
-      <div class="project-item">
-        <p><strong>Interactive Ridership Dashboard</strong> — Built with Python, SQL, and Grafana to visualize ridership trends across metro lines. Includes ETL pipeline with Apache Airflow.</p>
-      </div>
+  <div class="project-item">
+    <p><strong>COVID-19 & Data Visualizations Research</strong> — Graduate project exploring how public visualizations evolved during the pandemic using NYT’s “What’s Going On in This Graph?” series (2015–2024). Combined qualitative and quantitative analyses to evaluate shifts in design, engagement, and public understanding.</p>
+  </div>
 
-      <div class="project-item">
-        <p><strong>Marvel Character Database</strong> — Scraped, cleaned, and organized Marvel.com character bios into a PostgreSQL warehouse; built classification system for affiliations and powers.</p>
-      </div>
+  <div class="project-item">
+    <p><strong>Interactive Metro Ridership Dashboard</strong> — Designed an ETL pipeline with Apache Airflow and PostgreSQL to track and visualize metro ridership patterns using Grafana. Integrated turnstile data, passenger metadata, and fare information into a star schema warehouse.</p>
+  </div>
 
-      <div class="project-item">
-        <p><strong>Churn Prediction Model</strong> — Developed a binary classifier for customer churn using scikit-learn. Included feature engineering and performance evaluation with caret in R.</p>
-      </div>
+  <div class="project-item">
+    <p><strong>Avengers: Data Assembled</strong> — Capstone collaboration analyzing over 1,800 Marvel characters. Built a relational database from scraped bios, classified character powers, affiliations, and screen presence, and used SQL/Python to explore predictors of MCU success.</p>
+  </div>
 
-      <div class="project-item">
-        <p><strong>Portfolio Website</strong> — HTML/CSS/JS site hosted on GitHub Pages featuring resume, blog, and interactive elements, with attention to design and accessibility.</p>
-      </div>
-    </div>
+  <div class="project-item">
+    <p><strong>Customer Churn Prediction</strong> — Developed a binary classification model using `caret` in R and `scikit-learn` in Python. Conducted feature engineering, evaluated performance metrics, and tuned hyperparameters for optimized accuracy and interpretability.</p>
+  </div>
+
+  <div class="project-item">
+    <p><strong>Personal Portfolio Website</strong> — Built and maintain a responsive portfolio in HTML/CSS/JS hosted on GitHub Pages. Features a dynamic resume, project showcase, and print-friendly PDF export with cross-browser compatibility and accessibility considerations.</p>
+  </div>
+</div>
+
 
     <div class="last-updated">Last Updated: <span id="last-updated-date"></span></div>
   </div> <!-- END .container -->
