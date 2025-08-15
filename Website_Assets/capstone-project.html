@@ -148,6 +148,37 @@
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   cursor: zoom-out;
 }
+    /* Button group styles (copied from your other page) */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.button-group a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  text-decoration: none;
+  color: #333;
+  background-color: #f5f5f5;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* IMPORTANT: keep icons small even with the global img rule */
+.button-group a img {
+  width: 28px;
+  height: 28px;
+  max-width: none;   /* override the global img { max-width:100% } */
+  box-shadow: none;  /* optional: avoid extra shadow on tiny icons */
+  margin: 0;         /* remove extra spacing from the global img rule */
+}
+
 
   </style>
 </head>
@@ -234,16 +265,20 @@
       </p>
     </section>
     
-    <section class="project-section" style="text-align: center;">
-      <h2>View on GitHub</h2>
-      <a href="https://github.com/wu-msds-capstones/salem-project-workbook-kendall_leonard_and_joshue_fuentes" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; font-size: 16px; text-decoration: none; color: #333; background-color: #f5f5f5; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" style="width: 28px; height: 28px;"> View Repository
-      </a>
-        <a href="https://wu-msds-capstones.github.io/capstone-writeup-kendall_leonard_and_joshue_fuentes/" target="_blank">
-      <img src="https://freesvg.org/img/pdf17.png" alt="PDF" />
+  <section class="project-section" style="text-align: center;">
+  <h2>View on GitHub & Read Full Paper</h2>
+  <div class="button-group">
+    <a href="https://github.com/wu-msds-capstones/salem-project-workbook-kendall_leonard_and_joshue_fuentes" target="_blank" rel="noopener">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub">
+      View Repository
+    </a>
+    <a href="https://wu-msds-capstones.github.io/capstone-writeup-kendall_leonard_and_joshue_fuentes/" target="_blank" rel="noopener">
+      <img src="https://freesvg.org/img/pdf17.png" alt="PDF">
       Read Full Paper Here
     </a>
-    </section>
+  </div>
+</section>
+
 
 
     <footer>
