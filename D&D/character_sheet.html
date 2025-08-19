@@ -14,7 +14,7 @@
             text-align: center;
         }
         .character-sheet {
-            max-width: 800px;
+            max-width: 900px;
             margin: auto;
             background: #fff;
             padding: 20px;
@@ -36,15 +36,25 @@
             border-radius: 4px;
         }
         .stats {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
-        .stats div {
-            flex: 1;
-            margin-right: 10px;
+        .abilities, .skills, .equipment {
+            margin-top: 20px;
         }
-        .stats div:last-child {
-            margin-right: 0;
+        .section-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            cursor: pointer;
+            color: #007BFF;
+        }
+        .section-title:hover {
+            text-decoration: underline;
+        }
+        .section-content {
+            display: none;
+            margin-top: 10px;
         }
         button {
             display: block;
@@ -103,8 +113,6 @@
                     <label for="constitution">Constitution</label>
                     <input type="number" id="constitution" name="constitution" min="1" max="20" required>
                 </div>
-            </div>
-            <div class="form-group stats">
                 <div>
                     <label for="intelligence">Intelligence</label>
                     <input type="number" id="intelligence" name="intelligence" min="1" max="20" required>
@@ -118,12 +126,35 @@
                     <input type="number" id="charisma" name="charisma" min="1" max="20" required>
                 </div>
             </div>
+            <div class="abilities">
+                <div class="section-title" onclick="toggleSection('abilitiesContent')">Abilities</div>
+                <div id="abilitiesContent" class="section-content">
+                    <p>Include abilities like spellcasting, rage, sneak attack, etc.</p>
+                </div>
+            </div>
+            <div class="skills">
+                <div class="section-title" onclick="toggleSection('skillsContent')">Skills</div>
+                <div id="skillsContent" class="section-content">
+                    <p>Include skills like Acrobatics, Arcana, Athletics, etc.</p>
+                </div>
+            </div>
+            <div class="equipment">
+                <div class="section-title" onclick="toggleSection('equipmentContent')">Equipment</div>
+                <div id="equipmentContent" class="section-content">
+                    <p>Include weapons, armor, and other gear.</p>
+                </div>
+            </div>
             <button type="button" onclick="generateCharacter()">Generate Character</button>
         </form>
         <div id="characterOutput" style="margin-top: 20px;"></div>
     </div>
 
     <script>
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.style.display = section.style.display === 'block' ? 'none' : 'block';
+        }
+
         function generateCharacter() {
             const form = document.getElementById('characterForm');
             const output = document.getElementById('characterOutput');
