@@ -1,172 +1,712 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Sheet</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            text-align: center;
-        }
-        .character-sheet {
-            max-width: 900px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .abilities, .skills, .equipment {
-            margin-top: 20px;
-        }
-        .section-title {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            cursor: pointer;
-            color: #007BFF;
-        }
-        .section-title:hover {
-            text-decoration: underline;
-        }
-        .section-content {
-            display: none;
-            margin-top: 10px;
-        }
-        button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>D&D Character Sheet — Free & Portable</title>
+<style>
+  :root{
+    --bg:#0b1020; --card:#121a33; --ink:#e9ecff; --muted:#9aa4d4;
+    --accent:#6ea8fe; --accent-2:#a9f; --danger:#ff6b6b; --ok:#51cf66;
+    --ring: 0 0 0 2px rgba(110,168,254,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{padding:18px 16px;text-align:center;position:sticky;top:0;background:linear-gradient(180deg,var(--bg),rgba(0,0,0,0))}
+  header h1{margin:0;font-size:1.4rem;letter-spacing:.2px}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:14px}
+  .grid{display:grid;gap:14px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;box-shadow:0 10px 25px rgba(0,0,0,.25)}
+  .card h2{margin:.2rem 0 10px;font-size:1.05rem;color:var(--accent)}
+  label{font-size:.85rem;color:var(--muted)}
+  input,select,textarea,button{border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0e1630;color:var(--ink);padding:8px 10px;font-size:.95rem;width:100%}
+  input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--ring);border-color:transparent}
+  textarea{min-height:90px;resize:vertical}
+  .row{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);cursor:pointer;font-size:.85rem;margin:4px 6px 0 0}
+  .chip input{width:auto}
+  .muted{color:var(--muted);font-size:.85rem}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .flex{display:flex;gap:10px;align-items:center}
+  .right{margin-left:auto}
+  .inline{display:inline-flex;gap:8px;align-items:center}
+  .stat{display:grid;place-items:center;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px;background:#0e1630}
+  .stat .mod{font-size:1.2rem;font-weight:700}
+  .stat small{color:var(--muted)}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:8px;text-align:left;font-size:.92rem}
+  th{color:var(--muted);font-weight:600}
+  .btn{background:linear-gradient(180deg,#1e2a5a,#1b2754);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+  .btn:hover{filter:brightness(1.05)}
+  .btn.ghost{background:transparent}
+  .btn.danger{background:#3b1b1b;border-color:#6b2b2b}
+  .pill{padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-size:.8rem}
+  .kpi{display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
+  .kpi > div{display:grid;gap:6px}
+  .center{text-align:center}
+  .narrow{max-width:780px;margin-inline:auto}
+  /* print */
+  @media print{
+    header{position:static;background:transparent}
+    .btn, .no-print{display:none !important}
+    body{background:#fff;color:#000}
+    .card{box-shadow:none;border-color:#ddd;background:#fff}
+  }
+</style>
 </head>
 <body>
-    <h1>Dungeons & Dragons Character Sheet</h1>
-    <div class="character-sheet">
-        <form id="characterForm">
-            <div class="form-group">
-                <label for="characterName">Character Name</label>
-                <input type="text" id="characterName" name="characterName" required>
-            </div>
-            <div class="form-group">
-                <label for="characterClass">Class</label>
-                <select id="characterClass" name="characterClass" required>
-                    <option value="Barbarian">Barbarian</option>
-                    <option value="Bard">Bard</option>
-                    <option value="Cleric">Cleric</option>
-                    <option value="Druid">Druid</option>
-                    <option value="Fighter">Fighter</option>
-                    <option value="Monk">Monk</option>
-                    <option value="Paladin">Paladin</option>
-                    <option value="Ranger">Ranger</option>
-                    <option value="Rogue">Rogue</option>
-                    <option value="Sorcerer">Sorcerer</option>
-                    <option value="Warlock">Warlock</option>
-                    <option value="Wizard">Wizard</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="characterRace">Race</label>
-                <input type="text" id="characterRace" name="characterRace" required>
-            </div>
-            <div class="form-group stats">
-                <div>
-                    <label for="strength">Strength</label>
-                    <input type="number" id="strength" name="strength" min="1" max="20" required>
-                </div>
-                <div>
-                    <label for="dexterity">Dexterity</label>
-                    <input type="number" id="dexterity" name="dexterity" min="1" max="20" required>
-                </div>
-                <div>
-                    <label for="constitution">Constitution</label>
-                    <input type="number" id="constitution" name="constitution" min="1" max="20" required>
-                </div>
-                <div>
-                    <label for="intelligence">Intelligence</label>
-                    <input type="number" id="intelligence" name="intelligence" min="1" max="20" required>
-                </div>
-                <div>
-                    <label for="wisdom">Wisdom</label>
-                    <input type="number" id="wisdom" name="wisdom" min="1" max="20" required>
-                </div>
-                <div>
-                    <label for="charisma">Charisma</label>
-                    <input type="number" id="charisma" name="charisma" min="1" max="20" required>
-                </div>
-            </div>
-            <div class="abilities">
-                <div class="section-title" onclick="toggleSection('abilitiesContent')">Abilities</div>
-                <div id="abilitiesContent" class="section-content">
-                    <p>Include abilities like spellcasting, rage, sneak attack, etc.</p>
-                </div>
-            </div>
-            <div class="skills">
-                <div class="section-title" onclick="toggleSection('skillsContent')">Skills</div>
-                <div id="skillsContent" class="section-content">
-                    <p>Include skills like Acrobatics, Arcana, Athletics, etc.</p>
-                </div>
-            </div>
-            <div class="equipment">
-                <div class="section-title" onclick="toggleSection('equipmentContent')">Equipment</div>
-                <div id="equipmentContent" class="section-content">
-                    <p>Include weapons, armor, and other gear.</p>
-                </div>
-            </div>
-            <button type="button" onclick="generateCharacter()">Generate Character</button>
-        </form>
-        <div id="characterOutput" style="margin-top: 20px;"></div>
+<header>
+  <h1>Free D&D 5e Character Sheet</h1>
+  <div class="muted">auto-calculations • local save • export/import • print</div>
+</header>
+
+<div class="wrap">
+
+  <!-- Identity -->
+  <section class="card">
+    <h2>Identity</h2>
+    <div class="grid cols-4">
+      <div>
+        <label>Character Name</label>
+        <input id="name" placeholder="Nina Cik">
+      </div>
+      <div>
+        <label>Class</label>
+        <select id="cls">
+          <option>Barbarian</option><option>Bard</option><option>Cleric</option>
+          <option>Druid</option><option>Fighter</option><option>Monk</option>
+          <option>Paladin</option><option>Ranger</option><option>Rogue</option>
+          <option>Sorcerer</option><option>Warlock</option><option>Wizard</option>
+        </select>
+      </div>
+      <div>
+        <label>Level</label>
+        <input id="level" type="number" min="1" max="20" value="1">
+      </div>
+      <div>
+        <label>Race</label>
+        <input id="race" placeholder="Human (Variant)">
+      </div>
+    </div>
+    <div class="grid cols-4" style="margin-top:10px">
+      <div>
+        <label>Background</label>
+        <input id="background" placeholder="Sage">
+      </div>
+      <div>
+        <label>Alignment</label>
+        <input id="alignment" placeholder="NG">
+      </div>
+      <div class="stat">
+        <div class="mod" id="profBonus">+2</div>
+        <small>Proficiency Bonus</small>
+      </div>
+      <div class="row">
+        <div>
+          <label>Inspiration</label>
+          <select id="inspiration"><option value="0">No</option><option value="1">Yes</option></select>
+        </div>
+        <div>
+          <label>XP</label>
+          <input id="xp" type="number" min="0" value="0">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abilities -->
+  <section class="card">
+    <h2>Abilities</h2>
+    <div class="grid cols-3">
+      <!-- Repeat block for each ability -->
+      <div class="stat">
+        <div class="flex" style="width:100%">
+          <div style="flex:1">
+            <label>Strength</label>
+            <input id="STR" type="number" min="1" max="30" value="10">
+          </div>
+          <div style="width:90px">
+            <label>Mod</label>
+            <div class="mod" id="STR_mod">+0</div>
+          </div>
+        </div>
+        <small>Saving Throw <span class="right mono" id="STR_save">+0</span></small>
+        <label class="inline muted"><input type="checkbox" data-save="STR"> Proficient</label>
+      </div>
+
+      <div class="stat">
+        <div class="flex" style="width:100%">
+          <div style="flex:1">
+            <label>Dexterity</label>
+            <input id="DEX" type="number" min="1" max="30" value="10">
+          </div>
+          <div style="width:90px">
+            <label>Mod</label>
+            <div class="mod" id="DEX_mod">+0</div>
+          </div>
+        </div>
+        <small>Saving Throw <span class="right mono" id="DEX_save">+0</span></small>
+        <label class="inline muted"><input type="checkbox" data-save="DEX"> Proficient</label>
+      </div>
+
+      <div class="stat">
+        <div class="flex" style="width:100%">
+          <div style="flex:1">
+            <label>Constitution</label>
+            <input id="CON" type="number" min="1" max="30" value="10">
+          </div>
+          <div style="width:90px">
+            <label>Mod</label>
+            <div class="mod" id="CON_mod">+0</div>
+          </div>
+        </div>
+        <small>Saving Throw <span class="right mono" id="CON_save">+0</span></small>
+        <label class="inline muted"><input type="checkbox" data-save="CON"> Proficient</label>
+      </div>
+
+      <div class="stat">
+        <div class="flex" style="width:100%">
+          <div style="flex:1">
+            <label>Intelligence</label>
+            <input id="INT" type="number" min="1" max="30" value="10">
+          </div>
+          <div style="width:90px">
+            <label>Mod</label>
+            <div class="mod" id="INT_mod">+0</div>
+          </div>
+        </div>
+        <small>Saving Throw <span class="right mono" id="INT_save">+0</span></small>
+        <label class="inline muted"><input type="checkbox" data-save="INT"> Proficient</label>
+      </div>
+
+      <div class="stat">
+        <div class="flex" style="width:100%">
+          <div style="flex:1">
+            <label>Wisdom</label>
+            <input id="WIS" type="number" min="1" max="30" value="10">
+          </div>
+          <div style="width:90px">
+            <label>Mod</label>
+            <div class="mod" id="WIS_mod">+0</div>
+          </div>
+        </div>
+        <small>Saving Throw <span class="right mono" id="WIS_save">+0</span></small>
+        <label class="inline muted"><input type="checkbox" data-save="WIS"> Proficient</label>
+      </div>
+
+      <div class="stat">
+        <div class="flex" style="width:100%">
+          <div style="flex:1">
+            <label>Charisma</label>
+            <input id="CHA" type="number" min="1" max="30" value="10">
+          </div>
+          <div style="width:90px">
+            <label>Mod</label>
+            <div class="mod" id="CHA_mod">+0</div>
+          </div>
+        </div>
+        <small>Saving Throw <span class="right mono" id="CHA_save">+0</span></small>
+        <label class="inline muted"><input type="checkbox" data-save="CHA"> Proficient</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Combat block -->
+  <section class="card">
+    <h2>Combat & Awareness</h2>
+    <div class="kpi">
+      <div>
+        <label>Armor Class</label>
+        <input id="ac" type="number" min="0" value="10">
+      </div>
+      <div>
+        <label>Initiative (auto Dex)</label>
+        <div class="flex">
+          <input id="initMisc" type="number" value="0" style="max-width:120px" title="misc bonus">
+          <span class="pill">Total: <span class="mono" id="initiative">+0</span></span>
+        </div>
+      </div>
+      <div>
+        <label>Speed (ft)</label>
+        <input id="speed" type="number" min="0" value="30">
+      </div>
+      <div>
+        <label>Passive Perception</label>
+        <div class="stat"><div class="mod" id="passivePerception">10</div></div>
+      </div>
     </div>
 
-    <script>
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            section.style.display = section.style.display === 'block' ? 'none' : 'block';
-        }
+    <div class="grid cols-3" style="margin-top:12px">
+      <div>
+        <label>HP Max</label>
+        <input id="hpMax" type="number" min="1" value="10">
+      </div>
+      <div>
+        <label>HP Current</label>
+        <input id="hpCur" type="number" min="0" value="10">
+      </div>
+      <div>
+        <label>Temp HP</label>
+        <input id="hpTemp" type="number" min="0" value="0">
+      </div>
+    </div>
 
-        function generateCharacter() {
-            const form = document.getElementById('characterForm');
-            const output = document.getElementById('characterOutput');
-            const formData = new FormData(form);
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label>Hit Dice (e.g., 1d8)</label>
+        <input id="hitDice" placeholder="1d10">
+      </div>
+      <div>
+        <label>Hit Dice Used</label>
+        <input id="hitDiceUsed" type="number" min="0" value="0">
+      </div>
+    </div>
 
-            let characterDetails = '<h2>Character Details</h2>';
-            formData.forEach((value, key) => {
-                characterDetails += `<p><strong>${key}:</strong> ${value}</p>`;
-            });
+    <div style="margin-top:10px">
+      <label>Death Saves</label><br/>
+      <div class="inline">
+        <span class="muted">Success</span>
+        <label class="chip"><input type="checkbox" class="ds-s"></label>
+        <label class="chip"><input type="checkbox" class="ds-s"></label>
+        <label class="chip"><input type="checkbox" class="ds-s"></label>
+        <span class="muted" style="margin-left:10px">Failure</span>
+        <label class="chip"><input type="checkbox" class="ds-f"></label>
+        <label class="chip"><input type="checkbox" class="ds-f"></label>
+        <label class="chip"><input type="checkbox" class="ds-f"></label>
+      </div>
+    </div>
 
-            output.innerHTML = characterDetails;
-        }
-    </script>
+    <div style="margin-top:12px">
+      <label>Conditions</label><br/>
+      <div id="conditions" class="inline">
+        <!-- Chips -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="card">
+    <h2>Skills</h2>
+    <div class="grid cols-3" id="skillsGrid"></div>
+    <div class="muted" style="margin-top:8px">Check “P” for proficiency, “E” for expertise (double prof).</div>
+  </section>
+
+  <!-- Attacks -->
+  <section class="card">
+    <h2>Attacks & Spellcasting</h2>
+    <table id="attacksTbl">
+      <thead><tr><th>Name</th><th>Ability</th><th>Prof?</th><th>To Hit</th><th>Damage</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="flex" style="margin-top:8px">
+      <button class="btn" id="addAttack">+ Add Attack</button>
+      <span class="muted">To Hit auto = ability mod + prof (if checked)</span>
+    </div>
+  </section>
+
+  <!-- Inventory -->
+  <section class="card">
+    <h2>Inventory</h2>
+    <table id="invTbl">
+      <thead><tr><th>Item</th><th>Qty</th><th>Weight</th><th>Total</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="flex" style="margin-top:8px">
+      <button class="btn" id="addItem">+ Add Item</button>
+      <span class="right">Carry Total: <span class="mono" id="carryTotal">0</span></span>
+    </div>
+  </section>
+
+  <!-- Features / Notes -->
+  <section class="card">
+    <h2>Features, Traits & Notes</h2>
+    <div class="grid cols-2">
+      <div>
+        <label>Class / Race Features</label>
+        <textarea id="features" placeholder="Rage (2/long rest), Darkvision 60 ft, Fey Ancestry..."></textarea>
+      </div>
+      <div>
+        <label>Notes</label>
+        <textarea id="notes" placeholder="Session notes, quest hooks, debts, contacts..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- Spellcasting -->
+  <section class="card">
+    <h2>Spellcasting</h2>
+    <div class="grid cols-3">
+      <div>
+        <label>Spellcasting Ability</label>
+        <select id="spellAbility">
+          <option value="INT">INT</option><option value="WIS">WIS</option><option value="CHA">CHA</option>
+        </select>
+      </div>
+      <div class="stat">
+        <div class="mod" id="spellSaveDC">8</div>
+        <small>Spell Save DC</small>
+      </div>
+      <div class="stat">
+        <div class="mod" id="spellAttack">+0</div>
+        <small>Spell Attack Mod</small>
+      </div>
+    </div>
+    <div class="grid cols-3" style="margin-top:8px">
+      <div>
+        <label>Cantrips Known</label>
+        <input id="cantrips" type="number" min="0" value="0">
+      </div>
+      <div>
+        <label>Prepared/Known Spells</label>
+        <input id="spellsKnown" type="number" min="0" value="0">
+      </div>
+      <div>
+        <label>Focus / Component Notes</label>
+        <input id="spellNotes" placeholder="Arcane focus, component pouch, ritual casting...">
+      </div>
+    </div>
+    <div class="grid cols-3" style="margin-top:10px">
+      <div><label>Slots L1</label><input class="slot" data-lvl="1" type="number" min="0" value="0"></div>
+      <div><label>Slots L2</label><input class="slot" data-lvl="2" type="number" min="0" value="0"></div>
+      <div><label>Slots L3</label><input class="slot" data-lvl="3" type="number" min="0" value="0"></div>
+      <div><label>Slots L4</label><input class="slot" data-lvl="4" type="number" min="0" value="0"></div>
+      <div><label>Slots L5</label><input class="slot" data-lvl="5" type="number" min="0" value="0"></div>
+      <div><label>Slots L6</label><input class="slot" data-lvl="6" type="number" min="0" value="0"></div>
+      <div><label>Slots L7</label><input class="slot" data-lvl="7" type="number" min="0" value="0"></div>
+      <div><label>Slots L8</label><input class="slot" data-lvl="8" type="number" min="0" value="0"></div>
+      <div><label>Slots L9</label><input class="slot" data-lvl="9" type="number" min="0" value="0"></div>
+    </div>
+    <div style="margin-top:10px">
+      <label>Prepared Spells (one per line)</label>
+      <textarea id="preparedSpells" placeholder="shield\nhealing word\nmisty step"></textarea>
+    </div>
+  </section>
+
+  <!-- Tools -->
+  <section class="card">
+    <h2>Utilities</h2>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Dice Roller</h2>
+        <div class="inline">
+          <input id="diceExpr" class="mono" placeholder="e.g., 2d6+3 or d20+5" style="max-width:220px">
+          <button class="btn" id="rollBtn">Roll</button>
+          <span class="pill">Result: <span class="mono" id="rollOut">—</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Save / Load</h2>
+        <div class="inline">
+          <button class="btn" id="saveBtn">Save (browser)</button>
+          <button class="btn" id="loadBtn">Load</button>
+          <button class="btn" id="exportBtn">Export JSON</button>
+          <label class="btn ghost no-print" for="importFile" style="cursor:pointer">Import JSON</label>
+          <input id="importFile" type="file" accept=".json" style="display:none">
+          <button class="btn right" onclick="window.print()">Print</button>
+        </div>
+        <div class="muted" style="margin-top:6px">Saves to localStorage; export for backups/share.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ===== Helpers ===== */
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+const mod = score => Math.floor((Number(score||0)-10)/2);
+const fmt = n => (n>=0?`+${n}`:`${n}`);
+const profForLevel = lvl => lvl>=17?6:lvl>=13?5:lvl>=9?4:lvl>=5?3:2;
+
+/* ===== Elements ===== */
+const abilIds = ["STR","DEX","CON","INT","WIS","CHA"];
+const skillList = [
+  ["Acrobatics","DEX"],["Animal Handling","WIS"],["Arcana","INT"],["Athletics","STR"],
+  ["Deception","CHA"],["History","INT"],["Insight","WIS"],["Intimidation","CHA"],
+  ["Investigation","INT"],["Medicine","WIS"],["Nature","INT"],["Perception","WIS"],
+  ["Performance","CHA"],["Persuasion","CHA"],["Religion","INT"],["Sleight of Hand","DEX"],
+  ["Stealth","DEX"],["Survival","WIS"]
+];
+const conditionNames = ["Blinded","Charmed","Deafened","Frightened","Grappled","Incapacitated","Invisible","Paralyzed","Petrified","Poisoned","Prone","Restrained","Stunned","Unconscious","Exhaustion"];
+
+/* Render skills and conditions once */
+(function initSkills(){
+  const grid = document.getElementById('skillsGrid');
+  skillList.forEach(([name,abil],i)=>{
+    const id = `sk_${i}`;
+    const row = document.createElement('div');
+    row.innerHTML = `
+      <label>${name} <span class="muted">(${abil})</span></label>
+      <div class="inline">
+        <label class="chip"><input type="checkbox" data-skill="${i}" data-type="prof"> P</label>
+        <label class="chip"><input type="checkbox" data-skill="${i}" data-type="exp"> E</label>
+        <span class="right">Total: <span class="mono" id="skmod_${i}">+0</span></span>
+      </div>`;
+    grid.appendChild(row);
+  });
+
+  const cwrap = document.getElementById('conditions');
+  conditionNames.forEach((c,i)=>{
+    const lab = document.createElement('label'); lab.className="chip";
+    lab.innerHTML = `<input type="checkbox" data-cond="${c}"> ${c}`;
+    cwrap.appendChild(lab);
+  });
+})();
+
+/* Initiative, proficiency, passive perception, spell math */
+function recomputeAll(){
+  const level = clamp(Number(document.getElementById('level').value||1),1,20);
+  const PB = profForLevel(level);
+  document.getElementById('profBonus').textContent = fmt(PB);
+
+  // ability mods & saves
+  abilIds.forEach(abil=>{
+    const score = clamp(Number(document.getElementById(abil).value||10),1,30);
+    document.getElementById(abil).value = score;
+    const m = mod(score);
+    document.getElementById(`${abil}_mod`).textContent = fmt(m);
+    const saveProf = document.querySelector(`[data-save="${abil}"]`)?.checked;
+    const save = m + (saveProf?PB:0);
+    document.getElementById(`${abil}_save`).textContent = fmt(save);
+  });
+
+  // initiative (Dex + misc)
+  const initMisc = Number(document.getElementById('initMisc').value||0);
+  const ini = mod(document.getElementById('DEX').value) + initMisc;
+  document.getElementById('initiative').textContent = fmt(ini);
+
+  // skills
+  skillList.forEach(([name,abil],i)=>{
+    const m = mod(document.getElementById(abil).value);
+    const prof = document.querySelector(`[data-skill="${i}"][data-type="prof"]`)?.checked;
+    const exp  = document.querySelector(`[data-skill="${i}"][data-type="exp"]`)?.checked;
+    const bonus = prof ? (exp ? PB*2 : PB) : 0;
+    document.getElementById(`skmod_${i}`).textContent = fmt(m + bonus);
+  });
+
+  // passive perception = 10 + Perception skill
+  const idxPer = skillList.findIndex(s=>s[0]==="Perception");
+  const ppTxt = document.getElementById(`skmod_${idxPer}`).textContent;
+  const pp = 10 + Number(ppTxt.replace('+',''));
+  document.getElementById('passivePerception').textContent = pp;
+
+  // spell math
+  const spellAbility = document.getElementById('spellAbility').value;
+  const spellMod = mod(document.getElementById(spellAbility).value);
+  document.getElementById('spellAttack').textContent = fmt(spellMod + PB);
+  document.getElementById('spellSaveDC').textContent = 8 + PB + spellMod;
+
+  // attacks to-hit refresh
+  document.querySelectorAll('#attacksTbl tbody tr').forEach(tr=>{
+    const abilSel = tr.querySelector('select');
+    const profChk = tr.querySelector('input[type="checkbox"]');
+    const m = mod(document.getElementById(abilSel.value).value);
+    const hit = m + (profChk.checked?PB:0);
+    tr.querySelector('[data-tohit]').textContent = fmt(hit);
+  });
+
+  // inventory totals
+  let tot=0;
+  document.querySelectorAll('#invTbl tbody tr').forEach(tr=>{
+    const q = Number(tr.querySelector('[data-qty]').value||0);
+    const w = Number(tr.querySelector('[data-wt]').value||0);
+    const t = q*w; tr.querySelector('[data-tot]').textContent = t.toFixed(2); tot += t;
+  });
+  document.getElementById('carryTotal').textContent = tot.toFixed(2);
+}
+
+/* Events binding */
+document.addEventListener('input', e=>{
+  const t=e.target;
+  if (t.matches('#level,#initMisc,#spellAbility, input[type="number"], [data-save], [data-skill], .slot')) recomputeAll();
+});
+document.addEventListener('change', e=>{
+  if (e.target.matches('[data-save],[data-skill],#spellAbility')) recomputeAll();
+});
+
+/* Attacks */
+document.getElementById('addAttack').addEventListener('click', ()=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input placeholder="Longsword"></td>
+    <td>
+      <select><option>STR</option><option>DEX</option><option>CON</option><option>INT</option><option>WIS</option><option>CHA</option></select>
+    </td>
+    <td class="center"><input type="checkbox"></td>
+    <td class="mono" data-tohit>+0</td>
+    <td><input placeholder="1d8+3 slashing"></td>
+    <td class="center"><button class="btn danger">✕</button></td>`;
+  document.querySelector('#attacksTbl tbody').appendChild(tr);
+  tr.addEventListener('input',recomputeAll);
+  tr.addEventListener('change',recomputeAll);
+  tr.querySelector('button').addEventListener('click',()=>tr.remove());
+  recomputeAll();
+});
+
+/* Inventory */
+document.getElementById('addItem').addEventListener('click', ()=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input placeholder="Rations"></td>
+    <td><input type="number" min="0" value="1" data-qty></td>
+    <td><input type="number" min="0" step="0.1" value="2" data-wt></td>
+    <td class="mono" data-tot>2.0</td>
+    <td class="center"><button class="btn danger">✕</button></td>`;
+  document.querySelector('#invTbl tbody').appendChild(tr);
+  tr.addEventListener('input',recomputeAll);
+  tr.querySelector('button').addEventListener('click',()=>{tr.remove();recomputeAll();});
+  recomputeAll();
+});
+
+/* Dice roller */
+document.getElementById('rollBtn').addEventListener('click', ()=>{
+  const expr = document.getElementById('diceExpr').value.trim();
+  if(!expr){document.getElementById('rollOut').textContent='—';return;}
+  // very simple parser: NdM(+/-K)
+  const m = expr.match(/^\s*(\d*)d(\d+)\s*([+-]\s*\d+)?\s*$/i);
+  let total=0, detail='';
+  if(m){
+    const n = Math.max(1, Number(m[1]||1));
+    const faces = Number(m[2]);
+    const add = m[3]? Number(m[3].replace(/\s+/g,'')) : 0;
+    const rolls=[];
+    for(let i=0;i<n;i++){ rolls.push(1+Math.floor(Math.random()*faces)); }
+    total = rolls.reduce((a,b)=>a+b,0) + add;
+    detail = `${rolls.join('+')}${add?fmt(add):''}`;
+  } else {
+    // fallback: d20 + X pattern like "d20+5"
+    const m2 = expr.match(/^\s*d20\s*([+-]\s*\d+)?\s*$/i);
+    if(m2){
+      const add = m2[1]? Number(m2[1].replace(/\s+/g,'')) : 0;
+      const r = 1+Math.floor(Math.random()*20);
+      total = r + add;
+      detail = `${r}${add?fmt(add):''}`;
+    } else {
+      detail = 'Invalid';
+    }
+  }
+  document.getElementById('rollOut').textContent = `${total}  (${detail})`;
+});
+
+/* Save/Load/Export/Import */
+function collectState(){
+  const getVal = id => document.getElementById(id)?.value;
+  const checks = sel => [...document.querySelectorAll(sel)].map(x=>x.checked);
+  return {
+    meta:{
+      name:getVal('name'), cls:getVal('cls'), level:getVal('level'), race:getVal('race'),
+      background:getVal('background'), alignment:getVal('alignment'), inspiration:getVal('inspiration'),
+      xp:getVal('xp')
+    },
+    abilities: Object.fromEntries(abilIds.map(a=>[a:getVal(a)])),
+    saveProf: Object.fromEntries(abilIds.map(a=>[a:document.querySelector(`[data-save="${a}"]`)?.checked||false])),
+    skills: skillList.map((_,i)=>({
+      prof: document.querySelector(`[data-skill="${i}"][data-type="prof"]`)?.checked||false,
+      exp: document.querySelector(`[data-skill="${i}"][data-type="exp"]`)?.checked||false
+    })),
+    combat:{
+      ac:getVal('ac'), initMisc:getVal('initMisc'), speed:getVal('speed'),
+      hpMax:getVal('hpMax'), hpCur:getVal('hpCur'), hpTemp:getVal('hpTemp'),
+      hitDice:getVal('hitDice'), hitDiceUsed:getVal('hitDiceUsed'),
+      dsS: checks('.ds-s'), dsF: checks('.ds-f'),
+      conditions: [...document.querySelectorAll('[data-cond]')].filter(x=>x.checked).map(x=>x.getAttribute('data-cond'))
+    },
+    attacks:[...document.querySelectorAll('#attacksTbl tbody tr')].map(tr=>({
+      name: tr.querySelector('td:nth-child(1) input').value,
+      abil: tr.querySelector('td:nth-child(2) select').value,
+      prof: tr.querySelector('td:nth-child(3) input').checked,
+      dmg:  tr.querySelector('td:nth-child(5) input').value
+    })),
+    inventory:[...document.querySelectorAll('#invTbl tbody tr')].map(tr=>({
+      item: tr.querySelector('td:nth-child(1) input').value,
+      qty:  tr.querySelector('[data-qty]').value,
+      wt:   tr.querySelector('[data-wt]').value
+    })),
+    features:getVal('features'), notes:getVal('notes'),
+    spells:{
+      ability:getVal('spellAbility'), cantrips:getVal('cantrips'), known:getVal('spellsKnown'),
+      notes:getVal('spellNotes'),
+      slots: Object.fromEntries([...document.querySelectorAll('.slot')].map(x=>[x.dataset.lvl,x.value])),
+      prepared:getVal('preparedSpells')
+    }
+  };
+}
+function loadState(state){
+  const setVal=(id,v)=>{if(document.getElementById(id)) document.getElementById(id).value=v;}
+  if(!state) return;
+  const {meta,abilities,saveProf,skills,combat,attacks,inventory,features,notes,spells} = state;
+
+  Object.entries(meta).forEach(([k,v])=>setVal(k,v));
+  Object.entries(abilities).forEach(([k,v])=>setVal(k,v));
+  Object.entries(saveProf).forEach(([k,v])=>{const el=document.querySelector(`[data-save="${k}"]`); if(el) el.checked=v;});
+  skills?.forEach((s,i)=>{
+    const p=document.querySelector(`[data-skill="${i}"][data-type="prof"]`);
+    const e=document.querySelector(`[data-skill="${i}"][data-type="exp"]`);
+    if(p) p.checked=!!s.prof; if(e) e.checked=!!s.exp;
+  });
+
+  setVal('ac',combat.ac); setVal('initMisc',combat.initMisc); setVal('speed',combat.speed);
+  setVal('hpMax',combat.hpMax); setVal('hpCur',combat.hpCur); setVal('hpTemp',combat.hpTemp);
+  setVal('hitDice',combat.hitDice); setVal('hitDiceUsed',combat.hitDiceUsed);
+  document.querySelectorAll('.ds-s').forEach((c,i)=>c.checked=!!combat.dsS?.[i]);
+  document.querySelectorAll('.ds-f').forEach((c,i)=>c.checked=!!combat.dsF?.[i]);
+  document.querySelectorAll('[data-cond]').forEach(c=>c.checked = combat.conditions?.includes(c.getAttribute('data-cond')));
+
+  // rebuild attacks
+  document.querySelector('#attacksTbl tbody').innerHTML='';
+  attacks?.forEach(a=>{
+    document.getElementById('addAttack').click();
+    const tr = document.querySelector('#attacksTbl tbody tr:last-child');
+    tr.querySelector('td:nth-child(1) input').value=a.name||'';
+    tr.querySelector('td:nth-child(2) select').value=a.abil||'STR';
+    tr.querySelector('td:nth-child(3) input').checked=!!a.prof;
+    tr.querySelector('td:nth-child(5) input').value=a.dmg||'';
+  });
+
+  // rebuild inventory
+  document.querySelector('#invTbl tbody').innerHTML='';
+  inventory?.forEach(it=>{
+    document.getElementById('addItem').click();
+    const tr = document.querySelector('#invTbl tbody tr:last-child');
+    tr.querySelector('td:nth-child(1) input').value=it.item||'';
+    tr.querySelector('[data-qty]').value=it.qty||0;
+    tr.querySelector('[data-wt]').value=it.wt||0;
+  });
+
+  setVal('features',features||''); setVal('notes',notes||'');
+  setVal('spellAbility',spells.ability||'INT');
+  setVal('cantrips',spells.cantrips||0); setVal('spellsKnown',spells.known||0);
+  setVal('spellNotes',spells.notes||'');
+  [...document.querySelectorAll('.slot')].forEach(x=>x.value = spells.slots?.[x.dataset.lvl] ?? 0);
+  setVal('preparedSpells',spells.prepared||'');
+  recomputeAll();
+}
+
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  localStorage.setItem('free5eCharacter', JSON.stringify(collectState()));
+  alert('Saved to your browser!');
+});
+document.getElementById('loadBtn').addEventListener('click',()=>{
+  const s = localStorage.getItem('free5eCharacter');
+  if(!s) return alert('No save found.');
+  loadState(JSON.parse(s));
+});
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const blob = new Blob([JSON.stringify(collectState(),null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('name').value||'character') + '.json';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+document.getElementById('importFile').addEventListener('change',e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader(); r.onload = () => loadState(JSON.parse(r.result)); r.readAsText(file);
+});
+
+/* Boot */
+recomputeAll();
+</script>
 </body>
 </html>
