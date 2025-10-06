@@ -56,20 +56,6 @@
       color: black;
     }
 
-    /* Finalized badge */
-    .progress-badge {
-      position: fixed;
-      top: 70px;
-      right: 20px;
-      background-color: #34c759;
-      color: #0f3d1e;
-      font-weight: bold;
-      padding: 8px 14px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      z-index: 1001;
-      font-size: 14px;
-    }
 
     h1 {
       text-align: center;
@@ -111,16 +97,17 @@
     }
 
     figcaption {
-      font-size: 14px; color: #555; margin-top: 8px;
+      font-size: 14px;
+      color: #555;
+      margin-top: 8px;
     }
 
-    /* Featured pick card */
     .feature-card {
       border: 1px solid #e8e8e8;
       border-radius: 12px;
       padding: 18px 20px;
       background: #fafafa;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
     .last-updated {
@@ -146,7 +133,10 @@
 
     .lightbox-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0,0,0,0.8);
       display: none;
       align-items: center;
@@ -162,7 +152,6 @@
       cursor: zoom-out;
     }
 
-    /* Button group styles */
     .button-group {
       display: flex;
       justify-content: center;
@@ -185,136 +174,115 @@
     }
 
     .button-group a img {
-      width: 28px; height: 28px;
+      width: 28px;
+      height: 28px;
       max-width: none;
       box-shadow: none;
       margin: 0;
     }
   </style>
 </head>
-<body>
 
+<body>
   <div id="navbar-container"></div>
   <div class="progress-badge">✅ Finalized — October 2025</div>
 
   <div class="container">
     <h1>Marvel: Data Assembled</h1>
-    <p class="project-subtitle">Predicting & Explaining MCU Adaptation Success from Comic Storytelling DNA<br>
-      <em>Master’s Capstone — Kendall Leonard & Joshue Fuentes-Ventura</em>
-    </p>
+    <p class="project-subtitle">Predicting & Explaining MCU Adaptation Success from Comic Storytelling DNA<br><em>Master’s Capstone — Kendall Leonard & Joshue Fuentes-Ventura</em></p>
 
     <section class="project-section">
       <h2>Overview</h2>
       <p>
-        We asked a simple question with big implications: 
-        <strong>Which comic traits predict a successful MCU adaptation?</strong>
-        Using scraped metadata from Marvel.com (comics/characters), IMDb (who appeared on screen), and Rotten Tomatoes (audience/critic reception), we built a clean relational warehouse and trained two complementary models—constrained XGBoost and logistic regression. We then combined their probabilities into an equal-weight <strong>success potential score</strong> to rank adaptation candidates and explain <em>why</em> they work.
+        The Marvel Cinematic Universe (MCU) is a superhero movie franchise that exploded onto the scene in 2008 with the premiere of <em>Iron Man</em> and has become one of the most successful film franchises in history. However, despite commercial success, many longtime fans have begun to question if the magic and creative spark that defined the franchise’s earlier phases has faded.
       </p>
       <p>
-        Big picture: since ~2019, Marvel reception has grown more volatile (greater variance in scores), reinforcing the need to choose source material carefully. Our models highlight patterns that consistently resonate on screen: <em>large-scale stakes</em>, <em>civil conflict</em>, <em>infiltration/deception</em>, and <em>advanced technology</em>.
+        The origin story of this project began with a simple but persistent question: why do some characters and storylines translate seamlessly to the screen while others, despite having rich and beloved source material, fail to resonate? Our goal was to understand the comic-specific storytelling elements—such as character development, power dynamics, team interactions, and narrative structure—that contribute to the success of adaptations.
       </p>
     </section>
 
     <section class="project-section">
-      <h2>Data Ingestion</h2>
-      <p><strong>Comics (Marvel.com):</strong> Custom scrapers pulled issue titles, descriptions, appearing characters, creators, page counts, and prices. We engineered features via regex/keyword detection for themes, threat level, events, team-ups, etc.</p>
-      <p><strong>Characters (Marvel.com):</strong> We scraped 1,868 characters with powers, aliases, and team affiliations from profiles and bios (far exceeding the Kaggle seed). </p>
-      <p><strong>Adaptation Links (IMDb):</strong> Standardized cast pages let us flag characters that appeared in the MCU, creating a bridge between comic traits and on-screen presence.</p>
-      <p><strong>Reception (Rotten Tomatoes):</strong> Critic and audience scores for all MCU films/series provide the success labels used in modeling (audience ≥ 85 = “successful”).</p>
+      <h2>Data Sources</h2>
+      <p>
+        The data for this project originates from three primary sources: the official Marvel website (Marvel.com), Rotten Tomatoes, and IMDb. Marvel.com provided comprehensive information about characters, comic book issues, story arcs, powers, and team affiliations. IMDb was used to identify which comic characters had already appeared in the MCU. Rotten Tomatoes offered critical and audience response data, allowing us to define adaptation success as an audience score above 85.
+      </p>
+      <p>
+        Our final dataset included 27,520 comics, 1,868 unique Marvel characters, and adaptation metadata for the complete set of MCU productions to date.
+      </p>
     </section>
 
     <section class="project-section">
       <h2>Data Organization</h2>
       <p>
-        Our schema connects comics, characters, powers, teams, creators, themes, threats, and MCU productions through bridge tables to preserve many-to-many relationships and analytic flexibility (3NF).
+        Our dataset integrates multiple streams of information—comic metadata, character details, MCU adaptation data, and audience/critic reception—into a unified relational structure. The schema captures character traits, comic metadata, adaptation linkages, and auxiliary attributes across over 20 interrelated tables.
       </p>
       <figure style="text-align:center;">
         <img src="https://k-leonard.github.io/Editor _ Mermaid Chart-2025-06-30-214349.png" alt="ER Diagram" class="zoomable">
-        <figcaption>Figure 1. Entity-relationship diagram of the warehouse.</figcaption>
+        <figcaption>Entity-relationship diagram visualizing our schema.</figcaption>
       </figure>
     </section>
 
     <section class="project-section">
-      <h2>Methods (Short)</h2>
-      <ul>
-        <li><strong>Problem:</strong> Binary classification of adaptation “success” from comic-level features.</li>
-        <li><strong>Labels:</strong> MCU title’s Rotten Tomatoes audience score mapped to its source (≥85 → success).</li>
-        <li><strong>Models:</strong> 
-          <em>Constrained XGBoost</em> (shallow trees, strong regularization) and 
-          <em>Logistic Regression</em> (interpretable coefficients, upsampling).</li>
-        <li><strong>Ensemble:</strong> Equal-weight average of predicted probabilities → <em>success potential score</em>.</li>
-      </ul>
+      <h2>Methods</h2>
+      <p>
+        Our analysis framed the problem as a binary classification task: given a comic issue’s metadata, could we predict whether it would be a strong candidate for a successful MCU adaptation? We trained three modeling strategies—Random Forest, constrained XGBoost, and Logistic Regression—each chosen for a specific reason.
+      </p>
+      <p>
+        The constrained XGBoost model used shallow trees, strong regularization, and feature subsampling to generalize better. The logistic regression model offered transparent coefficients that directly show the direction and magnitude of each feature’s influence on the outcome. Finally, we averaged the two models’ predicted probabilities to create a composite success potential score.
+      </p>
     </section>
 
     <section class="project-section">
       <h2>Ethical Considerations</h2>
-      <ul>
-        <li>Used official/semi-official sources; avoided fan wikis except for broad series-level consensus when no canonical mapping existed.</li>
-        <li>Recognized bias in source text and ratings; discarded unreliable demographic inference.</li>
-        <li>Used human-in-the-loop checks for AI-assisted threat labeling; treated models as decision-support, not prescriptions.</li>
-      </ul>
+      <p>
+        We prioritized sourcing information from official or semi-official platforms to ensure accuracy, attribution, and compliance with public data access guidelines. Marvel’s official descriptions often reflect the creative and cultural context in which they were written, so to avoid introducing systematic errors, we discarded automated classifications for gender or nationality.
+      </p>
+      <p>
+        Predictive models like ours have real-world influence if used in industry settings. Our models are decision-support tools, intended to complement rather than replace human judgment.
+      </p>
     </section>
 
     <section class="project-section">
       <h2>Results</h2>
-      <p><strong>Reception Trend:</strong> Post-2019 titles show significantly higher variance in audience and critic scores, with a slight audience drift downward and a critic drift slightly upward—evidence of a widening taste gap.</p>
-
-      <p><strong>Model Performance:</strong></p>
+      <p>
+        Each dot in our visualization represents a single MCU or television release between 2008 and 2025. The earlier Marvel phases (2008–2018) maintained a fairly consistent audience reception, often in the 80–90% range. Since 2019, however, scores have become far more variable. Statistical testing confirmed significantly higher variability in scores, revealing that the MCU is no longer as consistent as it used to be.
+      </p>
       <ul>
-        <li><strong>Constrained XGBoost:</strong> Accuracy ≈ 89.9%, AUC ≈ 0.968, Kappa ≈ 0.447, Sensitivity ≈ 89.4%, Specificity ≈ 92.9%.</li>
-        <li><strong>Logistic Regression:</strong> Accuracy ≈ 81.2%, AUC ≈ 0.898, Precision ≈ 96.5%, Recall ≈ 71.0%, Kappa ≈ 0.425.</li>
+        <li><strong>XGBoost:</strong> 89.9% accuracy, AUC 0.968, Kappa 0.4473, sensitivity 89.4%, specificity 92.9%.</li>
+        <li><strong>Logistic Regression:</strong> 81.2% accuracy, AUC 0.898, precision 96.5%, recall 71.0%, Kappa 0.425.</li>
       </ul>
-
-      <p><strong>What matters (converging signals):</strong> large-scale stakes (national/cosmic), civil conflict, rivalries/power struggles, infiltration/deception & investigation, and weapons/super-tech. Logistic coefficients emphasized <em>scientific ethics</em>, <em>civil conflict</em>, <em>social threats/uprising</em>, <em>faith/religion</em>, <em>coming-of-age</em>, and <em>doppelganger/identity</em> arcs.</p>
-
-      <figure style="text-align:center;">
-        <img src="https://k-leonard.github.io/Website_Assets/placeholder_xgb_top15.png" alt="Top XGBoost Features" class="zoomable">
-        <figcaption>Figure 2. Top predictors (XGBoost Gain). Replace with your exported plot.</figcaption>
-      </figure>
-
-      <figure style="text-align:center;">
-        <img src="https://k-leonard.github.io/Website_Assets/placeholder_logit_top15.png" alt="Top Logistic Coefficients" class="zoomable">
-        <figcaption>Figure 3. Largest absolute logistic coefficients. Replace with your exported plot.</figcaption>
-      </figure>
-
-      <figure style="text-align:center;">
-        <img src="https://k-leonard.github.io/Website_Assets/placeholder_consensus.png" alt="Consensus Importance" class="zoomable">
-        <figcaption>Figure 4. Consensus importance (rank-normalized blend of both models). Replace with your exported plot.</figcaption>
-      </figure>
+      <p>
+        The most influential predictors were the number of issues in the series, the theme of civil conflict, the number of creators, and page count. Themes of scientific ethics, civil conflict, and social threats or uprisings also strongly correlated with success.
+      </p>
     </section>
 
     <section class="project-section">
-      <h2>Featured Recommendation</h2>
+      <h2>Top Recommendation</h2>
       <div class="feature-card">
-        <p><strong>Top pick:</strong> <em>Agents of Atlas (2006) #5</em></p>
-        <ul>
-          <li><strong>Ensemble score:</strong> ~0.999 (XGB ≈ 0.9988, Logit ≈ 1.0000)</li>
-          <li><strong>Why it works:</strong> Rivalries & power struggles, civil conflict, national-emergency stakes, infiltration/deception, mystery/investigation, and super-tech—traits our models associate with consistently strong MCU reception.</li>
-          <li><strong>Note:</strong> Not a single-issue prescription—MCU projects typically blend arcs. This issue exemplifies the narrative DNA our models favor.</li>
-        </ul>
+        <p>
+          Our top candidate was <em>Agents of Atlas (2006) #5</em>, with an XGBoost probability of 0.9988, a logistic regression probability of 1.0000, and a combined score of 0.9994. The issue features rivalries and power struggles, civil conflict, and national emergency-level threats, alongside infiltration, deception, mystery, and investigation.
+        </p>
+        <p>
+          These thematic drivers, combined with advanced technology and a diverse team structure, closely mirror the narrative DNA of past successful MCU adaptations.
+        </p>
       </div>
     </section>
 
     <section class="project-section">
-      <h2>Limitations</h2>
-      <ul>
-        <li>Models are source-material–only by design (no casting, direction, marketing, budget).</li>
-        <li>Series-level adaptation mapping and incomplete metadata introduce uncertainty.</li>
-        <li>Logistic assumes linear log-odds; XGBoost uses shallow trees—both constrain discoverable relationships.</li>
-      </ul>
+      <h2>Discussion & Limitations</h2>
+      <p>
+        Our findings demonstrate that it is possible to identify promising MCU adaptation candidates by analyzing the structural and thematic DNA of the comics themselves. Many real-world factors that influence film success—such as casting, directing, visual effects, and marketing—were intentionally excluded. There is no official, comprehensive list linking individual comics to their screen adaptations, and subtle or context-dependent traits may have gone undetected.
+      </p>
     </section>
 
     <section class="project-section">
       <h2>Future Work</h2>
-      <ul>
-        <li>Character-level modeling (power sets, archetypes, affiliations) directly in the prediction pipeline.</li>
-        <li>Improved comic↔adaptation mapping; careful use of curated fan data with provenance.</li>
-        <li>NLP for richer theme/event extraction; time-aware modeling to track shifting tastes.</li>
-        <li>Test outside the MCU (other publishers/IP) and optionally integrate production factors.</li>
-      </ul>
+      <p>
+        Character-level modeling presents another significant opportunity. Future steps include experimenting with different weighting strategies for the ensemble, improving adaptation mapping, and expanding the analysis to non-MCU properties. By quantifying the narrative elements of source material, studios could make more informed choices about which stories to adapt.
+      </p>
     </section>
 
-    <section class="project-section" style="text-align: center;">
+    <section class="project-section" style="text-align:center;">
       <h2>View on GitHub & Read Full Paper</h2>
       <div class="button-group">
         <a href="https://github.com/wu-msds-capstones/salem-project-workbook-kendall_leonard_and_joshue_fuentes" target="_blank" rel="noopener">
@@ -326,88 +294,45 @@
           Read Full Paper Here
         </a>
       </div>
-      <p style="margin-top:10px; font-size: 14px; color:#666;">
-        Disclaimer: We are not affiliated with Marvel Studios or The Walt Disney Company; this is an academic passion project.
+      <p style="margin-top:10px;font-size:14px;color:#666;">
+        Disclaimer: We are not officially associated with Marvel Studios or The Walt Disney Company. This capstone is a passion project, and we earn no income from this publication.
       </p>
     </section>
 
     <footer>
-      <div class="last-updated">
-        Last Updated: <span id="last-updated-date">Loading...</span>
-      </div>
-      <p><em>This page summarizes the finalized capstone (October 2025) and may receive minor post-defense tweaks.</em></p>
+      <div class="last-updated">Last Updated: <span id="last-updated-date">Loading...</span></div>
+      <p><em>This page summarizes the finalized capstone (October 2025).</em></p>
       <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
     </footer>
   </div>
 
   <script>
-    // Load Navbar
     fetch('https://k-leonard.github.io/navbar.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('navbar-container').innerHTML = data;
-        const script = document.createElement("script");
-        script.textContent = `
-          function toggleSidebar() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = (sidebar.style.width === "250px") ? "0" : "250px";
-          }
-        `;
-        document.body.appendChild(script);
-      })
-      .catch(error => console.error('Error loading the navbar:', error));
-
-    // Fetch last commit from GitHub API (path points to this HTML)
-    const apiURL = "https://api.github.com/repos/k-leonard/k-leonard.github.io/commits?path=Website_Assets/capstone-project.html&per_page=1";
-
-    fetch(apiURL)
-      .then(response => response.json())
-      .then(data => {
-        if (data && data[0]) {
-          const dateString = data[0].commit.committer.date;
-          const date = new Date(dateString);
-          const options = { year: "numeric", month: "long", day: "numeric" };
-          const formatted = date.toLocaleDateString("en-US", options);
-          const day = date.getDate();
-          const suffix = (d) => {
-            if (d > 3 && d < 21) return "th";
-            switch (d % 10) {
-              case 1: return "st";
-              case 2: return "nd";
-              case 3: return "rd";
-              default: return "th";
-            }
-          };
-          document.getElementById("last-updated-date").textContent = formatted.replace(String(day), day + suffix(day));
-        } else {
-          document.getElementById("last-updated-date").textContent = "Unavailable";
-        }
-      })
-      .catch(error => {
-        console.error("GitHub API error:", error);
-        document.getElementById("last-updated-date").textContent = "Unavailable";
-      });
-
-    // Simple lightbox for zoomable images
-    const lightbox = document.createElement('div');
-    lightbox.className = 'lightbox-overlay';
-    lightbox.id = 'lightbox';
-    lightbox.innerHTML = '<img src="" alt="Enlarged view">';
+      .then(r=>r.text())
+      .then(d=>{document.getElementById('navbar-container').innerHTML=d});
+    const apiURL="https://api.github.com/repos/k-leonard/k-leonard.github.io/commits?path=Website_Assets/capstone-project.html&per_page=1";
+    fetch(apiURL).then(r=>r.json()).then(data=>{
+      if(data&&data[0]){
+        const date=new Date(data[0].commit.committer.date);
+        const opt={year:"numeric",month:"long",day:"numeric"};
+        document.getElementById("last-updated-date").textContent=date.toLocaleDateString("en-US",opt);
+      }
+    });
+    const lightbox=document.createElement('div');
+    lightbox.className='lightbox-overlay';lightbox.id='lightbox';
+    lightbox.innerHTML='<img src="" alt="Enlarged view">';
     document.body.appendChild(lightbox);
-
-    const zoomables = document.querySelectorAll('.zoomable');
-    const lightboxImg = lightbox.querySelector('img');
-
-    zoomables.forEach(img => {
-      img.addEventListener('click', () => {
-        lightboxImg.src = img.src;
-        lightbox.style.display = 'flex';
+    const zoomables=document.querySelectorAll('.zoomable');
+    const lightboxImg=lightbox.querySelector('img');
+    zoomables.forEach(img=>{
+      img.addEventListener('click',()=>{
+        lightboxImg.src=img.src;
+        lightbox.style.display='flex';
       });
     });
-
-    lightbox.addEventListener('click', () => {
-      lightbox.style.display = 'none';
-      lightboxImg.src = '';
+    lightbox.addEventListener('click',()=>{
+      lightbox.style.display='none';
+      lightboxImg.src='';
     });
   </script>
 </body>
