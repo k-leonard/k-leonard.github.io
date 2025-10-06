@@ -121,28 +121,23 @@
       width: 28px;
       height: 28px;
     }
-
-    .progress-badge {
-      position: fixed;
-      top: 70px;
-      right: 20px;
-      background-color: #ffcc00;
-      color: #333;
-      font-weight: bold;
-      padding: 8px 14px;
+ .disclaimer-box {
+      background-color: #fff8e1;
+      border-left: 5px solid #f0c000;
+      padding: 15px 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      z-index: 1001;
-      font-size: 14px;
+      font-size: 0.95rem;
+      color: #555;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
     }
+  
   </style>
 </head>
 
 <body>
   <div id="navbar-container"></div>
 
-  <!-- 🚧 Work In Progress Banner -->
-  <div class="progress-badge">🚧 In Progress – Expected August 2025</div>
 
   <div class="container">
     <h1>Riding the Data Pipeline</h1>
@@ -155,6 +150,22 @@
         The system ingests, processes, and visualizes daily rider behavior and fare usage trends using Airflow, PostgreSQL, and Grafana.
         The goal was to support data-driven decisions around fare policy, rider equity, and system performance while practicing real-world data engineering techniques.
       </p>
+    </section>
+
+        <section class="project-section">
+      <h2>Project Context & Note</h2>
+      <div class="disclaimer-box">
+        <p>
+          This was a <strong>class-wide collaborative project</strong> built as part of an advanced data engineering course. 
+          Each milestone rotated between teams — meaning that my group would begin a new phase using another team’s previous milestone as our starting point. 
+          While my team (including Tatum, Jon, and mentor Jed) contributed substantially to multiple phases, the nature of this rotation means that 
+          code ownership was shared and iterative. 
+        </p>
+        <p>
+          Additionally, all work was conducted on our professor’s managed server environment, so I do not have direct access to the full source code or logs. 
+          The content presented here reflects my team’s architectural contributions, debugging solutions, and analysis deliverables throughout the project.
+        </p>
+      </div>
     </section>
 
     <section class="project-section">
@@ -173,7 +184,7 @@
     <section class="project-section">
       <h2>Project Breakdown</h2>
       <p><strong>Duration:</strong> January–August 2025<br>
-         <strong>Team:</strong> Kendall Leonard, Tatum Good, Jon [Last Name], with mentorship/support from Jed
+         <strong>Team:</strong> Kendall Leonard, Tatum Good, Jon Garrow, with mentorship/support from Jed Rembold
       </p>
 
       <h3>What This Project Is</h3>
