@@ -51,17 +51,23 @@
       font-size: 18px;
     }
 
-    .navbar a:hover {
-      background-color: #ddd;
-      color: black;
+    .navbar a:hover { background-color: #ddd; color: black; }
+
+    .progress-badge {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      background-color: #34c759;
+      color: #0f3d1e;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      font-size: 14px;
     }
 
-
-    h1 {
-      text-align: center;
-      color: #222;
-      font-size: 2.5em;
-    }
+    h1 { text-align: center; color: #222; font-size: 2.5em; }
 
     .project-subtitle {
       text-align: center;
@@ -70,9 +76,7 @@
       margin-bottom: 30px;
     }
 
-    .project-section {
-      margin-bottom: 40px;
-    }
+    .project-section { margin-bottom: 40px; }
 
     h2 {
       color: #000205;
@@ -82,9 +86,7 @@
       font-size: 1.6em;
     }
 
-    ul {
-      padding-left: 20px;
-    }
+    ul { padding-left: 20px; }
 
     img {
       max-width: 100%;
@@ -96,91 +98,72 @@
       cursor: zoom-in;
     }
 
-    figcaption {
-      font-size: 14px;
-      color: #555;
-      margin-top: 8px;
-    }
+    figcaption { font-size: 14px; color: #555; margin-top: 8px; }
 
     .feature-card {
       border: 1px solid #e8e8e8;
       border-radius: 12px;
       padding: 18px 20px;
       background: #fafafa;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 
-    .last-updated {
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-      margin-top: 20px;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-    }
-
-    a.back-link {
-      color: #337ab7;
-      text-decoration: none;
-    }
-
-    a.back-link:hover {
-      text-decoration: underline;
-    }
+    .last-updated { text-align: center; font-size: 14px; color: #666; margin-top: 20px; }
+    footer { text-align: center; margin-top: 40px; }
+    a.back-link { color: #337ab7; text-decoration: none; }
+    a.back-link:hover { text-decoration: underline; }
 
     .lightbox-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); display: none;
+      align-items: center; justify-content: center; z-index: 2000;
     }
-
     .lightbox-overlay img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      max-width: 90%; max-height: 90%;
+      border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
       cursor: zoom-out;
     }
 
     .button-group {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 15px;
+      display: flex; justify-content: center;
+      gap: 20px; flex-wrap: wrap; margin-top: 15px;
     }
-
     .button-group a {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
-      text-decoration: none;
-      color: #333;
-      background-color: #f5f5f5;
-      padding: 10px 20px;
-      border-radius: 8px;
+      display: inline-flex; align-items: center; gap: 12px;
+      font-size: 16px; text-decoration: none; color: #333;
+      background-color: #f5f5f5; padding: 10px 20px; border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .button-group a img {
-      width: 28px;
-      height: 28px;
-      max-width: none;
-      box-shadow: none;
-      margin: 0;
+      width: 28px; height: 28px; max-width: none; box-shadow: none; margin: 0;
+    }
+
+    /* Interactive ERD styles */
+    #zoom-controls {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin: 10px 0 15px 0;
+    }
+    #zoom-controls button {
+      padding: 6px 12px; font-size: 14px;
+      border-radius: 6px; border: 1px solid #aaa;
+      background: #eee; cursor: pointer;
+    }
+    #diagram-container {
+      height: 65vh; /* fits nicely within your container */
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 10px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);
+    }
+    #diagram-wrapper {
+      display: flex; justify-content: center; align-items: center;
+      min-width: 600px;
     }
   </style>
+
+  <!-- Pan/zoom library for the ERD -->
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
 </head>
 
 <body>
@@ -216,10 +199,202 @@
       <p>
         Our dataset integrates multiple streams of information—comic metadata, character details, MCU adaptation data, and audience/critic reception—into a unified relational structure. The schema captures character traits, comic metadata, adaptation linkages, and auxiliary attributes across over 20 interrelated tables.
       </p>
-      <figure style="text-align:center;">
-        <img src="https://k-leonard.github.io/Editor _ Mermaid Chart-2025-06-30-214349.png" alt="ER Diagram" class="zoomable">
-        <figcaption>Entity-relationship diagram visualizing our schema.</figcaption>
-      </figure>
+
+      <!-- Interactive ERD starts here -->
+      <div id="zoom-controls">
+        <button onclick="zoomIn()">Zoom In</button>
+        <button onclick="zoomOut()">Zoom Out</button>
+        <button onclick="resetZoom()">Reset</button>
+      </div>
+
+      <div id="diagram-container">
+        <div id="diagram-wrapper"></div>
+      </div>
+
+      <!-- Mermaid definition (hidden text block) -->
+      <script type="text/plain" id="mermaid-container">
+%%{init: {'theme': 'default', 'flowchart': {'htmlLabels': true}, 'er': { 'useMaxWidth': false }}}%%
+erDiagram
+    marvel_heroes {
+        int character_id PK
+        string civilian_name
+        boolean comedy
+        string sex
+        boolean in_movie
+        int ethnicity_id FK
+        int species_id FK
+    }
+
+    character_ethnicities {
+        int ethnicity_id PK
+        string ethnicity_label
+    }
+
+    species {
+        int species_id PK
+        string description
+    }
+
+    hero_aliases {
+        int alias_id PK
+        string alias_name
+    }
+
+    hero_to_alias {
+        int character_id FK
+        int alias_id FK
+    }
+
+    powers {
+        int power_id PK
+        string description
+    }
+
+    power_type {
+        int power_type_id PK
+        string description
+    }
+
+    character_power_type {
+        int character_id FK
+        int power_type_id FK
+    }
+
+    hero_powers {
+        int character_id FK
+        int power_id FK
+    }
+
+    teams {
+        int team_id PK
+        string description
+    }
+
+    characters_in_teams {
+        int character_id FK
+        int team_id FK
+    }
+
+    marvel_ratings {
+        int media_id PK
+        string title
+        string type
+        float critic_score
+        float audience_score
+        date release_date
+    }
+
+    characters_in_movies {
+        int character_id FK
+        int movie_id FK
+    }
+
+    comics {
+        int comic_id PK
+        int series_id FK
+        string comic_title
+        date release_date
+        int page_count
+        string rating
+        float price
+        string description
+        int threat_id FK
+        boolean used_in_movie
+        boolean movie_based
+        boolean mentor
+        boolean impactful_moment
+        boolean comedy
+        boolean cultural
+        int location_id FK
+        boolean romance
+        boolean origin_story
+        int major_event FK
+        string comic_url
+    }
+
+    comic_series {
+        int series_id PK
+        string series_name
+    }
+
+    comic_characters {
+        int comic_id FK
+        int character_id FK
+    }
+
+    comic_to_creator {
+        int comic_id FK
+        int creator_id FK
+    }
+
+    creators {
+        int creator_id PK
+        string creator_name
+    }
+
+    comic_to_movie {
+        int comic_id FK
+        int movie_id FK
+    }
+
+    comic_themes {
+        int comic_id FK
+        int theme_id FK
+    }
+
+    comic_threats {
+        int comic_id FK
+        int threat_id FK
+    }
+
+    themes {
+        int theme_id PK
+        string description
+    }
+
+    threat_level {
+        int threat_id PK
+        string description
+    }
+
+    locations {
+        int location_id PK
+        string description
+    }
+
+    major_event {
+        int event_id PK
+        string description
+    }
+
+    %% Relationships
+    marvel_heroes ||--o{ character_power_type : has
+    power_type ||--o{ character_power_type : classifies
+    marvel_heroes ||--o{ hero_powers : uses
+    powers ||--o{ hero_powers : is
+    marvel_heroes ||--o{ hero_to_alias : has
+    hero_aliases ||--o{ hero_to_alias : includes
+    marvel_heroes ||--o{ characters_in_teams : member
+    teams ||--o{ characters_in_teams : consists_of
+    marvel_heroes ||--o{ characters_in_movies : featured_in
+    marvel_ratings ||--o{ characters_in_movies : includes
+    marvel_heroes ||--o{ comic_characters : appears_in
+    comics ||--o{ comic_characters : features
+    comics ||--o{ comic_to_creator : created_by
+    creators ||--o{ comic_to_creator : contributes
+    comics ||--o{ comic_to_movie : adapted_to
+    marvel_ratings ||--o{ comic_to_movie : based_on
+    comics ||--o{ comic_themes : explores
+    themes ||--o{ comic_themes : present_in
+    comics ||--o{ comic_threats : faces
+    threat_level ||--o{ comic_threats : level
+    comics ||--o| comic_series : part_of
+    comics ||--o| locations : set_in
+    comics ||--o| major_event : involves
+    marvel_heroes }|--|| character_ethnicities : identifies_as
+    marvel_heroes }|--|| species : belongs_to
+      </script>
+      <!-- Interactive ERD ends here -->
     </section>
 
     <section class="project-section">
@@ -307,17 +482,24 @@
   </div>
 
   <script>
+    // Load Navbar
     fetch('https://k-leonard.github.io/navbar.html')
       .then(r=>r.text())
       .then(d=>{document.getElementById('navbar-container').innerHTML=d});
+
+    // Last updated via GitHub API
     const apiURL="https://api.github.com/repos/k-leonard/k-leonard.github.io/commits?path=Website_Assets/capstone-project.html&per_page=1";
     fetch(apiURL).then(r=>r.json()).then(data=>{
       if(data&&data[0]){
         const date=new Date(data[0].commit.committer.date);
         const opt={year:"numeric",month:"long",day:"numeric"};
         document.getElementById("last-updated-date").textContent=date.toLocaleDateString("en-US",opt);
+      } else {
+        document.getElementById("last-updated-date").textContent="Unavailable";
       }
-    });
+    }).catch(()=>{document.getElementById("last-updated-date").textContent="Unavailable";});
+
+    // Simple lightbox for zoomable images (still present for any other images)
     const lightbox=document.createElement('div');
     lightbox.className='lightbox-overlay';lightbox.id='lightbox';
     lightbox.innerHTML='<img src="" alt="Enlarged view">';
@@ -334,6 +516,48 @@
       lightbox.style.display='none';
       lightboxImg.src='';
     });
+  </script>
+
+  <!-- Mermaid (ES module) to render the ERD -->
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+    // Choose your starting view
+    const INITIAL_ZOOM = 4;
+    const INITIAL_PAN  = { x: -1950, y: 70 };
+
+    // Render Mermaid -> inject SVG
+    const def = document.getElementById("mermaid-container").textContent;
+    const { svg } = await mermaid.render("erd", def);
+    const wrapper = document.getElementById("diagram-wrapper");
+    wrapper.innerHTML = svg;
+
+    // Optional: remove Mermaid's auto title if present
+    const headerText = wrapper.querySelector('svg text');
+    if (headerText && headerText.textContent.trim() === 'Entity Relationship Diagram') {
+      headerText.parentNode.removeChild(headerText);
+    }
+
+    // Init pan/zoom
+    const instance = svgPanZoom(wrapper.querySelector("svg"), {
+      zoomEnabled: true,
+      panEnabled: true,
+      controlIconsEnabled: false,
+      minZoom: 0.1,
+      maxZoom: 10
+    });
+
+    // Set the initial view
+    instance.zoom(INITIAL_ZOOM);
+    instance.pan(INITIAL_PAN);
+
+    // Expose button handlers
+    window.zoomIn = () => instance.zoomIn();
+    window.zoomOut = () => instance.zoomOut();
+    window.resetZoom = () => {
+      instance.zoom(INITIAL_ZOOM);
+      instance.pan(INITIAL_PAN);
+    };
   </script>
 </body>
 </html>
