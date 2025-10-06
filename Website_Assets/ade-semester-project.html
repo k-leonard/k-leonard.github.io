@@ -75,6 +75,12 @@
       padding-bottom: 5px;
     }
 
+    h3 {
+      color: #000205;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
     ul {
       padding-left: 20px;
     }
@@ -115,99 +121,164 @@
       width: 28px;
       height: 28px;
     }
-    .progress-badge {
-  position: fixed;
-  top: 70px;
-  right: 20px;
-  background-color: #ffcc00;
-  color: #333;
-  font-weight: bold;
-  padding: 8px 14px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 1001;
-  font-size: 14px;
-}
 
+    .progress-badge {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      background-color: #ffcc00;
+      color: #333;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      font-size: 14px;
+    }
   </style>
 </head>
-<body>
 
+<body>
   <div id="navbar-container"></div>
 
   <!-- 🚧 Work In Progress Banner -->
   <div class="progress-badge">🚧 In Progress – Expected August 2025</div>
 
-
   <div class="container">
     <h1>Riding the Data Pipeline</h1>
-    <p class="project-subtitle">Master's of Data Science Capstone Project</p>
+    <p class="project-subtitle">A Data Engineering Project on Public Transit Ridership</p>
 
     <section class="project-section">
       <h2>Overview</h2>
       <p>
         This project delivers an end-to-end data pipeline for analyzing public transportation ridership and fare data.
-        The system ingests, processes, and visualizes daily rider behavior and fare usage trends using Airflow, PostgreSQL, and Grafana. Our goal was to support data-driven decisions around fare policy, rider equity, and system performance.
+        The system ingests, processes, and visualizes daily rider behavior and fare usage trends using Airflow, PostgreSQL, and Grafana.
+        The goal was to support data-driven decisions around fare policy, rider equity, and system performance while practicing real-world data engineering techniques.
       </p>
     </section>
 
     <section class="project-section">
       <h2>Skills & Tools Used</h2>
       <ul>
-        <li>Python (pandas, psycopg2)</li>
-        <li>SQL (PostgreSQL)</li>
-        <li>Apache Airflow (DAG scheduling, timezone handling)</li>
-        <li>Grafana (dashboarding, time-series plots)</li>
-        <li>Cloud storage (S3 buckets)</li>
-        <li>Team collaboration with GitHub and Slack</li>
+        <li>Python (pandas, psycopg2, boto3, networkx)</li>
+        <li>SQL (PostgreSQL, DuckDB)</li>
+        <li>Apache Airflow (DAG scheduling, dependency management)</li>
+        <li>Grafana (dashboarding, time-series analytics)</li>
+        <li>Cloud storage with S3 (MinIO)</li>
+        <li>Kafka (real-time event processing)</li>
+        <li>GitHub for version control and collaboration</li>
       </ul>
     </section>
 
     <section class="project-section">
-      <h2>Process</h2>
-      <ul>
-        <li><strong>Data Ingestion:</strong> Created Airflow DAGs to scrape and export rider and fare data from APIs into S3 as JSON.</li>
-        <li><strong>Data Organization:</strong> Designed and maintained dimension and fact tables in a PostgreSQL warehouse.</li>
-        <li><strong>Data Loading:</strong> Used Airflow to transform and insert data from S3 into structured warehouse tables with timestamp handling.</li>
-        <li><strong>Dashboarding:</strong> Built Grafana dashboards to track daily ridership, fare type usage, and performance over time.</li>
-        <li><strong>Team Workflow:</strong> Iterated with teammates using GitHub issues, milestone reviews, and feedback-based revisions.</li>
-      </ul>
-    </section>
-
-    <section class="project-section">
-      <h2>Key Outcomes</h2>
-      <ul>
-        <li>Automated daily ingestion and transformation of ridership and fare data using custom Airflow DAGs</li>
-        <li>Created robust fact and dimension tables that support flexible filtering and analysis</li>
-        <li>Visualized key KPIs in Grafana, including peak ridership times and equity breakdowns by fare type</li>
-        <li>Handled complex timezone issues and ensured timestamp accuracy across systems</li>
-        <li>Produced clean, well-documented code and reproducible workflows</li>
-      </ul>
-    </section>
-
-    <section class="project-section">
-      <h2>Reflection</h2>
-      <p>
-        Although this project is still ongoing, I have still learned a lot. This project taught me how to build reliable data infrastructure and collaborate on a complex technical workflow.
-        The biggest challenge was debugging timezone misalignments across ingestion and warehouse stages — but solving it deepened my understanding of both Python and PostgreSQL datetime behavior.
-        I'm proud of how our team handled feedback loops and iterated on dashboard design. In the future, I'd like to expand the system to support multi-year trends and machine learning-driven forecasting.
+      <h2>Project Breakdown</h2>
+      <p><strong>Duration:</strong> January–August 2025<br>
+         <strong>Team:</strong> Kendall Leonard, Tatum Good, Jon [Last Name], with mentorship/support from Jed
       </p>
-    </section>
 
-    <!-- ✅ GitHub Section -->
-    <section class="github-link">
-      <a href="https://github.com/k-leonard/DataPipeline-Capstone" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" />
-        View GitHub Repository
-      </a>
+      <h3>What This Project Is</h3>
+      <p>
+        “Riding the Data Pipeline” is a production-style data engineering initiative for a public transit system.
+        We built an automated data infrastructure that ingests ridership and fare data, structures it in a relational warehouse,
+        and visualizes system performance through Grafana dashboards. The system simulates real-world data challenges:
+        distributed ingestion, schema evolution, incremental updates, and accurate timestamp handling.
+      </p>
+
+      <h3>Key Components</h3>
+      <ul>
+        <li>
+          <strong>Automated Ingestion (Airflow):</strong>
+          Developed multiple DAGs to extract rider and fare data from APIs and export to MinIO (S3) as JSON/Parquet.
+          Tasks used <code>CronDataIntervalTimetable</code> for precise scheduling and custom logging for traceability.
+        </li>
+        <li>
+          <strong>Warehouse Design (PostgreSQL):</strong>
+          Created a star-schema warehouse with dimension tables for riders, passengers, fare types, stations, rides, and segments,
+          and fact tables for ridership, fares, and durations. Schema evolved to accommodate new features like tap pairing and fare linking.
+        </li>
+        <li>
+          <strong>Transform &amp; Load:</strong>
+          Airflow and PostgresHook handled extraction from S3, data normalization, and incremental upserts.
+          Type-2 dimension tracking and timezone alignment ensured historical consistency and accuracy across DuckDB and PostgreSQL.
+        </li>
+        <li>
+          <strong>Analytical Workflows:</strong>
+          Designed “Business Questions” that guided warehouse logic and analytics:
+          <ol>
+            <li>Daily and peak ridership patterns</li>
+            <li>Fare type equity and distribution</li>
+            <li>Ride durations and flow between stations</li>
+            <li>High-traffic segments and congestion</li>
+            <li>Real-time wait times via Kafka event streams</li>
+          </ol>
+        </li>
+        <li>
+          <strong>Dashboards (Grafana):</strong>
+          Built interactive dashboards to display key metrics:
+          ridership over time, fare type usage, segment congestion, and equity indicators.
+          Iterative design feedback led to improved labeling, cleaner comparisons, and standardized color schemes.
+        </li>
+      </ul>
+
+      <h3>Milestone Highlights</h3>
+      <ul>
+        <li><strong>M1–M2:</strong> Set up ingestion DAGs and S3 export; designed initial warehouse schema; built baseline ridership KPIs.</li>
+        <li><strong>M3:</strong> Implemented ride duration calculations by pairing in/out taps and resolved timezone misalignments.</li>
+        <li><strong>M4:</strong> Added NetworkX-based segment mapping and traffic aggregation by segment/date/time.</li>
+        <li><strong>M5:</strong> Integrated Kafka train-event streams to compute near-real-time passenger wait times.</li>
+      </ul>
+
+      <h3>Challenges &amp; What We Solved</h3>
+      <ul>
+        <li>
+          <strong>Timezone Synchronization:</strong>
+          Solved 7-hour timestamp drift caused by inconsistent UTC/local assumptions between Airflow, Python, DuckDB, and PostgreSQL.
+        </li>
+        <li>
+          <strong>Tap Pairing Logic:</strong>
+          Developed a matching algorithm to pair passenger entry/exit events and handle incomplete data for accurate duration tracking.
+        </li>
+        <li>
+          <strong>Performance &amp; Memory Management:</strong>
+          Used batching, CTEs, and strategic DuckDB transformations to maintain speed and reproducibility with large datasets.
+        </li>
+        <li>
+          <strong>Team Collaboration:</strong>
+          Managed version control via GitHub with modular DAG ownership, code reviews, and milestone documentation.
+        </li>
+      </ul>
+
+      <h3>Outcomes</h3>
+      <ul>
+        <li>Five fully operational Airflow DAGs for ingestion, transformation, and analytics.</li>
+        <li>Normalized, scalable warehouse schema supporting multi-dimensional analysis.</li>
+        <li>Grafana dashboards displaying real-time ridership and fare KPIs.</li>
+        <li>Kafka integration for live wait-time monitoring.</li>
+        <li>Reproducible, transparent workflows with full documentation.</li>
+      </ul>
+
+      <h3>What I Learned</h3>
+      <p>
+        This project deepened my understanding of scalable data pipeline architecture and real-world system integration.
+        I learned how to troubleshoot distributed components, coordinate schema changes, and optimize Airflow task execution.
+        In the future, I aim to extend the warehouse for multi-year trend modeling and machine learning-based forecasting.
+      </p>
+
+      <h3>Links</h3>
+      <ul>
+        <li>📂 <a href="https://github.com/k-leonard/DataPipeline-Capstone" target="_blank" rel="noopener">GitHub Repository</a></li>
+        <li>📊 <a href="#" aria-disabled="true">Grafana Dashboard (Demo)</a> <!-- replace # with live/demo link when ready --></li>
+        <li>🧱 <a href="#" aria-disabled="true">ERD &amp; Schema Docs</a> <!-- replace # with ERD page or PDF --></li>
+      </ul>
     </section>
 
     <footer>
-      <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">Back to Projects</a>
+      <a class="back-link" href="https://k-leonard.github.io/Website_Assets/Projects.html">← Back to Projects</a>
     </footer>
   </div>
 
   <script>
+    // Load shared navbar
     fetch('https://k-leonard.github.io/navbar.html')
       .then(response => response.text())
       .then(data => {
