@@ -97,6 +97,20 @@ function route() {
   }
 }
 
+function wireTabs() {
+  ["home", "browse", "collection"].forEach(name => {
+    const tab = el(`tab-${name}`);
+    if (!tab) return;
+
+    tab.addEventListener("click", (e) => {
+      // Works whether tab is <a> or <button>
+      e.preventDefault();
+      window.location.hash = `#${name}`;
+      route();
+    });
+  });
+}
+
 
 // --------------------
 // Browse filter helpers
@@ -179,6 +193,10 @@ async function logout() {
 // DB-backed MultiSelect (search + add new)
 // --------------------
 function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
+   if (!btn || !menu || !chips) {
+    console.warn(`Missing multiselect elements for ${tableName}`);
+    return { setRows: () => {}, getIds: () => [], clear: () => {} };
+  }
   const btn = el(buttonId);
   const menu = el(menuId);
   const chips = el(chipsId);
@@ -443,7 +461,10 @@ async function loadShows() {
 // Render
 // --------------------
 function renderTable(rows) {
-  const tbody = el("table").querySelector("tbody");
+   const table = el("table");
+  if (!table) return;
+  const tbody = table.querySelector("tbody");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   for (const r of rows) {
@@ -565,6 +586,18 @@ async function init() {
     if (DEV_MODE) rerenderFiltered();
     else loadShows();
   });
+   // --------------------
+  // Router wiring (MUST run in DEV_MODE too)
+  // --------------------
+  wireTabs();
+  window.addEventListener("hashchange", route);
+
+  // Default to #home on first load
+  if (!window.location.hash) window.location.hash = "#home";
+
+  // Run once on boot
+  route();
+
 
   // DEV_MODE boot
   if (DEV_MODE) {
@@ -625,14 +658,7 @@ async function init() {
     rerenderFiltered();
     return;
   }
-// Router wiring
-window.addEventListener("hashchange", route);
 
-// Default to #home on first load
-if (!window.location.hash) window.location.hash = "#home";
-
-// Run immediately
-route();
 
 
   // Normal mode: Supabase online
