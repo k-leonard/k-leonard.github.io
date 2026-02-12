@@ -32,8 +32,27 @@
         </select>
         <input name="my_rating" type="number" min="1" max="10" placeholder="My rating (1–10)" />
         <input name="studio" placeholder="Studio" />
-        <input name="platforms" placeholder="Platforms (comma-separated)" />
-        <input name="genres" placeholder="Genres (comma-separated)" />
+        <div class="multiselect">
+  <label>Where to Watch</label>
+  <button type="button" id="platformBtn" class="secondary">Select platforms</button>
+  <div id="platformMenu" class="menu hidden"></div>
+  <div id="platformChips" class="chips"></div>
+</div>
+
+<div class="multiselect">
+  <label>Genres</label>
+  <button type="button" id="genreBtn" class="secondary">Select genres</button>
+  <div id="genreMenu" class="menu hidden"></div>
+  <div id="genreChips" class="chips"></div>
+</div>
+
+<div class="multiselect">
+  <label>Tropes</label>
+  <button type="button" id="tropeBtn" class="secondary">Select tropes</button>
+  <div id="tropeMenu" class="menu hidden"></div>
+  <div id="tropeChips" class="chips"></div>
+</div>
+
         <textarea name="notes" placeholder="Notes"></textarea>
         <button type="submit">Add</button>
       </form>
@@ -66,6 +85,48 @@
   </main>
 
   <script type="module" src="./app.js"></script>
+  .multiselect { grid-column: 1 / -1; }
+.multiselect label { display:block; margin-bottom: 6px; font-weight: 600; }
+
+.menu {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid #d7dbe7;
+  border-radius: 10px;
+  background: #fff;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.hidden { display: none; }
+
+.menu .search {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.menu label.option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #d7dbe7;
+  background: #f6f7fb;
+  font-size: 12px;
+}
+
 </body>
 </html>
 
