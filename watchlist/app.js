@@ -1,4 +1,5 @@
 console.log("app.js loaded");
+const DEV_MODE = true; // <-- set to false when Supabase is back
 
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -417,16 +418,47 @@ async function init() {
   el("statusFilter").addEventListener("change", loadShows);
 
   // Auth state
-  const { data: { session } } = await supabase.auth.getSession();
-  showAuthedUI(!!session);
+ if (DEV_MODE) {
+  showAuthedUI(true);
 
-  if (session) {
-    platformSelect.setRows(await loadOptionRows("platforms"));
-    genreSelect.setRows(await loadOptionRows("genres"));
-    tropeSelect.setRows(await loadOptionRows("tropes"));
-    await loadShows();
-  }
+  // Fake sample data for UI work
+  platformSelect.setRows([
+    { id: 1, name: "Crunchyroll" },
+    { id: 2, name: "Netflix" },
+    { id: 3, name: "Hulu" }
+  ]);
 
+  genreSelect.setRows([
+    { id: 1, name: "Romance" },
+    { id: 2, name: "Action" },
+    { id: 3, name: "Slice of Life" }
+  ]);
+
+  tropeSelect.setRows([
+    { id: 1, name: "Enemies to Lovers" },
+    { id: 2, name: "Found Family" },
+    { id: 3, name: "Time Loop" }
+  ]);
+
+  renderTable([
+    {
+      id: 1,
+      title: "7th Time Loop",
+      status: "Watching",
+      rating_stars: 4,
+      studio: "Studio A",
+      last_watched: "2026-02-11",
+      show_platforms: [{ platforms: { name: "Crunchyroll" } }],
+      show_genres: [{ genres: { name: "Romance" } }],
+      show_tropes: [{ tropes: { name: "Time Loop" } }]
+    }
+  ]);
+
+  return;
+}
+
+
+if (!DEV_MODE) {
   supabase.auth.onAuthStateChange(async (_event, session2) => {
     showAuthedUI(!!session2);
     authMsg.textContent = session2 ? "Logged in." : "Logged out.";
@@ -439,7 +471,6 @@ async function init() {
     }
   });
 }
-
 init();
 
 
