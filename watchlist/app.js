@@ -4,7 +4,6 @@ const DEV_MODE = true; // <-- set to false when Supabase is back
 console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 
 
-
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -18,6 +17,9 @@ const listCard = el("listCard");
 const logoutBtn = el("logout");
 const authCard = el("authCard");
 
+// Cache for client-side filtering
+let ALL_SHOWS_CACHE = [];
+
 // --------------------
 // UI helpers
 // --------------------
@@ -27,7 +29,6 @@ function showAuthedUI(isAuthed) {
   logoutBtn.style.display = isAuthed ? "" : "none";
   if (authCard) authCard.style.display = isAuthed ? "none" : "";
 }
-
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -50,6 +51,66 @@ function parseRatingStars(input) {
   if (s.includes("★")) return (s.match(/★/g) || []).length;
   const n = Number(s);
   return Number.isFinite(n) ? Math.min(5, Math.max(0, Math.round(n))) : null;
+}
+
+function debounce(fn, ms) {
+  let t = null;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+// --------------------
+// Browse filter helpers
+// --------------------
+function fillSelect(selectId, rows, label) {
+  const sel = el(selectId);
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML =
+    `<option value="">All ${label}</option>` +
+    (rows || [])
+      .map(r => `<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}</option>`)
+      .join("");
+  sel.value = current || "";
+}
+
+function rowHasName(list, key, wanted) {
+  if (!wanted) return true;
+  return (list || []).some(x => x?.[key]?.name === wanted);
+}
+
+function applyClientFilters(rows) {
+  const q = (el("q")?.value || "").trim().toLowerCase();
+  const status = el("statusFilter")?.value || "";
+  const platform = el("platformFilter")?.value || "";
+  const genre = el("genreFilter")?.value || "";
+  const trope = el("tropeFilter")?.value || "";
+  const studio = (el("studioFilter")?.value || "").trim().toLowerCase();
+  const minRating = el("minRatingFilter")?.value ? Number(el("minRatingFilter").value) : null;
+
+  return (rows || []).filter(r => {
+    if (q && !String(r.title || "").toLowerCase().includes(q)) return false;
+    if (status && r.status !== status) return false;
+    if (studio && !String(r.studio || "").toLowerCase().includes(studio)) return false;
+
+    if (minRating != null) {
+      const rs = r.rating_stars == null ? 0 : Number(r.rating_stars);
+      if (rs < minRating) return false;
+    }
+
+    if (platform && !rowHasName(r.show_platforms, "platforms", platform)) return false;
+    if (genre && !rowHasName(r.show_genres, "genres", genre)) return false;
+    if (trope && !rowHasName(r.show_tropes, "tropes", trope)) return false;
+
+    return true;
+  });
+}
+
+function rerenderFiltered() {
+  renderTable(applyClientFilters(ALL_SHOWS_CACHE));
+  msg.textContent = applyClientFilters(ALL_SHOWS_CACHE).length ? "" : "No results.";
 }
 
 // --------------------
@@ -85,8 +146,8 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
   const menu = el(menuId);
   const chips = el(chipsId);
 
-  const selected = new Map(); // Map<optionId, optionName>
-  let allRows = []; // [{id, name}]
+  const selected = new Map();
+  let allRows = [];
 
   function renderChips() {
     chips.innerHTML = Array.from(selected.values())
@@ -97,10 +158,7 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
 
   function renderMenu(filterText = "") {
     const f = filterText.trim().toLowerCase();
-
-    const filtered = f
-      ? allRows.filter(r => r.name.toLowerCase().includes(f))
-      : allRows;
+    const filtered = f ? allRows.filter(r => r.name.toLowerCase().includes(f)) : allRows;
 
     const optionsHtml = filtered.map(r => {
       const checked = selected.has(r.id) ? "checked" : "";
@@ -123,12 +181,10 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
       <div id="${menuId}_options">${optionsHtml}</div>
     `;
 
-    // Search listener
     menu.querySelector(`#${menuId}_search`).addEventListener("input", (e) => {
       renderMenu(e.target.value);
     });
 
-    // Add listener
     const addBtn = menu.querySelector(`#${menuId}_addBtn`);
     if (addBtn) {
       addBtn.addEventListener("click", async () => {
@@ -147,7 +203,6 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
       });
     }
 
-    // Checkbox listeners
     menu.querySelectorAll('input[type="checkbox"][data-id]').forEach(cb => {
       cb.addEventListener("change", () => {
         const id = Number(cb.dataset.id);
@@ -185,6 +240,7 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
     }
   };
 }
+
 // --------------------
 // Clickable Stars for Ratings
 // --------------------
@@ -208,34 +264,28 @@ function setupStarRating({ containerId, inputId, clearId }) {
     paint(n);
   }
 
-  // hover preview
   stars.forEach((btn) => {
     btn.addEventListener("mouseenter", () => paint(Number(btn.dataset.value)));
     btn.addEventListener("mouseleave", () => paint(value));
-
-    btn.addEventListener("click", () => {
-      set(Number(btn.dataset.value));
-    });
+    btn.addEventListener("click", () => set(Number(btn.dataset.value)));
   });
 
   clearBtn.addEventListener("click", () => set(0));
-
   return { clear: () => set(0) };
 }
 
+// --------------------
+// DB helpers
+// --------------------
 async function getOrCreateOptionRow(tableName, name) {
   const cleaned = String(name).trim();
   if (!cleaned) return null;
 
-  // Insert if missing (unique(name) + ignore duplicates)
   const ins = await supabase
     .from(tableName)
     .insert([{ name: cleaned }], { onConflict: "name", ignoreDuplicates: true });
 
-  if (ins.error) {
-    console.error(`Insert into ${tableName} failed:`, ins.error);
-    // still try to select
-  }
+  if (ins.error) console.error(`Insert into ${tableName} failed:`, ins.error);
 
   const sel = await supabase
     .from(tableName)
@@ -285,11 +335,8 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
   const title = formData.get("title").trim();
   const status = formData.get("status");
   const studio = String(formData.get("studio") || "").trim() || null;
-
-  // rating: accept ★★★★☆ or a number (stored 0-5)
   const rating_stars = parseRatingStars(formData.get("my_rating"));
 
-  // status -> last_watched rules
   let last_watched = null;
   if (status === "Watched") {
     const d = new Date();
@@ -298,7 +345,6 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
   }
   if (status === "To Be Watched") last_watched = null;
 
-  // Insert show + get show_id
   const ins = await supabase
     .from("shows")
     .insert([{
@@ -319,7 +365,6 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
 
   const show_id = ins.data.id;
 
-  // Insert joins
   await insertJoinRows({ joinTable: "show_platforms", user_id, show_id, fkColumn: "platform_id", ids: platformIds });
   await insertJoinRows({ joinTable: "show_genres", user_id, show_id, fkColumn: "genre_id", ids: genreIds });
   await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
@@ -334,18 +379,13 @@ async function deleteShow(id) {
 
 async function loadShows() {
   if (DEV_MODE) return;
+
   msg.textContent = "Loading…";
-  const q = el("q").value.trim();
-  const status = el("statusFilter").value;
 
   let query = supabase
     .from("shows")
     .order("created_at", { ascending: false });
 
-  if (q) query = query.ilike("title", `%${q}%`);
-  if (status) query = query.eq("status", status);
-
-  // Select show fields + joined option names
   const { data, error } = await query.select(`
     id, user_id, title, status, rating_stars, studio, last_watched, created_at,
     show_platforms(platforms(name)),
@@ -358,10 +398,13 @@ async function loadShows() {
     return;
   }
 
-  renderTable(data || []);
-  msg.textContent = (data && data.length) ? "" : "No results.";
+  ALL_SHOWS_CACHE = data || [];
+  rerenderFiltered();
 }
 
+// --------------------
+// Render
+// --------------------
 function renderTable(rows) {
   const tbody = el("table").querySelector("tbody");
   tbody.innerHTML = "";
@@ -396,18 +439,9 @@ function renderTable(rows) {
 }
 
 // --------------------
-// Init / wiring
+// Init
 // --------------------
-function debounce(fn, ms) {
-  let t = null;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
-  };
-}
-
 async function init() {
-  // Create selects (requires HTML elements to exist)
   const platformSelect = setupDbMultiSelect({
     buttonId: "platformBtn",
     menuId: "platformMenu",
@@ -430,11 +464,10 @@ async function init() {
   });
 
   const starUI = setupStarRating({
-  containerId: "ratingStars",
-  inputId: "my_rating",
-  clearId: "clearRating"
-});
-
+    containerId: "ratingStars",
+    inputId: "my_rating",
+    clearId: "clearRating"
+  });
 
   // Login button
   el("sendLink").addEventListener("click", () => {
@@ -448,12 +481,19 @@ async function init() {
   // Add form
   el("addForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    if (DEV_MODE) {
+      msg.textContent = "DEV_MODE: not saving to DB.";
+      return;
+    }
+
     await addShow(
       new FormData(e.target),
       platformSelect.getIds(),
       genreSelect.getIds(),
       tropeSelect.getIds()
     );
+
     e.target.reset();
     starUI.clear();
     platformSelect.clear();
@@ -462,41 +502,65 @@ async function init() {
     await loadShows();
   });
 
-  // Browse controls
-  el("refresh").addEventListener("click", loadShows);
-  el("q").addEventListener("input", debounce(loadShows, 250));
-  el("statusFilter").addEventListener("change", loadShows);
+  // Browse controls (new)
+  const rerender = debounce(rerenderFiltered, 150);
+  ["q","statusFilter","platformFilter","genreFilter","tropeFilter","studioFilter","minRatingFilter"]
+    .forEach(id => {
+      const node = el(id);
+      if (!node) return;
+      const evt = (id === "q" || id === "studioFilter") ? "input" : "change";
+      node.addEventListener(evt, rerender);
+    });
 
-    // Auth state
+  el("clearFilters")?.addEventListener("click", () => {
+    if (el("q")) el("q").value = "";
+    if (el("statusFilter")) el("statusFilter").value = "";
+    if (el("platformFilter")) el("platformFilter").value = "";
+    if (el("genreFilter")) el("genreFilter").value = "";
+    if (el("tropeFilter")) el("tropeFilter").value = "";
+    if (el("studioFilter")) el("studioFilter").value = "";
+    if (el("minRatingFilter")) el("minRatingFilter").value = "";
+    rerenderFiltered();
+  });
+
+  // Refresh button
+  el("refresh").addEventListener("click", () => {
+    if (DEV_MODE) rerenderFiltered();
+    else loadShows();
+  });
+
+  // DEV_MODE boot
   if (DEV_MODE) {
     showAuthedUI(true);
     authMsg.textContent = "DEV_MODE: auth disabled (Supabase outage)";
-
-    // Disable login button so it doesn't try to fetch
     el("sendLink").disabled = true;
 
-    // Fake options so dropdowns work
-    platformSelect.setRows([
+    const devPlatforms = [
       { id: 1, name: "Crunchyroll" },
       { id: 2, name: "Netflix" },
       { id: 3, name: "Hulu" }
-    ]);
-
-    genreSelect.setRows([
+    ];
+    const devGenres = [
       { id: 1, name: "Romance" },
       { id: 2, name: "Action" },
       { id: 3, name: "Slice of Life" }
-    ]);
-
-    tropeSelect.setRows([
+    ];
+    const devTropes = [
       { id: 1, name: "Enemies to Lovers" },
       { id: 2, name: "Found Family" },
-      { id: 3, name: "Time Loop" }
-    ]);
-console.log("Stars found:", document.querySelectorAll(".star").length);
+      { id: 3, name: "Time Loop" },
+      { id: 4, name: "Slow Burn" }
+    ];
 
-    // Fake table rows so you can style UI
-    renderTable([
+    platformSelect.setRows(devPlatforms);
+    genreSelect.setRows(devGenres);
+    tropeSelect.setRows(devTropes);
+
+    fillSelect("platformFilter", devPlatforms, "platforms");
+    fillSelect("genreFilter", devGenres, "genres");
+    fillSelect("tropeFilter", devTropes, "tropes");
+
+    ALL_SHOWS_CACHE = [
       {
         id: 1,
         title: "7th Time Loop",
@@ -519,8 +583,9 @@ console.log("Stars found:", document.querySelectorAll(".star").length);
         show_genres: [{ genres: { name: "Romance" } }],
         show_tropes: [{ tropes: { name: "Slow Burn" } }]
       }
-    ]);
+    ];
 
+    rerenderFiltered();
     return;
   }
 
@@ -529,9 +594,18 @@ console.log("Stars found:", document.querySelectorAll(".star").length);
   showAuthedUI(!!session);
 
   if (session) {
-    platformSelect.setRows(await loadOptionRows("platforms"));
-    genreSelect.setRows(await loadOptionRows("genres"));
-    tropeSelect.setRows(await loadOptionRows("tropes"));
+    const p = await loadOptionRows("platforms");
+    const g = await loadOptionRows("genres");
+    const t = await loadOptionRows("tropes");
+
+    platformSelect.setRows(p);
+    genreSelect.setRows(g);
+    tropeSelect.setRows(t);
+
+    fillSelect("platformFilter", p, "platforms");
+    fillSelect("genreFilter", g, "genres");
+    fillSelect("tropeFilter", t, "tropes");
+
     await loadShows();
   }
 
@@ -540,16 +614,23 @@ console.log("Stars found:", document.querySelectorAll(".star").length);
     authMsg.textContent = session2 ? "Logged in." : "Logged out.";
 
     if (session2) {
-      platformSelect.setRows(await loadOptionRows("platforms"));
-      genreSelect.setRows(await loadOptionRows("genres"));
-      tropeSelect.setRows(await loadOptionRows("tropes"));
+      const p = await loadOptionRows("platforms");
+      const g = await loadOptionRows("genres");
+      const t = await loadOptionRows("tropes");
+
+      platformSelect.setRows(p);
+      genreSelect.setRows(g);
+      tropeSelect.setRows(t);
+
+      fillSelect("platformFilter", p, "platforms");
+      fillSelect("genreFilter", g, "genres");
+      fillSelect("tropeFilter", t, "tropes");
+
       await loadShows();
     }
   });
 }
 
-// IMPORTANT: init() call must be OUTSIDE the function
 init();
-
 
 
