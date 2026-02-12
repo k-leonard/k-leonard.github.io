@@ -1,9 +1,9 @@
-
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const DEV_MODE = true; // <-- set to false when Supabase is back
 console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
@@ -16,6 +16,7 @@ const msg = el("msg");
 const appSection = el("app");
 const listCard = el("listCard");
 const logoutBtn = el("logout");
+const authCard = el("authCard");
 
 // --------------------
 // UI helpers
@@ -24,7 +25,9 @@ function showAuthedUI(isAuthed) {
   appSection.style.display = isAuthed ? "" : "none";
   listCard.style.display = isAuthed ? "" : "none";
   logoutBtn.style.display = isAuthed ? "" : "none";
+  if (authCard) authCard.style.display = isAuthed ? "none" : "";
 }
+
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -419,48 +422,73 @@ async function init() {
   el("q").addEventListener("input", debounce(loadShows, 250));
   el("statusFilter").addEventListener("change", loadShows);
 
-  // Auth state
- if (DEV_MODE) {
-  showAuthedUI(true);
+    // Auth state
+  if (DEV_MODE) {
+    showAuthedUI(true);
+    authMsg.textContent = "DEV_MODE: auth disabled (Supabase outage)";
 
-  // Fake sample data for UI work
-  platformSelect.setRows([
-    { id: 1, name: "Crunchyroll" },
-    { id: 2, name: "Netflix" },
-    { id: 3, name: "Hulu" }
-  ]);
+    // Disable login button so it doesn't try to fetch
+    el("sendLink").disabled = true;
 
-  genreSelect.setRows([
-    { id: 1, name: "Romance" },
-    { id: 2, name: "Action" },
-    { id: 3, name: "Slice of Life" }
-  ]);
+    // Fake options so dropdowns work
+    platformSelect.setRows([
+      { id: 1, name: "Crunchyroll" },
+      { id: 2, name: "Netflix" },
+      { id: 3, name: "Hulu" }
+    ]);
 
-  tropeSelect.setRows([
-    { id: 1, name: "Enemies to Lovers" },
-    { id: 2, name: "Found Family" },
-    { id: 3, name: "Time Loop" }
-  ]);
+    genreSelect.setRows([
+      { id: 1, name: "Romance" },
+      { id: 2, name: "Action" },
+      { id: 3, name: "Slice of Life" }
+    ]);
 
-  renderTable([
-    {
-      id: 1,
-      title: "7th Time Loop",
-      status: "Watching",
-      rating_stars: 4,
-      studio: "Studio A",
-      last_watched: "2026-02-11",
-      show_platforms: [{ platforms: { name: "Crunchyroll" } }],
-      show_genres: [{ genres: { name: "Romance" } }],
-      show_tropes: [{ tropes: { name: "Time Loop" } }]
-    }
-  ]);
+    tropeSelect.setRows([
+      { id: 1, name: "Enemies to Lovers" },
+      { id: 2, name: "Found Family" },
+      { id: 3, name: "Time Loop" }
+    ]);
 
-  return;
-}
+    // Fake table rows so you can style UI
+    renderTable([
+      {
+        id: 1,
+        title: "7th Time Loop",
+        status: "Watching",
+        rating_stars: 4,
+        studio: "Studio A",
+        last_watched: "2026-02-11",
+        show_platforms: [{ platforms: { name: "Crunchyroll" } }],
+        show_genres: [{ genres: { name: "Romance" } }],
+        show_tropes: [{ tropes: { name: "Time Loop" } }]
+      },
+      {
+        id: 2,
+        title: "365 Days Before the Wedding",
+        status: "To Be Watched",
+        rating_stars: null,
+        studio: "",
+        last_watched: null,
+        show_platforms: [{ platforms: { name: "Crunchyroll" } }],
+        show_genres: [{ genres: { name: "Romance" } }],
+        show_tropes: [{ tropes: { name: "Slow Burn" } }]
+      }
+    ]);
 
+    return;
+  }
 
-if (!DEV_MODE) {
+  // Normal mode: Supabase online
+  const { data: { session } } = await supabase.auth.getSession();
+  showAuthedUI(!!session);
+
+  if (session) {
+    platformSelect.setRows(await loadOptionRows("platforms"));
+    genreSelect.setRows(await loadOptionRows("genres"));
+    tropeSelect.setRows(await loadOptionRows("tropes"));
+    await loadShows();
+  }
+
   supabase.auth.onAuthStateChange(async (_event, session2) => {
     showAuthedUI(!!session2);
     authMsg.textContent = session2 ? "Logged in." : "Logged out.";
@@ -473,6 +501,9 @@ if (!DEV_MODE) {
     }
   });
 }
+
+// IMPORTANT: init() call must be OUTSIDE the function
 init();
+
 
 
