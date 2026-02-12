@@ -1,1 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Watchlist</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Watchlist</h1>
+
+    <section class="card">
+      <h2>Login</h2>
+      <div class="row">
+        <input id="email" type="email" placeholder="you@email.com" />
+        <button id="sendLink">Send magic link</button>
+        <button id="logout" class="secondary" style="display:none;">Logout</button>
+      </div>
+      <p id="authMsg" class="muted"></p>
+    </section>
+
+    <section class="card" id="app" style="display:none;">
+      <h2>Add show</h2>
+      <form id="addForm" class="grid">
+        <input name="title" placeholder="Title" required />
+        <select name="status">
+          <option>To Be Watched</option>
+          <option>Watching</option>
+          <option>Watched</option>
+          <option>Dropped</option>
+        </select>
+        <input name="my_rating" type="number" min="1" max="10" placeholder="My rating (1–10)" />
+        <input name="studio" placeholder="Studio" />
+        <input name="platforms" placeholder="Platforms (comma-separated)" />
+        <input name="genres" placeholder="Genres (comma-separated)" />
+        <textarea name="notes" placeholder="Notes"></textarea>
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card" id="listCard" style="display:none;">
+      <h2>Browse</h2>
+      <div class="row">
+        <input id="q" placeholder="Search title…" />
+        <select id="statusFilter">
+          <option value="">All statuses</option>
+          <option>To Be Watched</option>
+          <option>Watching</option>
+          <option>Watched</option>
+          <option>Dropped</option>
+        </select>
+        <button id="refresh" class="secondary">Refresh</button>
+      </div>
+
+      <table id="table">
+        <thead>
+          <tr>
+            <th>Title</th><th>Status</th><th>Rating</th><th>Platforms</th><th>Genres</th><th>Studio</th><th>Last Watched</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="msg" class="muted"></p>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
 
