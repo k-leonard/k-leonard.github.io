@@ -81,36 +81,37 @@ function debounce(fn, ms) {
 // Hash Router (Home / Browse / Collection)
 // --------------------
 function route() {
-  const hash = (window.location.hash || "#home").slice(1);
-
+  const raw = (window.location.hash || "#home").slice(1);
   const views = ["home", "browse", "collection"];
-  const viewId = (name) => `view-${name}`;
-  const tabId = (name) => `tab-${name}`;
 
-  // Show exactly one view
+  // Normalize bad hashes back to home
+  const hash = views.includes(raw) ? raw : "home";
+
   for (const name of views) {
-    const v = el(viewId(name));
-    if (v) v.style.display = (name === hash) ? "" : "none";
+    setDisplay(`view-${name}`, name === hash);
 
-    const t = el(tabId(name));
+    const t = el(`tab-${name}`);
     if (t) t.classList.toggle("active", name === hash);
   }
 }
 
 function wireTabs() {
-  ["home", "browse", "collection"].forEach(name => {
+  const views = ["home", "browse", "collection"];
+
+  views.forEach(name => {
     const tab = el(`tab-${name}`);
-    if (!tab) return;
+    if (!tab) {
+      console.warn("Missing tab element:", `tab-${name}`);
+      return;
+    }
 
     tab.addEventListener("click", (e) => {
-      // Works whether tab is <a> or <button>
       e.preventDefault();
       window.location.hash = `#${name}`;
       route();
     });
   });
 }
-
 
 // --------------------
 // Browse filter helpers
@@ -193,13 +194,15 @@ async function logout() {
 // DB-backed MultiSelect (search + add new)
 // --------------------
 function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
-   if (!btn || !menu || !chips) {
-    console.warn(`Missing multiselect elements for ${tableName}`);
-    return { setRows: () => {}, getIds: () => [], clear: () => {} };
-  }
   const btn = el(buttonId);
   const menu = el(menuId);
   const chips = el(chipsId);
+
+  // Safety: if the HTML isn't on this page/view yet, don't crash
+  if (!btn || !menu || !chips) {
+    console.warn(`Missing multiselect elements for ${tableName}`, { buttonId, menuId, chipsId });
+    return { setRows: () => {}, getIds: () => [], clear: () => {} };
+  }
 
   const selected = new Map();
   let allRows = [];
@@ -295,6 +298,7 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
     }
   };
 }
+
 
 // --------------------
 // Clickable Stars for Ratings
@@ -586,17 +590,17 @@ async function init() {
     if (DEV_MODE) rerenderFiltered();
     else loadShows();
   });
-   // --------------------
+  // --------------------
   // Router wiring (MUST run in DEV_MODE too)
   // --------------------
   wireTabs();
   window.addEventListener("hashchange", route);
 
-  // Default to #home on first load
   if (!window.location.hash) window.location.hash = "#home";
 
-  // Run once on boot
+  console.log("Router ready. Current hash =", window.location.hash);
   route();
+
 
 
   // DEV_MODE boot
