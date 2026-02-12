@@ -493,6 +493,7 @@ async function init() {
       { id: 2, name: "Found Family" },
       { id: 3, name: "Time Loop" }
     ]);
+console.log("Stars found:", document.querySelectorAll(".star").length);
 
     // Fake table rows so you can style UI
     renderTable([
