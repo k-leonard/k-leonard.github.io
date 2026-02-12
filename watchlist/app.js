@@ -24,11 +24,22 @@ let ALL_SHOWS_CACHE = [];
 // UI helpers
 // --------------------
 function showAuthedUI(isAuthed) {
-  appSection.style.display = isAuthed ? "" : "none";
-  listCard.style.display = isAuthed ? "" : "none";
-  logoutBtn.style.display = isAuthed ? "" : "none";
+  // These might not exist depending on your current HTML, so guard them
+  if (appSection) appSection.style.display = isAuthed ? "" : "none";
+
+  // If you're using tab views now, show/hide the views instead of the old listCard
+  const homeView = el("view-home");
+  const browseView = el("view-browse");
+  const collectionView = el("view-collection");
+
+  if (homeView) homeView.style.display = isAuthed ? "" : "none";
+  if (browseView) browseView.style.display = isAuthed ? "" : "none";
+  if (collectionView) collectionView.style.display = isAuthed ? "" : "none";
+
+  if (logoutBtn) logoutBtn.style.display = isAuthed ? "" : "none";
   if (authCard) authCard.style.display = isAuthed ? "none" : "";
 }
+
 
 function escapeHtml(s) {
   return String(s ?? "")
