@@ -57,13 +57,16 @@ th, td { border-bottom: 1px solid #eef0f6; padding: 10px; text-align: left; }
 .starField { grid-column: 1 / -1; }
 .stars { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .star {
-  font-size: 22px;
-  line-height: 1;
-  padding: 6px 8px;
-  border: 1px solid #d7dbe7;
-  border-radius: 10px;
-  background: #fff;
+  font-size: 24px;
   cursor: pointer;
+  user-select: none;
 }
+
 .star:hover { background: #f6f7fb; }
 .starClear { margin-left: 8px; }
+.star {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
