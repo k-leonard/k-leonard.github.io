@@ -29,20 +29,21 @@ function setDisplay(id, show) {
 }
 
 function showAuthedUI(isAuthed) {
-  // Auth card
   setDisplay("authCard", !isAuthed);
 
-  // Logout button
   const logout = el("logout");
   if (logout) logout.style.display = isAuthed ? "" : "none";
 
-  // Views (new tab layout)
-  setDisplay("view-home", isAuthed);
-  setDisplay("view-browse", isAuthed);
-  setDisplay("view-collection", isAuthed);
-
-  // Add form card (inside Home)
-  setDisplay("app", isAuthed);
+  // Important: do NOT force all views visible here.
+  // Let the router decide which view is shown.
+  if (isAuthed) route();
+  else {
+    // If logged out, hide all views
+    ["home","browse","collection"].forEach(name => {
+      const v = el(`view-${name}`);
+      if (v) v.style.display = "none";
+    });
+  }
 }
 
 
