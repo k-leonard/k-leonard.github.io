@@ -131,3 +131,23 @@ th, td { border-bottom: 1px solid #eef0f6; padding: 10px; text-align: left; }
   font-size: 12px;
 }
 
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tab {
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid #d7dbe7;
+  background: #f6f7fb;
+  font-weight: 500;
+}
+
+.tab.active {
+  background: #1f2937;
+  color: white;
+  border-color: #1f2937;
+}
