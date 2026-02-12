@@ -292,6 +292,7 @@ async function deleteShow(id) {
 }
 
 async function loadShows() {
+  if (DEV_MODE) return;
   msg.textContent = "Loading…";
   const q = el("q").value.trim();
   const status = el("statusFilter").value;
