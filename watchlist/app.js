@@ -185,6 +185,43 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
     }
   };
 }
+// --------------------
+// Clickable Stars for Ratings
+// --------------------
+function setupStarRating({ containerId, inputId, clearId }) {
+  const wrap = el(containerId);
+  const hidden = el(inputId);
+  const clearBtn = el(clearId);
+
+  const stars = Array.from(wrap.querySelectorAll(".star"));
+  let value = 0;
+
+  function paint(n) {
+    stars.forEach((btn, i) => {
+      btn.textContent = (i < n) ? "★" : "☆";
+    });
+  }
+
+  function set(n) {
+    value = n;
+    hidden.value = n ? String(n) : "";
+    paint(n);
+  }
+
+  // hover preview
+  stars.forEach((btn) => {
+    btn.addEventListener("mouseenter", () => paint(Number(btn.dataset.value)));
+    btn.addEventListener("mouseleave", () => paint(value));
+
+    btn.addEventListener("click", () => {
+      set(Number(btn.dataset.value));
+    });
+  });
+
+  clearBtn.addEventListener("click", () => set(0));
+
+  return { clear: () => set(0) };
+}
 
 async function getOrCreateOptionRow(tableName, name) {
   const cleaned = String(name).trim();
@@ -392,6 +429,13 @@ async function init() {
     tableName: "tropes"
   });
 
+  const starUI = setupStarRating({
+  containerId: "ratingStars",
+  inputId: "my_rating",
+  clearId: "clearRating"
+});
+
+
   // Login button
   el("sendLink").addEventListener("click", () => {
     const email = el("email").value.trim();
@@ -411,6 +455,7 @@ async function init() {
       tropeSelect.getIds()
     );
     e.target.reset();
+    starUI.clear();
     platformSelect.clear();
     genreSelect.clear();
     tropeSelect.clear();
