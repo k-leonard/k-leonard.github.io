@@ -6,10 +6,23 @@
   <title>Watchlist</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
+
 <body>
   <main class="container">
-    <h1>Watchlist</h1>
+    <header class="topbar">
+      <div>
+        <h1 class="title">Watchlist</h1>
+        <p class="muted small">Your personal tracker for anime + shows</p>
+      </div>
 
+      <nav class="tabs" aria-label="Watchlist sections">
+        <a class="tab" href="#home" id="tab-home">Home</a>
+        <a class="tab" href="#browse" id="tab-browse">Browse</a>
+        <a class="tab" href="#collection" id="tab-collection">My Collection</a>
+      </nav>
+    </header>
+
+    <!-- Auth -->
     <section class="card" id="authCard">
       <h2>Login</h2>
       <div class="row">
@@ -20,154 +33,172 @@
       <p id="authMsg" class="muted"></p>
     </section>
 
-    <section class="card" id="app" style="display:none;">
-      <h2>Add show</h2>
-      <form id="addForm" class="grid">
-        <input name="title" placeholder="Title" required />
-        <select name="status">
+    <!-- HOME -->
+    <section class="card view" id="view-home" style="display:none;">
+      <h2>Home</h2>
+
+      <!-- optional: we’ll wire these later -->
+      <div class="homeGrid">
+        <div class="miniCard">
+          <div class="kpiLabel muted">To Watch</div>
+          <div class="kpiValue" id="kpiToWatch">–</div>
+        </div>
+        <div class="miniCard">
+          <div class="kpiLabel muted">Watching</div>
+          <div class="kpiValue" id="kpiWatching">–</div>
+        </div>
+        <div class="miniCard">
+          <div class="kpiLabel muted">Waiting Next Season</div>
+          <div class="kpiValue" id="kpiWaiting">–</div>
+        </div>
+        <div class="miniCard">
+          <div class="kpiLabel muted">Watched</div>
+          <div class="kpiValue" id="kpiWatched">–</div>
+        </div>
+      </div>
+
+      <section class="card innerCard" id="app" style="display:none; margin-top:14px;">
+        <h3>Add show</h3>
+
+        <form id="addForm" class="grid">
+          <input name="title" placeholder="Title" required />
+
+          <select name="status">
+            <option>To Be Watched</option>
+            <option>Watching</option>
+            <option>Watched</option>
+            <option>Dropped</option>
+            <option>Waiting for Next Season</option>
+          </select>
+
+          <div class="starField">
+            <label>My rating</label>
+            <div class="stars" id="ratingStars">
+              <span class="star" data-value="1">☆</span>
+              <span class="star" data-value="2">☆</span>
+              <span class="star" data-value="3">☆</span>
+              <span class="star" data-value="4">☆</span>
+              <span class="star" data-value="5">☆</span>
+              <span class="starClear secondary" id="clearRating">Clear</span>
+            </div>
+            <input type="hidden" name="my_rating" id="my_rating" />
+          </div>
+
+          <input name="studio" placeholder="Studio" />
+
+          <div class="multiselect">
+            <label>Where to Watch</label>
+            <button type="button" id="platformBtn" class="secondary">Select platforms</button>
+            <div id="platformMenu" class="menu hidden"></div>
+            <div id="platformChips" class="chips"></div>
+          </div>
+
+          <div class="multiselect">
+            <label>Genres</label>
+            <button type="button" id="genreBtn" class="secondary">Select genres</button>
+            <div id="genreMenu" class="menu hidden"></div>
+            <div id="genreChips" class="chips"></div>
+          </div>
+
+          <div class="multiselect">
+            <label>Tropes</label>
+            <button type="button" id="tropeBtn" class="secondary">Select tropes</button>
+            <div id="tropeMenu" class="menu hidden"></div>
+            <div id="tropeChips" class="chips"></div>
+          </div>
+
+          <textarea name="notes" placeholder="Notes"></textarea>
+          <button type="submit">Add</button>
+        </form>
+      </section>
+    </section>
+
+    <!-- BROWSE -->
+    <section class="card view" id="view-browse" style="display:none;">
+      <h2>Browse</h2>
+
+      <div class="filters">
+        <input id="q" placeholder="Search title…" />
+
+        <select id="statusFilter">
+          <option value="">All statuses</option>
           <option>To Be Watched</option>
           <option>Watching</option>
           <option>Watched</option>
           <option>Dropped</option>
+          <option>Waiting for Next Season</option>
         </select>
-       <div class="starField">
-  <label>My rating</label>
-  <div class="stars" id="ratingStars">
-    <span class="star" data-value="1">☆</span>
-    <span class="star" data-value="2">☆</span>
-    <span class="star" data-value="3">☆</span>
-    <span class="star" data-value="4">☆</span>
-    <span class="star" data-value="5">☆</span>
-    <span class="starClear secondary" id="clearRating">Clear</span>
-  </div>
-  <input type="hidden" name="my_rating" id="my_rating" />
-</div>
 
-        <input name="studio" placeholder="Studio" />
-        <div class="multiselect">
-  <label>Where to Watch</label>
-  <button type="button" id="platformBtn" class="secondary">Select platforms</button>
-  <div id="platformMenu" class="menu hidden"></div>
-  <div id="platformChips" class="chips"></div>
-</div>
+        <select id="platformFilter">
+          <option value="">All platforms</option>
+        </select>
 
-<div class="multiselect">
-  <label>Genres</label>
-  <button type="button" id="genreBtn" class="secondary">Select genres</button>
-  <div id="genreMenu" class="menu hidden"></div>
-  <div id="genreChips" class="chips"></div>
-</div>
+        <select id="genreFilter">
+          <option value="">All genres</option>
+        </select>
 
-<div class="multiselect">
-  <label>Tropes</label>
-  <button type="button" id="tropeBtn" class="secondary">Select tropes</button>
-  <div id="tropeMenu" class="menu hidden"></div>
-  <div id="tropeChips" class="chips"></div>
-</div>
+        <select id="tropeFilter">
+          <option value="">All tropes</option>
+        </select>
 
-        <textarea name="notes" placeholder="Notes"></textarea>
-        <button type="submit">Add</button>
-      </form>
-    </section>
+        <input id="studioFilter" placeholder="Studio contains…" />
 
-    <section class="card" id="listCard" style="display:none;">
-      <h2>Browse</h2>
-     <div class="filters">
-  <input id="q" placeholder="Search title…" />
+        <select id="minRatingFilter">
+          <option value="">Any rating</option>
+          <option value="1">★ and up</option>
+          <option value="2">★★ and up</option>
+          <option value="3">★★★ and up</option>
+          <option value="4">★★★★ and up</option>
+          <option value="5">★★★★★</option>
+        </select>
 
-  <select id="statusFilter">
-    <option value="">All statuses</option>
-    <option>To Be Watched</option>
-    <option>Watching</option>
-    <option>Watched</option>
-    <option>Dropped</option>
-    <option>Waiting for Next Season</option>
-  </select>
-
-  <select id="platformFilter">
-    <option value="">All platforms</option>
-  </select>
-
-  <select id="genreFilter">
-    <option value="">All genres</option>
-  </select>
-
-  <select id="tropeFilter">
-    <option value="">All tropes</option>
-  </select>
-
-  <input id="studioFilter" placeholder="Studio contains…" />
-
-  <select id="minRatingFilter">
-    <option value="">Any rating</option>
-    <option value="1">★ and up</option>
-    <option value="2">★★ and up</option>
-    <option value="3">★★★ and up</option>
-    <option value="4">★★★★ and up</option>
-    <option value="5">★★★★★</option>
-  </select>
-
-  <div class="filterBtns">
-    <button id="clearFilters" class="secondary" type="button">Clear</button>
-    <button id="refresh" class="secondary" type="button">Refresh</button>
-  </div>
-</div>
+        <div class="filterBtns">
+          <button id="clearFilters" class="secondary" type="button">Clear</button>
+          <button id="refresh" class="secondary" type="button">Refresh</button>
+        </div>
+      </div>
 
       <table id="table">
         <thead>
           <tr>
-            <th>Title</th><th>Status</th><th>Rating</th><th>Platforms</th><th>Genres</th><th>Studio</th><th>Last Watched</th><th></th>
+            <th>Title</th><th>Status</th><th>Rating</th><th>Platforms</th><th>Genres</th><th>Tropes</th><th>Studio</th><th>Last Watched</th><th></th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
+
       <p id="msg" class="muted"></p>
+    </section>
+
+    <!-- COLLECTION -->
+    <section class="card view" id="view-collection" style="display:none;">
+      <h2>My Collection</h2>
+      <p class="muted">
+        This will be your “library view” (everything you’ve watched / rated), with a toggle for Anime vs Non-anime.
+      </p>
+
+      <div class="row">
+        <select id="collectionGroup">
+          <option value="">All</option>
+          <option value="Anime">Anime</option>
+          <option value="Non-anime">Non-anime</option>
+        </select>
+
+        <select id="collectionSort">
+          <option value="recent">Recently watched</option>
+          <option value="rating">Highest rated</option>
+          <option value="alpha">A → Z</option>
+        </select>
+      </div>
+
+      <div id="collectionList" class="muted" style="margin-top: 10px;">
+        (We’ll render cards here next.)
+      </div>
     </section>
   </main>
 
   <script type="module" src="./app.js"></script>
-  .multiselect { grid-column: 1 / -1; }
-.multiselect label { display:block; margin-bottom: 6px; font-weight: 600; }
 
-.menu {
-  margin-top: 8px;
-  padding: 10px;
-  border: 1px solid #d7dbe7;
-  border-radius: 10px;
-  background: #fff;
-  max-height: 200px;
-  overflow: auto;
-}
-
-.hidden { display: none; }
-
-.menu .search {
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.menu label.option {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 4px 0;
-}
-
-.chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.chip {
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid #d7dbe7;
-  background: #f6f7fb;
-  font-size: 12px;
-}
-
+  <!-- NOTE: move any CSS you pasted into styles.css, not here -->
 </body>
 </html>
-
