@@ -30,7 +30,19 @@
           <option>Watched</option>
           <option>Dropped</option>
         </select>
-        <input name="my_rating" type="number" min="1" max="10" placeholder="My rating (1–10)" />
+        <div class="starField">
+  <label>My rating</label>
+  <div class="stars" id="ratingStars" aria-label="Rating" role="radiogroup">
+    <button type="button" class="star" data-value="1" aria-label="1 star">☆</button>
+    <button type="button" class="star" data-value="2" aria-label="2 stars">☆</button>
+    <button type="button" class="star" data-value="3" aria-label="3 stars">☆</button>
+    <button type="button" class="star" data-value="4" aria-label="4 stars">☆</button>
+    <button type="button" class="star" data-value="5" aria-label="5 stars">☆</button>
+    <button type="button" class="secondary starClear" id="clearRating">Clear</button>
+  </div>
+  <input type="hidden" name="my_rating" id="my_rating" />
+</div>
+
         <input name="studio" placeholder="Studio" />
         <div class="multiselect">
   <label>Where to Watch</label>
