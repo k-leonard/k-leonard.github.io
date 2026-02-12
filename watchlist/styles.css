@@ -88,3 +88,46 @@ th, td { border-bottom: 1px solid #eef0f6; padding: 10px; text-align: left; }
   .filters { grid-template-columns: 1fr 1fr; }
   .filterBtns { grid-column: 1 / -1; justify-content: flex-start; }
 }
+
+.multiselect { grid-column: 1 / -1; }
+.multiselect label { display:block; margin-bottom: 6px; font-weight: 600; }
+
+.menu {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid #d7dbe7;
+  border-radius: 10px;
+  background: #fff;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.hidden { display: none; }
+
+.menu .search {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.menu label.option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #d7dbe7;
+  background: #f6f7fb;
+  font-size: 12px;
+}
+
