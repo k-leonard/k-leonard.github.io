@@ -13,7 +13,6 @@ const el = (id) => document.getElementById(id);
 const authMsg = el("authMsg");
 const msg = el("msg");
 const appSection = el("app");
-const listCard = el("listCard");
 const logoutBtn = el("logout");
 const authCard = el("authCard");
 
@@ -23,21 +22,27 @@ let ALL_SHOWS_CACHE = [];
 // --------------------
 // UI helpers
 // --------------------
+function setDisplay(id, show) {
+  const node = el(id);
+  if (!node) return;
+  node.style.display = show ? "" : "none";
+}
+
 function showAuthedUI(isAuthed) {
-  // These might not exist depending on your current HTML, so guard them
-  if (appSection) appSection.style.display = isAuthed ? "" : "none";
+  // Auth card
+  setDisplay("authCard", !isAuthed);
 
-  // If you're using tab views now, show/hide the views instead of the old listCard
-  const homeView = el("view-home");
-  const browseView = el("view-browse");
-  const collectionView = el("view-collection");
+  // Logout button
+  const logout = el("logout");
+  if (logout) logout.style.display = isAuthed ? "" : "none";
 
-  if (homeView) homeView.style.display = isAuthed ? "" : "none";
-  if (browseView) browseView.style.display = isAuthed ? "" : "none";
-  if (collectionView) collectionView.style.display = isAuthed ? "" : "none";
+  // Views (new tab layout)
+  setDisplay("view-home", isAuthed);
+  setDisplay("view-browse", isAuthed);
+  setDisplay("view-collection", isAuthed);
 
-  if (logoutBtn) logoutBtn.style.display = isAuthed ? "" : "none";
-  if (authCard) authCard.style.display = isAuthed ? "none" : "";
+  // Add form card (inside Home)
+  setDisplay("app", isAuthed);
 }
 
 
