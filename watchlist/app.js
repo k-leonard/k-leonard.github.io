@@ -60,6 +60,47 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...args), ms);
   };
 }
+// --------------------
+// Simple Hash Router (Home / Browse / Collection)
+// --------------------
+function route() {
+  const hash = window.location.hash.replace("#", "") || "home";
+
+  const views = {
+    home: el("view-home"),
+    browse: el("view-browse"),
+    collection: el("view-collection")
+  };
+
+  const tabs = {
+    home: el("tab-home"),
+    browse: el("tab-browse"),
+    collection: el("tab-collection")
+  };
+
+  // Hide all views
+  Object.values(views).forEach(v => {
+    if (v) v.style.display = "none";
+  });
+
+  // Remove active tab state
+  Object.values(tabs).forEach(t => {
+    if (t) t.classList.remove("active");
+  });
+
+  // Show selected
+  if (views[hash]) {
+    views[hash].style.display = "";
+  } else {
+    views.home.style.display = "";
+  }
+
+  if (tabs[hash]) {
+    tabs[hash].classList.add("active");
+  } else {
+    tabs.home.classList.add("active");
+  }
+}
 
 // --------------------
 // Browse filter helpers
@@ -588,6 +629,15 @@ async function init() {
     rerenderFiltered();
     return;
   }
+// Router wiring
+window.addEventListener("hashchange", route);
+
+// If no hash on load, default to #home
+if (!window.location.hash) {
+  window.location.hash = "#home";
+} else {
+  route();
+}
 
   // Normal mode: Supabase online
   const { data: { session } } = await supabase.auth.getSession();
