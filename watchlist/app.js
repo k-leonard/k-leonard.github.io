@@ -77,46 +77,25 @@ function debounce(fn, ms) {
   };
 }
 // --------------------
-// Simple Hash Router (Home / Browse / Collection)
+// Hash Router (Home / Browse / Collection)
 // --------------------
 function route() {
-  const hash = window.location.hash.replace("#", "") || "home";
+  const hash = (window.location.hash || "#home").slice(1);
 
-  const views = {
-    home: el("view-home"),
-    browse: el("view-browse"),
-    collection: el("view-collection")
-  };
+  const views = ["home", "browse", "collection"];
+  const viewId = (name) => `view-${name}`;
+  const tabId = (name) => `tab-${name}`;
 
-  const tabs = {
-    home: el("tab-home"),
-    browse: el("tab-browse"),
-    collection: el("tab-collection")
-  };
+  // Show exactly one view
+  for (const name of views) {
+    const v = el(viewId(name));
+    if (v) v.style.display = (name === hash) ? "" : "none";
 
-  // Hide all views
-  Object.values(views).forEach(v => {
-    if (v) v.style.display = "none";
-  });
-
-  // Remove active tab state
-  Object.values(tabs).forEach(t => {
-    if (t) t.classList.remove("active");
-  });
-
-  // Show selected
-  if (views[hash]) {
-    views[hash].style.display = "";
-  } else {
-    views.home.style.display = "";
-  }
-
-  if (tabs[hash]) {
-    tabs[hash].classList.add("active");
-  } else {
-    tabs.home.classList.add("active");
+    const t = el(tabId(name));
+    if (t) t.classList.toggle("active", name === hash);
   }
 }
+
 
 // --------------------
 // Browse filter helpers
@@ -648,12 +627,12 @@ async function init() {
 // Router wiring
 window.addEventListener("hashchange", route);
 
-// If no hash on load, default to #home
-if (!window.location.hash) {
-  window.location.hash = "#home";
-} else {
-  route();
-}
+// Default to #home on first load
+if (!window.location.hash) window.location.hash = "#home";
+
+// Run immediately
+route();
+
 
   // Normal mode: Supabase online
   const { data: { session } } = await supabase.auth.getSession();
