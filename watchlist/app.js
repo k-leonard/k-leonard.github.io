@@ -944,7 +944,6 @@ const [p, g, t, s] = await Promise.all([
   loadOptionRows("studios")
 ]);
 
-  ]);
 
   platformSelect.setRows(p);
   genreSelect.setRows(g);
