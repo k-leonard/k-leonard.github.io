@@ -309,9 +309,20 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
       <div id="${menuId}_options">${optionsHtml}</div>
     `;
 
-    menu.querySelector(`#${menuId}_search`).addEventListener("input", (e) => {
-      renderMenu(e.target.value);
-    });
+ const searchEl = menu.querySelector(`#${menuId}_search`);
+
+// IMPORTANT: keep the typed value after re-render
+searchEl.value = filterText;
+
+// IMPORTANT: keep focus so typing doesn't "die"
+searchEl.focus({ preventScroll: true });
+searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
+
+searchEl.addEventListener("input", (e) => {
+  // Re-render using the current typed value
+  renderMenu(e.target.value);
+});
+
 
     const addBtn = menu.querySelector(`#${menuId}_addBtn`);
     if (addBtn) {
