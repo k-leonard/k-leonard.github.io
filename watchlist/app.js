@@ -358,6 +358,11 @@ function setupStarRating({ containerId, inputId, clearId }) {
   const hidden = el(inputId);
   const clearBtn = el(clearId);
 
+  if (!wrap || !hidden || !clearBtn) {
+    console.warn("Missing star rating elements", { containerId, inputId, clearId });
+    return { clear: () => {} };
+  }
+
   const stars = Array.from(wrap.querySelectorAll(".star"));
   let value = 0;
 
@@ -381,6 +386,7 @@ function setupStarRating({ containerId, inputId, clearId }) {
 
   clearBtn.addEventListener("click", () => set(0));
   return { clear: () => set(0) };
+}
 }
 
 // --------------------
@@ -513,14 +519,6 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
   msg.textContent = "Added!";
 }
 
-
-  const show_id = ins.data.id;
-
-  await insertJoinRows({ joinTable: "show_platforms", user_id, show_id, fkColumn: "platform_id", ids: platformIds });
-  await insertJoinRows({ joinTable: "show_genres", user_id, show_id, fkColumn: "genre_id", ids: genreIds });
-  await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
-
-  msg.textContent = "Added!";
 
 
 async function deleteShow(id) {
