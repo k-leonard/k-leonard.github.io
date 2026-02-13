@@ -235,3 +235,37 @@ input, select, textarea{
     grid-template-columns: 1fr;
   }
 }
+/* ---------- Fix multiselect menu checkbox layout ---------- */
+
+/* Don't apply big input styling to checkboxes */
+input[type="checkbox"]{
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Make menu options compact + left-aligned */
+.multiselect .menu label.option{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 6px 8px;
+  margin: 0;
+  font-weight: 400;   /* overrides .multiselect label { font-weight:600 } */
+}
+
+/* Ensure option text doesn’t get pushed around */
+.multiselect .menu label.option span{
+  display: inline-block;
+  text-align: left;
+  margin: 0;
+}
+
+/* Optional: nice hover for options */
+.multiselect .menu label.option:hover{
+  background: #f6f7fb;
+  border-radius: 8px;
+}
