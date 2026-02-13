@@ -151,3 +151,40 @@ th, td { border-bottom: 1px solid #eef0f6; padding: 10px; text-align: left; }
   color: white;
   border-color: #1f2937;
 }
+/* Make the main add form a clean 2-col grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Standard field styling */
+.field span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Progress block should span the full form width,
+   but still have 2 columns inside it */
+.progressBlock {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Same idea for OVA block, if you want it to look consistent */
+.ovaBlock {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
