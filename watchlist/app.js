@@ -828,35 +828,35 @@ function namesFromJoin(list, key) {
 async function loadShowDetail(showId) {
   const titleEl = el("showTitle");
   const metaEl = el("showMeta");
-  const descEl = el("showDescription");
   const factsEl = el("showFacts");
   const tagsEl = el("showTags");
-  const notesEl = el("showNotes");
   const msgEl = el("showDetailMsg");
 
   if (msgEl) msgEl.textContent = "Loading…";
 
-  // NOTE: add/remove fields based on your schema
+  // (Optional but recommended) lock to current user too
+  const user_id = await getUserId();
+
   const { data, error } = await supabase
     .from("shows")
     .select(`
-      id, title, status, rating_stars, last_watched, created_at,
+      id, user_id, title, status, rating_stars, last_watched, created_at,
       category, show_type, ongoing, release_date,
       seasons, episodes, episode_length_min,
       movies, movie_length_min,
       ovas, ova_length_min,
       current_season, current_episode,
-      notes,
-      description,
       show_platforms(platforms(name)),
       show_genres(genres(name)),
       show_tropes(tropes(name)),
       show_studios(studios(name))
     `)
     .eq("id", showId)
+    .eq("user_id", user_id)   // prevents seeing other users’ rows + helps RLS consistency
     .single();
 
   if (error) {
+    console.error("loadShowDetail error:", error);
     if (msgEl) msgEl.textContent = `Error: ${error.message}`;
     return;
   }
@@ -871,16 +871,12 @@ async function loadShowDetail(showId) {
     data.status,
     data.rating_stars ? starsDisplay(data.rating_stars) : null
   ].filter(Boolean);
-
   if (metaEl) metaEl.textContent = metaBits.join(" • ");
 
-  if (descEl) descEl.textContent = data.description?.trim() || "(No description yet.)";
-  if (notesEl) notesEl.textContent = data.notes?.trim() || "(No notes.)";
-
-  const platforms = namesFromJoin(data.show_platforms, "platforms");
-  const genres = namesFromJoin(data.show_genres, "genres");
-  const tropes = namesFromJoin(data.show_tropes, "tropes");
-  const studios = namesFromJoin(data.show_studios, "studios");
+  const platforms = (data.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
+  const genres = (data.show_genres || []).map(x => x.genres?.name).filter(Boolean);
+  const tropes = (data.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
+  const studios = (data.show_studios || []).map(x => x.studios?.name).filter(Boolean);
 
   if (factsEl) {
     factsEl.innerHTML = [
@@ -890,16 +886,13 @@ async function loadShowDetail(showId) {
       labelVal("Current season", data.current_season),
       labelVal("Current episode", data.current_episode),
 
-      // TV info
       labelVal("# Seasons", data.seasons),
       labelVal("# Episodes", data.episodes),
       labelVal("Episode length (min)", data.episode_length_min),
 
-      // Movie info
       labelVal("# Movies", data.movies),
       labelVal("Movie length (min)", data.movie_length_min),
 
-      // Anime extras
       labelVal("# OVAs", data.ovas),
       labelVal("OVA length (min)", data.ova_length_min),
     ].join("");
@@ -915,6 +908,7 @@ async function loadShowDetail(showId) {
     `;
   }
 }
+
 
 // --------------------
 // Init
