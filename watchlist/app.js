@@ -406,6 +406,90 @@ function updateHomeCounts() {
   });
 }
 
+function getCollectionRows() {
+  const group = el("collectionGroup")?.value || "";
+  const sort = el("collectionSort")?.value || "recent";
+
+  // Filter
+  let rows = (ALL_SHOWS_CACHE || []).slice();
+  if (group) rows = rows.filter(r => r.category === group);
+
+  // Sort
+  if (sort === "alpha") {
+    rows.sort((a, b) => String(a.title || "").localeCompare(String(b.title || "")));
+  } else if (sort === "rating") {
+    rows.sort((a, b) => (Number(b.rating_stars || 0) - Number(a.rating_stars || 0)));
+  } else {
+    // recent = most recently watched, else newest created
+    rows.sort((a, b) => {
+      const aw = a.last_watched ? Date.parse(a.last_watched) : -Infinity;
+      const bw = b.last_watched ? Date.parse(b.last_watched) : -Infinity;
+      if (bw !== aw) return bw - aw;
+
+      const ac = a.created_at ? Date.parse(a.created_at) : 0;
+      const bc = b.created_at ? Date.parse(b.created_at) : 0;
+      return bc - ac;
+    });
+  }
+
+  return rows;
+}
+
+function renderCollection() {
+  const wrap = el("collectionList");
+  const note = el("collectionMsg");
+  if (!wrap) return;
+
+  const rows = getCollectionRows();
+
+  if (!rows.length) {
+    wrap.innerHTML = "";
+    if (note) note.textContent = "No items yet (try switching filters or add a show).";
+    return;
+  }
+
+  if (note) note.textContent = "";
+
+  wrap.innerHTML = rows.map(r => {
+    const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
+    const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
+    const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
+
+    const progress =
+      r.status === "Watching" && (r.current_season || r.current_episode)
+        ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
+        : "";
+
+    return `
+      <div class="card" style="margin: 10px 0;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+          <div>
+            <div style="font-weight:700; font-size:16px;">${escapeHtml(r.title)}</div>
+            <div class="muted" style="margin-top:4px;">
+              ${escapeHtml(r.category || "")}${r.show_type ? " • " + escapeHtml(r.show_type) : ""}
+              ${r.ongoing ? " • " + escapeHtml(r.ongoing) : ""}
+            </div>
+          </div>
+
+          <div style="text-align:right;">
+            <div style="font-weight:600;">${escapeHtml(r.status || "")}</div>
+            <div class="muted">${escapeHtml(starsDisplay(r.rating_stars))}</div>
+            ${progress ? `<div class="muted" style="margin-top:4px;">${escapeHtml(progress)}</div>` : ""}
+          </div>
+        </div>
+
+        <div class="muted" style="margin-top:10px; display:grid; gap:6px;">
+          ${platforms.length ? `<div><b>Where:</b> ${escapeHtml(platforms.join(", "))}</div>` : ""}
+          ${genres.length ? `<div><b>Genres:</b> ${escapeHtml(genres.join(", "))}</div>` : ""}
+          ${tropes.length ? `<div><b>Tropes:</b> ${escapeHtml(tropes.join(", "))}</div>` : ""}
+          ${r.studio ? `<div><b>Studio:</b> ${escapeHtml(r.studio)}</div>` : ""}
+          ${r.last_watched ? `<div><b>Last watched:</b> ${escapeHtml(r.last_watched)}</div>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 
 // --------------------
 // Clickable Stars for Ratings
