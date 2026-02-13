@@ -259,11 +259,19 @@
     </section>
   </main>
 
-  <script type="module" src="./app.js"></script>
-<div>To Watch: <span id="count-toWatch">0</span></div>
-<div>Watching: <span id="count-watching">0</span></div>
-<div>Waiting Next Season: <span id="count-waiting">0</span></div>
-<div>Watched: <span id="count-watched">0</span></div>
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  // TODO: replace with your real values (Project Settings → API)
+  const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
+
+  // Make it available to app.js
+  window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+
+<script type="module" src="./app.js"></script>
+
 
 </body>
 </html>
