@@ -44,6 +44,31 @@ function showAuthedUI(isAuthed) {
   route();
 }
 
+function toIntOrNull(v) {
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? Math.trunc(n) : null;
+}
+
+function toDateOrNull(v) {
+  const s = String(v ?? "").trim();
+  return s ? s : null; // 'YYYY-MM-DD' from <input type="date">
+}
+function syncOvaVisibility() {
+  const cat = el("category")?.value;
+  const isAnime = cat === "Anime";
+  const block = el("ovaBlock");
+  if (block) block.style.display = isAnime ? "" : "none";
+
+  // If switching away from Anime, clear OVA inputs
+  if (!isAnime) {
+    const ovas = document.querySelector('input[name="ovas"]');
+    const ovaLen = document.querySelector('input[name="ova_length_min"]');
+    if (ovas) ovas.value = "";
+    if (ovaLen) ovaLen.value = "";
+  }
+}
 
 
 function escapeHtml(s) {
@@ -421,6 +446,23 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
   const studio = String(formData.get("studio") || "").trim() || null;
   const rating_stars = parseRatingStars(formData.get("my_rating"));
 
+  const category = formData.get("category") || "Non-anime";
+  const show_type = formData.get("show_type") || null;
+  const ongoing = formData.get("ongoing") || null;
+  const release_date = toDateOrNull(formData.get("release_date"));
+
+  const seasons = toIntOrNull(formData.get("seasons"));
+  const episodes = toIntOrNull(formData.get("episodes"));
+  const episode_length_min = toIntOrNull(formData.get("episode_length_min"));
+
+  const movies = toIntOrNull(formData.get("movies"));
+  const movie_length_min = toIntOrNull(formData.get("movie_length_min"));
+
+  // Anime-only (store null if not Anime)
+  const ovas = (category === "Anime") ? toIntOrNull(formData.get("ovas")) : null;
+  const ova_length_min = (category === "Anime") ? toIntOrNull(formData.get("ova_length_min")) : null;
+
+  // status -> last_watched rules
   let last_watched = null;
   if (status === "Watched") {
     const d = new Date();
@@ -437,7 +479,22 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
       status,
       rating_stars,
       studio,
-      last_watched
+      last_watched,
+
+      category,
+      show_type,
+      ongoing,
+      release_date,
+
+      seasons,
+      episodes,
+      episode_length_min,
+
+      movies,
+      movie_length_min,
+
+      ovas,
+      ova_length_min
     }])
     .select("id")
     .single();
@@ -446,6 +503,16 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
     msg.textContent = `Error: ${ins.error.message}`;
     return;
   }
+
+  const show_id = ins.data.id;
+
+  await insertJoinRows({ joinTable: "show_platforms", user_id, show_id, fkColumn: "platform_id", ids: platformIds });
+  await insertJoinRows({ joinTable: "show_genres", user_id, show_id, fkColumn: "genre_id", ids: genreIds });
+  await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
+
+  msg.textContent = "Added!";
+}
+
 
   const show_id = ins.data.id;
 
@@ -470,12 +537,17 @@ async function loadShows() {
     .from("shows")
     .order("created_at", { ascending: false });
 
-  const { data, error } = await query.select(`
-    id, user_id, title, status, rating_stars, studio, last_watched, created_at,
-    show_platforms(platforms(name)),
-    show_genres(genres(name)),
-    show_tropes(tropes(name))
-  `);
+ const { data, error } = await query.select(`
+  id, user_id, title, status, rating_stars, studio, last_watched, created_at,
+  category, show_type, ongoing, release_date,
+  seasons, episodes, episode_length_min,
+  movies, movie_length_min,
+  ovas, ova_length_min,
+  show_platforms(platforms(name)),
+  show_genres(genres(name)),
+  show_tropes(tropes(name))
+`);
+
 
   if (error) {
     msg.textContent = `Error: ${error.message}`;
@@ -582,12 +654,14 @@ async function init() {
       tropeSelect.getIds()
     );
 
-    e.target.reset();
-    starUI.clear();
-    platformSelect.clear();
-    genreSelect.clear();
-    tropeSelect.clear();
-    await loadShows();
+  e.target.reset();
+starUI.clear();
+platformSelect.clear();
+genreSelect.clear();
+tropeSelect.clear();
+syncOvaVisibility();
+await loadShows();
+
   });
 
   // Browse controls (new)
@@ -626,6 +700,9 @@ async function init() {
 
   console.log("Router ready. Current hash =", window.location.hash);
   route();
+// Anime toggle -> show/hide OVA fields
+el("category")?.addEventListener("change", syncOvaVisibility);
+syncOvaVisibility();
 
 
 
