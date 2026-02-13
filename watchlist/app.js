@@ -521,7 +521,7 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
   await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
 
   msg.textContent = "Added!";
-}
+
 
 async function deleteShow(id) {
   const { error } = await supabase.from("shows").delete().eq("id", id);
