@@ -531,23 +531,19 @@ async function loadShows() {
 
   msg.textContent = "Loading…";
 
- const { data, error } = await supabase
-  .from("shows")
-  .select(`...`)
-  .order("created_at", { ascending: false });
-
-
- const { data, error } = await query.select(`
-  id, user_id, title, status, rating_stars, studio, last_watched, created_at,
-  category, show_type, ongoing, release_date,
-  seasons, episodes, episode_length_min,
-  movies, movie_length_min,
-  ovas, ova_length_min,
-  show_platforms(platforms(name)),
-  show_genres(genres(name)),
-  show_tropes(tropes(name))
-`);
-
+  const { data, error } = await supabase
+    .from("shows")
+    .select(`
+      id, user_id, title, status, rating_stars, studio, last_watched, created_at,
+      category, show_type, ongoing, release_date,
+      seasons, episodes, episode_length_min,
+      movies, movie_length_min,
+      ovas, ova_length_min,
+      show_platforms(platforms(name)),
+      show_genres(genres(name)),
+      show_tropes(tropes(name))
+    `)
+    .order("created_at", { ascending: false });
 
   if (error) {
     msg.textContent = `Error: ${error.message}`;
@@ -556,7 +552,7 @@ async function loadShows() {
 
   ALL_SHOWS_CACHE = data || [];
   rerenderFiltered();
- updateHomeCounts();
+  updateHomeCounts();
 }
 
 // --------------------
