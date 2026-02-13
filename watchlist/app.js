@@ -299,6 +299,32 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
   };
 }
 
+function updateHomeCounts() {
+  const counts = { 
+    "To Be Watched": 0,
+    "Watching": 0,
+    "Waiting for Next Season": 0,
+    "Watched": 0
+  };
+
+  for (const r of (ALL_SHOWS_CACHE || [])) {
+    if (counts[r.status] != null) counts[r.status] += 1;
+  }
+
+  // These IDs must exist in your home view HTML
+  const map = [
+    ["count-toWatch", counts["To Be Watched"]],
+    ["count-watching", counts["Watching"]],
+    ["count-waiting", counts["Waiting for Next Season"]],
+    ["count-watched", counts["Watched"]],
+  ];
+
+  map.forEach(([id, val]) => {
+    const node = el(id);
+    if (node) node.textContent = String(val);
+  });
+}
+
 
 // --------------------
 // Clickable Stars for Ratings
@@ -459,6 +485,7 @@ async function loadShows() {
 
   ALL_SHOWS_CACHE = data || [];
   rerenderFiltered();
+ updateHomeCounts();
 }
 
 // --------------------
@@ -665,46 +692,54 @@ async function init() {
 
 
 
-  // Normal mode: Supabase online
-  const { data: { session } } = await supabase.auth.getSession();
-  showAuthedUI(!!session);
+// Normal mode: Supabase online
+const { data: { session } } = await supabase.auth.getSession();
+showAuthedUI(!!session);
 
-  if (session) {
-    const p = await loadOptionRows("platforms");
-    const g = await loadOptionRows("genres");
-    const t = await loadOptionRows("tropes");
+if (session) {
+  const [p, g, t] = await Promise.all([
+    loadOptionRows("platforms"),
+    loadOptionRows("genres"),
+    loadOptionRows("tropes")
+  ]);
 
-    platformSelect.setRows(p);
-    genreSelect.setRows(g);
-    tropeSelect.setRows(t);
+  platformSelect.setRows(p);
+  genreSelect.setRows(g);
+  tropeSelect.setRows(t);
 
-    fillSelect("platformFilter", p, "platforms");
-    fillSelect("genreFilter", g, "genres");
-    fillSelect("tropeFilter", t, "tropes");
+  fillSelect("platformFilter", p, "platforms");
+  fillSelect("genreFilter", g, "genres");
+  fillSelect("tropeFilter", t, "tropes");
 
-    await loadShows();
-  }
+  await loadShows();       // fills ALL_SHOWS_CACHE
+  updateHomeCounts();      // (you’ll add this below)
+  // optional: renderCollectionCards(); etc
+}
 
-  supabase.auth.onAuthStateChange(async (_event, session2) => {
-    showAuthedUI(!!session2);
-    authMsg.textContent = session2 ? "Logged in." : "Logged out.";
+supabase.auth.onAuthStateChange(async (_event, session2) => {
+  showAuthedUI(!!session2);
+  if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
 
-    if (session2) {
-      const p = await loadOptionRows("platforms");
-      const g = await loadOptionRows("genres");
-      const t = await loadOptionRows("tropes");
+  if (!session2) return;
 
-      platformSelect.setRows(p);
-      genreSelect.setRows(g);
-      tropeSelect.setRows(t);
+  const [p, g, t] = await Promise.all([
+    loadOptionRows("platforms"),
+    loadOptionRows("genres"),
+    loadOptionRows("tropes")
+  ]);
 
-      fillSelect("platformFilter", p, "platforms");
-      fillSelect("genreFilter", g, "genres");
-      fillSelect("tropeFilter", t, "tropes");
+  platformSelect.setRows(p);
+  genreSelect.setRows(g);
+  tropeSelect.setRows(t);
 
-      await loadShows();
-    }
-  });
+  fillSelect("platformFilter", p, "platforms");
+  fillSelect("genreFilter", g, "genres");
+  fillSelect("tropeFilter", t, "tropes");
+
+  await loadShows();
+  updateHomeCounts();
+});
+
 }
 
 init();
