@@ -11,7 +11,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const el = (id) => document.getElementById(id);
 
 const authMsg = el("authMsg");
-const msg = el("msg");
+const browseMsg = el("msg");
+const homeMsg = el("homeMsg");
+
+function setMsg(text) {
+  if (homeMsg) homeMsg.textContent = text;
+  if (browseMsg) browseMsg.textContent = text;
+}
 const appSection = el("app");
 const logoutBtn = el("logout");
 const authCard = el("authCard");
@@ -34,6 +40,7 @@ function showAuthedUI(isAuthed) {
   const logout = el("logout");
   if (logout) logout.style.display = isAuthed ? "" : "none";
 
+   setDisplay("app", isAuthed);
   // Hide all app views if not authed
   if (!isAuthed) {
     ["home", "browse", "collection"].forEach(name => setDisplay(`view-${name}`, false));
