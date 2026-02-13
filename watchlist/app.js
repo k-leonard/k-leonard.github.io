@@ -291,7 +291,15 @@ function applyClientFilters(rows) {
   return (rows || []).filter(r => {
     if (q && !String(r.title || "").toLowerCase().includes(q)) return false;
     if (status && r.status !== status) return false;
-    if (studio && !String(r.studio || "").toLowerCase().includes(studio)) return false;
+if (studio) {
+  const studioNames = (r.show_studios || [])
+    .map(x => x.studios?.name)
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (!studioNames.includes(studio)) return false;
+}
 
     if (minRating != null) {
       const rs = r.rating_stars == null ? 0 : Number(r.rating_stars);
@@ -743,7 +751,7 @@ async function loadShows() {
   const { data, error } = await supabase
     .from("shows")
     .select(`
-       id, user_id, title, status, rating_stars, studio, last_watched, created_at,
+       id, user_id, title, status, rating_stars, last_watched, created_at,
     category, show_type, ongoing, release_date,
     seasons, episodes, episode_length_min,
     movies, movie_length_min,
@@ -793,7 +801,7 @@ function renderTable(rows) {
       <td>${escapeHtml(platforms.join(", "))}</td>
       <td>${escapeHtml(genres.join(", "))}</td>
       <td>${escapeHtml(tropes.join(", "))}</td>
-      <td>${escapeHtml(r.studio ?? "")}</td>
+      <td>${escapeHtml(studios.join(", "))}</td>
       <td>${r.last_watched ?? ""}</td>
       <td><button data-id="${r.id}" class="danger">Delete</button></td>
     `;
