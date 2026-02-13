@@ -679,14 +679,15 @@ async function loadShows() {
   const { data, error } = await supabase
     .from("shows")
     .select(`
-      id, user_id, title, status, rating_stars, studio, last_watched, created_at,
-      category, show_type, ongoing, release_date,
-      seasons, episodes, episode_length_min,
-      movies, movie_length_min,
-      ovas, ova_length_min,
-      show_platforms(platforms(name)),
-      show_genres(genres(name)),
-      show_tropes(tropes(name))
+       id, user_id, title, status, rating_stars, studio, last_watched, created_at,
+    category, show_type, ongoing, release_date,
+    seasons, episodes, episode_length_min,
+    movies, movie_length_min,
+    ovas, ova_length_min,
+    current_season, current_episode,
+    show_platforms(platforms(name)),
+    show_genres(genres(name)),
+    show_tropes(tropes(name))
     `)
     .order("created_at", { ascending: false });
 
@@ -698,6 +699,7 @@ async function loadShows() {
   ALL_SHOWS_CACHE = data || [];
   rerenderFiltered();
   updateHomeCounts();
+ renderCollection();
 }
 
 // --------------------
@@ -851,6 +853,9 @@ syncProgressVisibility();
 el("show_type")?.addEventListener("change", syncTypeVisibility);
 syncTypeVisibility();
 
+ el("collectionGroup")?.addEventListener("change", renderCollection);
+el("collectionSort")?.addEventListener("change", renderCollection);
+
 
   // DEV_MODE boot
   if (DEV_MODE) {
@@ -960,6 +965,8 @@ supabase.auth.onAuthStateChange(async (_event, session2) => {
 
   await loadShows();
   updateHomeCounts();
+
+
 });
 
 }
