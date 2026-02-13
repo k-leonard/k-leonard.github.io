@@ -34,16 +34,16 @@ function showAuthedUI(isAuthed) {
   const logout = el("logout");
   if (logout) logout.style.display = isAuthed ? "" : "none";
 
-  // Important: do NOT force all views visible here.
-  // Let the router decide which view is shown.
-  if (isAuthed) route();
-  else {
-    // If logged out, hide all views
-    ["home","browse","collection"].forEach(name => {
-      const v = el(`view-${name}`);
-      if (v) v.style.display = "none";
-    });
+  // Hide all app views if not authed
+  if (!isAuthed) {
+    ["home", "browse", "collection"].forEach(name => setDisplay(`view-${name}`, false));
+    return;
   }
+
+  // Authed: router decides which view shows
+  route();
+}
+
 }
 
 
