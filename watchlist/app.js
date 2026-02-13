@@ -650,7 +650,7 @@ async function loadOptionRows(tableName) {
 
   const r = await supabase.from(joinTable).insert(rows);
   if (r.error) console.error(`${joinTable} insert error:`, r.error);
-}
+
 
 // --------------------
 // CRUD
