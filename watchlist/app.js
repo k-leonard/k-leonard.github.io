@@ -44,7 +44,6 @@ function showAuthedUI(isAuthed) {
   route();
 }
 
-}
 
 
 function escapeHtml(s) {
