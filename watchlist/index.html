@@ -70,6 +70,68 @@
             <option>Dropped</option>
             <option>Waiting for Next Season</option>
           </select>
+<select name="category" id="category">
+  <option value="Anime">Anime</option>
+  <option value="Non-anime" selected>Non-anime</option>
+</select>
+
+<select name="show_type">
+  <option value="">Type (optional)</option>
+  <option>TV</option>
+  <option>Movie</option>
+  <option>TV &amp; Movie</option>
+</select>
+
+<select name="ongoing">
+  <option value="">Ongoing? (optional)</option>
+  <option>Yes</option>
+  <option>No</option>
+  <option>On Hiatus</option>
+  <option>To Be Released</option>
+</select>
+
+<label class="field">
+  <span>Date Released</span>
+  <input type="date" name="release_date" />
+</label>
+
+<label class="field">
+  <span># Seasons</span>
+  <input type="number" name="seasons" min="0" step="1" />
+</label>
+
+<label class="field">
+  <span># Episodes</span>
+  <input type="number" name="episodes" min="0" step="1" />
+</label>
+
+<label class="field">
+  <span>Episode length (min)</span>
+  <input type="number" name="episode_length_min" min="0" step="1" />
+</label>
+
+<label class="field">
+  <span># Movies</span>
+  <input type="number" name="movies" min="0" step="1" />
+</label>
+
+<label class="field">
+  <span>Movie length (min)</span>
+  <input type="number" name="movie_length_min" min="0" step="1" />
+</label>
+
+<!-- Anime-only block -->
+<div id="ovaBlock" class="ovaBlock" style="display:none;">
+  <label class="field">
+    <span># OVAs</span>
+    <input type="number" name="ovas" min="0" step="1" />
+  </label>
+
+  <label class="field">
+    <span>OVA length (min)</span>
+    <input type="number" name="ova_length_min" min="0" step="1" />
+  </label>
+</div>
 
           <div class="starField">
             <label>My rating</label>
