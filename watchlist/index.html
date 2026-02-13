@@ -289,6 +289,41 @@
 
       <div id="collectionList" style="margin-top: 10px;"></div>
 <p id="collectionMsg" class="muted"></p>
+<!-- SHOW DETAILS -->
+<section class="card view" id="view-show" style="display:none;">
+  <div class="row" style="justify-content: space-between;">
+    <div>
+      <h2 id="showTitle">Show</h2>
+      <p class="muted" id="showMeta"></p>
+    </div>
+
+    <button id="backToCollection" type="button" class="secondary">← Back</button>
+  </div>
+
+  <div id="showDetailMsg" class="muted" style="margin-top:8px;"></div>
+
+  <div class="grid" style="margin-top:12px;">
+    <div class="card innerCard">
+      <h3 style="margin-top:0;">Description</h3>
+      <p id="showDescription" class="muted">(No description yet.)</p>
+    </div>
+
+    <div class="card innerCard">
+      <h3 style="margin-top:0;">Your Info</h3>
+      <div id="showFacts"></div>
+    </div>
+  </div>
+
+  <div class="card innerCard" style="margin-top:12px;">
+    <h3 style="margin-top:0;">Tags</h3>
+    <div id="showTags"></div>
+  </div>
+
+  <div class="card innerCard" style="margin-top:12px;">
+    <h3 style="margin-top:0;">Notes</h3>
+    <p id="showNotes" class="muted">(No notes.)</p>
+  </div>
+</section>
 
     </section>
   </main>
