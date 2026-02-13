@@ -387,7 +387,7 @@ function setupStarRating({ containerId, inputId, clearId }) {
   clearBtn.addEventListener("click", () => set(0));
   return { clear: () => set(0) };
 }
-}
+
 
 // --------------------
 // DB helpers
