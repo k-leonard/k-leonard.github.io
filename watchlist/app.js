@@ -681,8 +681,6 @@ platformSelect.clear();
 genreSelect.clear();
 tropeSelect.clear();
 syncOvaVisibility();
-   document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
-syncProgressVisibility();
 await loadShows();
 
   });
@@ -726,6 +724,9 @@ await loadShows();
 // Anime toggle -> show/hide OVA fields
 el("category")?.addEventListener("change", syncOvaVisibility);
 syncOvaVisibility();
+// Status toggle -> show/hide progress fields
+document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
+syncProgressVisibility();
 
 
 
