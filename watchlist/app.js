@@ -530,7 +530,7 @@ function renderCollection() {
     const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
     const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
     const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
-
+  const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
     const progress =
       r.status === "Watching" && (r.current_season || r.current_episode)
         ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
@@ -642,14 +642,6 @@ async function loadOptionRows(tableName) {
 }
 
 
-  const rows = ids.map(id => ({
-    user_id,
-    show_id,
-    [fkColumn]: id
-  }));
-
-  const r = await supabase.from(joinTable).insert(rows);
-  if (r.error) console.error(`${joinTable} insert error:`, r.error);
 
 
 // --------------------
