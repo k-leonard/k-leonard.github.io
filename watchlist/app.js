@@ -641,8 +641,6 @@ async function loadOptionRows(tableName) {
   return r.data || [];
 }
 
-async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
-  if (!ids || !ids.length) return;
 
   const rows = ids.map(id => ({
     user_id,
