@@ -581,7 +581,7 @@ async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
 // --------------------
 // CRUD
 // --------------------
-async function addShow(formData, platformIds, genreIds, tropeIds) {
+async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
   const user_id = await getUserId();
   if (!user_id) {
     msg.textContent = "You must be logged in.";
@@ -660,6 +660,7 @@ current_episode
   await insertJoinRows({ joinTable: "show_platforms", user_id, show_id, fkColumn: "platform_id", ids: platformIds });
   await insertJoinRows({ joinTable: "show_genres", user_id, show_id, fkColumn: "genre_id", ids: genreIds });
   await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
+ await insertJoinRows({ joinTable: "show_studios", user_id, show_id, fkColumn: "studio_id", ids: studioIds });
 
   msg.textContent = "Added!";
 }
@@ -687,7 +688,8 @@ async function loadShows() {
     current_season, current_episode,
     show_platforms(platforms(name)),
     show_genres(genres(name)),
-    show_tropes(tropes(name))
+    show_tropes(tropes(name)),
+     show_studios(studios(name))
     `)
     .order("created_at", { ascending: false });
 
@@ -716,6 +718,8 @@ function renderTable(rows) {
     const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
     const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
     const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
+   const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
+
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -765,6 +769,13 @@ async function init() {
     chipsId: "tropeChips",
     tableName: "tropes"
   });
+ const studioSelect = setupDbMultiSelect({
+  buttonId: "studioBtn",
+  menuId: "studioMenu",
+  chipsId: "studioChips",
+  tableName: "studios"
+});
+
 
   const starUI = setupStarRating({
     containerId: "ratingStars",
@@ -794,7 +805,8 @@ async function init() {
       new FormData(e.target),
       platformSelect.getIds(),
       genreSelect.getIds(),
-      tropeSelect.getIds()
+      tropeSelect.getIds(),
+      studioSelect.getIds()
     );
 
   e.target.reset();
@@ -802,6 +814,7 @@ starUI.clear();
 platformSelect.clear();
 genreSelect.clear();
 tropeSelect.clear();
+   studioSelect.clear();
 syncOvaVisibility();
 await loadShows();
 
@@ -924,16 +937,19 @@ const { data: { session } } = await supabase.auth.getSession();
 showAuthedUI(!!session);
 
 if (session) {
-  const [p, g, t] = await Promise.all([
-    loadOptionRows("platforms"),
-    loadOptionRows("genres"),
-    loadOptionRows("tropes")
+const [p, g, t, s] = await Promise.all([
+  loadOptionRows("platforms"),
+  loadOptionRows("genres"),
+  loadOptionRows("tropes"),
+  loadOptionRows("studios")
+]);
+
   ]);
 
   platformSelect.setRows(p);
   genreSelect.setRows(g);
   tropeSelect.setRows(t);
-
+studioSelect.setRows(s);
   fillSelect("platformFilter", p, "platforms");
   fillSelect("genreFilter", g, "genres");
   fillSelect("tropeFilter", t, "tropes");
