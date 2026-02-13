@@ -269,3 +269,35 @@ input[type="checkbox"]{
   background: #f6f7fb;
   border-radius: 8px;
 }
+.collectionCard{
+  width: 100%;
+  text-align: left;
+  border: 1px solid #d7dbe7;
+  background: #fff;
+  color: #111;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+}
+.collectionCard:hover{
+  background: #f6f7fb;
+}
+.collectionTitle{
+  font-weight: 700;
+}
+.collectionMeta{
+  font-size: 13px;
+}
+
+.factRow{
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eef0f6;
+}
+.factRow:last-child{ border-bottom: 0; }
+.factLabel{ font-size: 12px; }
+.factValue{ font-size: 14px; }
