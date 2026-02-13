@@ -531,9 +531,11 @@ async function loadShows() {
 
   msg.textContent = "Loading…";
 
-  let query = supabase
-    .from("shows")
-    .order("created_at", { ascending: false });
+ const { data, error } = await supabase
+  .from("shows")
+  .select(`...`)
+  .order("created_at", { ascending: false });
+
 
  const { data, error } = await query.select(`
   id, user_id, title, status, rating_stars, studio, last_watched, created_at,
