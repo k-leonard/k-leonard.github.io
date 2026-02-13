@@ -172,7 +172,13 @@
     <input type="hidden" name="my_rating" id="my_rating" />
   </div>
 
-  <input name="studio" placeholder="Studio" />
+ <div class="multiselect">
+  <label>Studio</label>
+  <button type="button" id="studioBtn" class="secondary">Select studio</button>
+  <div id="studioMenu" class="menu hidden"></div>
+  <div id="studioChips" class="chips"></div>
+</div>
+
 
   <div class="multiselect">
     <label>Where to Watch</label>
