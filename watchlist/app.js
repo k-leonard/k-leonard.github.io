@@ -91,6 +91,31 @@ function syncProgressVisibility() {
   }
 }
 
+function syncTypeVisibility() {
+  const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
+
+  const isTV = type === "TV" || type === "TV & Movie";
+  const isMovie = type === "Movie" || type === "TV & Movie";
+
+  const tvBlock = el("tvBlock");
+  const movieBlock = el("movieBlock");
+
+  if (tvBlock) tvBlock.style.display = isTV ? "" : "none";
+  if (movieBlock) movieBlock.style.display = isMovie ? "" : "none";
+
+  // Clear hidden fields so you don’t save stale values
+  if (!isTV) {
+    document.querySelector('input[name="seasons"]')?.setAttribute("value", "");
+    const a = document.querySelector('input[name="seasons"]'); if (a) a.value = "";
+    const b = document.querySelector('input[name="episodes"]'); if (b) b.value = "";
+    const c = document.querySelector('input[name="episode_length_min"]'); if (c) c.value = "";
+  }
+
+  if (!isMovie) {
+    const a = document.querySelector('input[name="movies"]'); if (a) a.value = "";
+    const b = document.querySelector('input[name="movie_length_min"]'); if (b) b.value = "";
+  }
+}
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -728,6 +753,8 @@ syncOvaVisibility();
 document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
 syncProgressVisibility();
 
+el("show_type")?.addEventListener("change", syncTypeVisibility);
+syncTypeVisibility();
 
 
   // DEV_MODE boot
