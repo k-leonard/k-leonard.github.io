@@ -71,6 +71,19 @@
             <option>Dropped</option>
             <option>Waiting for Next Season</option>
           </select>
+
+          <div id="progressBlock" style="display:none;">
+  <label class="field">
+    <span>Current season</span>
+    <input type="number" name="current_season" min="1" step="1" />
+  </label>
+
+  <label class="field">
+    <span>Current episode</span>
+    <input type="number" name="current_episode" min="1" step="1" />
+  </label>
+</div>
+
 <select name="category" id="category">
   <option value="Anime">Anime</option>
   <option value="Non-anime" selected>Non-anime</option>
