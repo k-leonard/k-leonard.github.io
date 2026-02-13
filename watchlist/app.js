@@ -148,22 +148,32 @@ function debounce(fn, ms) {
   };
 }
 // --------------------
-// Hash Router (Home / Browse / Collection)
+// Hash Router (Home / Browse / Collection/ Show Tab)
 // --------------------
 function route() {
   const raw = (window.location.hash || "#home").slice(1);
-  const views = ["home", "browse", "collection"];
 
-  // Normalize bad hashes back to home
-  const hash = views.includes(raw) ? raw : "home";
+  // split "show?id=123" -> name="show", query="id=123"
+  const [nameRaw] = raw.split("?");
+  const views = ["home", "browse", "collection", "show"];
 
-  for (const name of views) {
-    setDisplay(`view-${name}`, name === hash);
+  const name = views.includes(nameRaw) ? nameRaw : "home";
 
-    const t = el(`tab-${name}`);
-    if (t) t.classList.toggle("active", name === hash);
+  views.forEach(v => {
+    setDisplay(`view-${v}`, v === name);
+
+    const t = el(`tab-${v}`);
+    if (t) t.classList.toggle("active", v === name);
+  });
+
+  // If we navigated to show detail, load it
+  if (name === "show") {
+    const params = new URLSearchParams(raw.split("?")[1] || "");
+    const id = params.get("id");
+    if (id) loadShowDetail(Number(id));
   }
 }
+
 
 function wireTabs() {
   const views = ["home", "browse", "collection"];
@@ -178,6 +188,55 @@ function wireTabs() {
     tab.addEventListener("click", (e) => {
       e.preventDefault();
       window.location.hash = `#${name}`;
+      route();
+    });
+  });
+}
+
+function renderCollectionCards() {
+  const wrap = el("collectionList");
+  if (!wrap) return;
+
+  if (!ALL_SHOWS_CACHE.length) {
+    wrap.textContent = "No shows yet.";
+    return;
+  }
+
+  // basic sorting options
+  const sort = el("collectionSort")?.value || "recent";
+  const group = el("collectionGroup")?.value || "";
+
+  let rows = ALL_SHOWS_CACHE.slice();
+
+  if (group) rows = rows.filter(r => r.category === group);
+
+  if (sort === "alpha") {
+    rows.sort((a, b) => String(a.title).localeCompare(String(b.title)));
+  } else if (sort === "rating") {
+    rows.sort((a, b) => (b.rating_stars ?? -1) - (a.rating_stars ?? -1));
+  } else {
+    // recent (created_at newest first) - if created_at exists
+    rows.sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
+  }
+
+  wrap.innerHTML = rows.map(r => {
+    const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
+    const status = r.status || "";
+    const type = r.show_type || "";
+    const cat = r.category || "";
+    return `
+      <button class="collectionCard" type="button" data-id="${r.id}">
+        <div class="collectionTitle">${escapeHtml(r.title)}</div>
+        <div class="collectionMeta muted">${escapeHtml([cat, type, status].filter(Boolean).join(" • "))}</div>
+        <div class="collectionMeta">${escapeHtml(rating)}</div>
+      </button>
+    `;
+  }).join("");
+
+  wrap.querySelectorAll(".collectionCard").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      window.location.hash = `#show?id=${id}`;
       route();
     });
   });
@@ -702,6 +761,7 @@ async function loadShows() {
   rerenderFiltered();
   updateHomeCounts();
  renderCollection();
+ renderCollectionCards();
 }
 
 // --------------------
@@ -743,6 +803,105 @@ function renderTable(rows) {
       await loadShows();
     });
   });
+}
+function labelVal(label, val) {
+  const v = (val === null || val === undefined || val === "") ? "—" : String(val);
+  return `<div class="factRow"><div class="factLabel muted">${escapeHtml(label)}</div><div class="factValue">${escapeHtml(v)}</div></div>`;
+}
+
+function namesFromJoin(list, key) {
+  return (list || []).map(x => x?.[key]?.name).filter(Boolean);
+}
+
+async function loadShowDetail(showId) {
+  const titleEl = el("showTitle");
+  const metaEl = el("showMeta");
+  const descEl = el("showDescription");
+  const factsEl = el("showFacts");
+  const tagsEl = el("showTags");
+  const notesEl = el("showNotes");
+  const msgEl = el("showDetailMsg");
+
+  if (msgEl) msgEl.textContent = "Loading…";
+
+  // NOTE: add/remove fields based on your schema
+  const { data, error } = await supabase
+    .from("shows")
+    .select(`
+      id, title, status, rating_stars, last_watched, created_at,
+      category, show_type, ongoing, release_date,
+      seasons, episodes, episode_length_min,
+      movies, movie_length_min,
+      ovas, ova_length_min,
+      current_season, current_episode,
+      notes,
+      description,
+      show_platforms(platforms(name)),
+      show_genres(genres(name)),
+      show_tropes(tropes(name)),
+      show_studios(studios(name))
+    `)
+    .eq("id", showId)
+    .single();
+
+  if (error) {
+    if (msgEl) msgEl.textContent = `Error: ${error.message}`;
+    return;
+  }
+
+  if (msgEl) msgEl.textContent = "";
+
+  if (titleEl) titleEl.textContent = data.title || "Show";
+
+  const metaBits = [
+    data.category,
+    data.show_type,
+    data.status,
+    data.rating_stars ? starsDisplay(data.rating_stars) : null
+  ].filter(Boolean);
+
+  if (metaEl) metaEl.textContent = metaBits.join(" • ");
+
+  if (descEl) descEl.textContent = data.description?.trim() || "(No description yet.)";
+  if (notesEl) notesEl.textContent = data.notes?.trim() || "(No notes.)";
+
+  const platforms = namesFromJoin(data.show_platforms, "platforms");
+  const genres = namesFromJoin(data.show_genres, "genres");
+  const tropes = namesFromJoin(data.show_tropes, "tropes");
+  const studios = namesFromJoin(data.show_studios, "studios");
+
+  if (factsEl) {
+    factsEl.innerHTML = [
+      labelVal("Ongoing", data.ongoing),
+      labelVal("Release date", data.release_date),
+      labelVal("Last watched", data.last_watched),
+      labelVal("Current season", data.current_season),
+      labelVal("Current episode", data.current_episode),
+
+      // TV info
+      labelVal("# Seasons", data.seasons),
+      labelVal("# Episodes", data.episodes),
+      labelVal("Episode length (min)", data.episode_length_min),
+
+      // Movie info
+      labelVal("# Movies", data.movies),
+      labelVal("Movie length (min)", data.movie_length_min),
+
+      // Anime extras
+      labelVal("# OVAs", data.ovas),
+      labelVal("OVA length (min)", data.ova_length_min),
+    ].join("");
+  }
+
+  if (tagsEl) {
+    tagsEl.innerHTML = `
+      ${studios.length ? `<div><span class="muted">Studios:</span> ${escapeHtml(studios.join(", "))}</div>` : ""}
+      ${platforms.length ? `<div><span class="muted">Platforms:</span> ${escapeHtml(platforms.join(", "))}</div>` : ""}
+      ${genres.length ? `<div><span class="muted">Genres:</span> ${escapeHtml(genres.join(", "))}</div>` : ""}
+      ${tropes.length ? `<div><span class="muted">Tropes:</span> ${escapeHtml(tropes.join(", "))}</div>` : ""}
+      ${(!studios.length && !platforms.length && !genres.length && !tropes.length) ? `<div class="muted">No tags yet.</div>` : ""}
+    `;
+  }
 }
 
 // --------------------
@@ -868,6 +1027,12 @@ syncTypeVisibility();
 
  el("collectionGroup")?.addEventListener("change", renderCollection);
 el("collectionSort")?.addEventListener("change", renderCollection);
+el("collectionGroup")?.addEventListener("change", renderCollectionCards);
+el("collectionSort")?.addEventListener("change", renderCollectionCards);
+el("backToCollection")?.addEventListener("click", () => {
+  window.location.hash = "#collection";
+  route();
+});
 
 
   // DEV_MODE boot
