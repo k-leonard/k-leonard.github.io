@@ -9,6 +9,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const el = (id) => document.getElementById(id);
+const msg = el("msg"); // <-- add this
 
 const authMsg = el("authMsg");
 const browseMsg = el("msg");
@@ -33,7 +34,23 @@ function setDisplay(id, show) {
   if (!node) return;
   node.style.display = show ? "" : "none";
 }
+async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
+  if (!ids || !ids.length) return;
 
+  const rows = ids.map(id => ({
+    user_id,
+    show_id,
+    [fkColumn]: id
+  }));
+
+  const r = await supabase.from(joinTable).insert(rows);
+
+  if (r.error) {
+    console.error(`${joinTable} insert error:`, r.error, rows);
+    // surface it so you SEE it
+    if (msg) msg.textContent = `Error inserting ${joinTable}: ${r.error.message}`;
+  }
+}
 function showAuthedUI(isAuthed) {
   setDisplay("authCard", !isAuthed);
 
@@ -541,7 +558,7 @@ function renderCollection() {
           ${platforms.length ? `<div><b>Where:</b> ${escapeHtml(platforms.join(", "))}</div>` : ""}
           ${genres.length ? `<div><b>Genres:</b> ${escapeHtml(genres.join(", "))}</div>` : ""}
           ${tropes.length ? `<div><b>Tropes:</b> ${escapeHtml(tropes.join(", "))}</div>` : ""}
-          ${r.studio ? `<div><b>Studio:</b> ${escapeHtml(r.studio)}</div>` : ""}
+          ${studios.length ? `<div><b>Studios:</b> ${escapeHtml(studios.join(", "))}</div>` : ""}
           ${r.last_watched ? `<div><b>Last watched:</b> ${escapeHtml(r.last_watched)}</div>` : ""}
         </div>
       </div>
@@ -649,7 +666,6 @@ async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
 
   const title = formData.get("title").trim();
   const status = formData.get("status");
-  const studio = String(formData.get("studio") || "").trim() || null;
   const rating_stars = parseRatingStars(formData.get("my_rating"));
 
   const category = formData.get("category") || "Non-anime";
@@ -685,8 +701,6 @@ const current_episode = toIntOrNull(formData.get("current_episode"));
       user_id,
       title,
       status,
-      rating_stars,
-      studio,
       last_watched,
 
       category,
@@ -935,6 +949,7 @@ async function init() {
   tableName: "studios"
 });
 
+console.log("studio elements:", !!el("studioBtn"), !!el("studioMenu"), !!el("studioChips"));
 
   const starUI = setupStarRating({
     containerId: "ratingStars",
@@ -1129,15 +1144,19 @@ supabase.auth.onAuthStateChange(async (_event, session2) => {
 
   if (!session2) return;
 
-  const [p, g, t] = await Promise.all([
-    loadOptionRows("platforms"),
-    loadOptionRows("genres"),
-    loadOptionRows("tropes")
-  ]);
+const [p, g, t, s] = await Promise.all([
+  loadOptionRows("platforms"),
+  loadOptionRows("genres"),
+  loadOptionRows("tropes"),
+  loadOptionRows("studios")
+]);
+
 
   platformSelect.setRows(p);
   genreSelect.setRows(g);
   tropeSelect.setRows(t);
+ studioSelect.setRows(s);
+
 
   fillSelect("platformFilter", p, "platforms");
   fillSelect("genreFilter", g, "genres");
