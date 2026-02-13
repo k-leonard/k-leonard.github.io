@@ -76,6 +76,20 @@ function syncOvaVisibility() {
     if (ovaLen) ovaLen.value = "";
   }
 }
+function syncProgressVisibility() {
+  const status = el("status")?.value || document.querySelector('select[name="status"]')?.value;
+  const isWatching = status === "Watching";
+
+  const block = el("progressBlock");
+  if (block) block.style.display = isWatching ? "" : "none";
+
+  if (!isWatching) {
+    const s = document.querySelector('input[name="current_season"]');
+    const e = document.querySelector('input[name="current_episode"]');
+    if (s) s.value = "";
+    if (e) e.value = "";
+  }
+}
 
 
 function escapeHtml(s) {
@@ -467,6 +481,8 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
   const seasons = toIntOrNull(formData.get("seasons"));
   const episodes = toIntOrNull(formData.get("episodes"));
   const episode_length_min = toIntOrNull(formData.get("episode_length_min"));
+ const current_season = toIntOrNull(formData.get("current_season"));
+const current_episode = toIntOrNull(formData.get("current_episode"));
 
   const movies = toIntOrNull(formData.get("movies"));
   const movie_length_min = toIntOrNull(formData.get("movie_length_min"));
@@ -507,7 +523,9 @@ async function addShow(formData, platformIds, genreIds, tropeIds) {
       movie_length_min,
 
       ovas,
-      ova_length_min
+      ova_length_min,
+     current_season,
+current_episode
     }])
     .select("id")
     .single();
@@ -663,6 +681,8 @@ platformSelect.clear();
 genreSelect.clear();
 tropeSelect.clear();
 syncOvaVisibility();
+   document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
+syncProgressVisibility();
 await loadShows();
 
   });
