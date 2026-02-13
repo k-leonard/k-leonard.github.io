@@ -724,7 +724,7 @@ current_episode
   msg.textContent = "Added!";
 }
 
-
+ 
 
 async function deleteShow(id) {
   const { error } = await supabase.from("shows").delete().eq("id", id);
