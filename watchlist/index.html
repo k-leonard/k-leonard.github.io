@@ -266,46 +266,32 @@
       <p id="msg" class="muted"></p>
     </section>
 
-    <!-- COLLECTION -->
-    <section class="card view" id="view-collection" style="display:none;">
-      <h2>My Collection</h2>
-      <p class="muted">
-        This will be your “library view” (everything you’ve watched / rated), with a toggle for Anime vs Non-anime.
-      </p>
+  <!-- COLLECTION -->
+<section class="card view" id="view-collection" style="display:none;">
+  <h2>My Collection</h2>
+  <p class="muted">
+    This will be your “library view” (everything you’ve watched / rated), with a toggle for Anime vs Non-anime.
+  </p>
 
-      <div class="row">
-        <select id="collectionGroup">
-          <option value="">All</option>
-          <option value="Anime">Anime</option>
-          <option value="Non-anime">Non-anime</option>
-        </select>
+  <div class="row">
+    <select id="collectionGroup">
+      <option value="">All</option>
+      <option value="Anime">Anime</option>
+      <option value="Non-anime">Non-anime</option>
+    </select>
 
-        <select id="collectionSort">
-          <option value="recent">Recently watched</option>
-          <option value="rating">Highest rated</option>
-          <option value="alpha">A → Z</option>
-        </select>
-      </div>
+    <select id="collectionSort">
+      <option value="recent">Recently watched</option>
+      <option value="rating">Highest rated</option>
+      <option value="alpha">A → Z</option>
+    </select>
+  </div>
 
-      <div id="collectionList" style="margin-top: 10px;"></div>
-<p id="collectionMsg" class="muted"></p>
-
-      <!-- SHOW DETAIL -->
-<section class="card view" id="view-show" style="display:none;">
-  <button id="backToCollection" class="secondary" type="button">← Back</button>
-
-  <h2 id="showTitle" style="margin-top:12px;">Show</h2>
-  <p id="showMeta" class="muted"></p>
-
-  <p id="showDetailMsg" class="muted"></p>
-
-  <div id="showTags" style="margin-top:10px;"></div>
-
-  <h3 style="margin-top:14px;">Details</h3>
-  <div id="showFacts"></div>
+  <div id="collectionList" style="margin-top: 10px;"></div>
+  <p id="collectionMsg" class="muted"></p>
 </section>
 
-<!-- SHOW DETAILS -->
+<!-- SHOW DETAILS (ONLY ONE, NOT NESTED) -->
 <section class="card view" id="view-show" style="display:none;">
   <div class="row" style="justify-content: space-between;">
     <div>
