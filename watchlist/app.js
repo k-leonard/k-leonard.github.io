@@ -7,6 +7,7 @@ console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let CURRENT_SHOW = null;
 
 const el = (id) => document.getElementById(id);
 const msg = el("msg"); // <-- add this
@@ -752,7 +753,9 @@ async function loadShows() {
     .from("shows")
     .select(`
        id, user_id, title, status, rating_stars, last_watched, created_at,
-    category, show_type, ongoing, release_date,
+    category, show_type, ongoing, release_date, rewatch_count,
+is_rewatching,
+last_rewatch_date,
     seasons, episodes, episode_length_min,
     movies, movie_length_min,
     ovas, ova_length_min,
@@ -842,7 +845,10 @@ async function loadShowDetail(showId) {
     .select(`
       id, user_id, title, status, rating_stars, last_watched, created_at,
       category, show_type, ongoing, release_date,
-      seasons, episodes, episode_length_min,
+      seasons, episodes, episode_length_min, rewatch_count,
+is_rewatching,
+last_rewatch_date,
+
       movies, movie_length_min,
       ovas, ova_length_min,
       current_season, current_episode,
@@ -895,6 +901,10 @@ async function loadShowDetail(showId) {
 
       labelVal("# OVAs", data.ovas),
       labelVal("OVA length (min)", data.ova_length_min),
+     labelVal("Rewatch count", data.rewatch_count),
+labelVal("Currently rewatching", data.is_rewatching ? "Yes" : "No"),
+labelVal("Last rewatch date", data.last_rewatch_date),
+
     ].join("");
   }
 
@@ -907,6 +917,85 @@ async function loadShowDetail(showId) {
       ${(!studios.length && !platforms.length && !genres.length && !tropes.length) ? `<div class="muted">No tags yet.</div>` : ""}
     `;
   }
+ CURRENT_SHOW = data;
+
+}
+
+function setEditMode(on) {
+  const form = el("editForm");
+  const editBtn = el("editShowBtn");
+  const saveBtn = el("saveShowBtn");
+  const cancelBtn = el("cancelShowBtn");
+
+  if (form) form.style.display = on ? "" : "none";
+  if (editBtn) editBtn.style.display = on ? "none" : "";
+  if (saveBtn) saveBtn.style.display = on ? "" : "none";
+  if (cancelBtn) cancelBtn.style.display = on ? "" : "none";
+}
+
+function fillEditForm(show) {
+  if (!show) return;
+
+  const setVal = (id, v) => { const n = el(id); if (n) n.value = (v ?? ""); };
+
+  setVal("edit_status", show.status);
+  setVal("edit_rating", show.rating_stars ?? "");
+  setVal("edit_last_watched", show.last_watched ?? "");
+  setVal("edit_current_season", show.current_season ?? "");
+  setVal("edit_current_episode", show.current_episode ?? "");
+  setVal("edit_description", show.description ?? "");
+  setVal("edit_notes", show.notes ?? "");
+
+  setVal("edit_rewatch_count", show.rewatch_count ?? 0);
+  const rw = el("edit_is_rewatching");
+  if (rw) rw.value = String(!!show.is_rewatching);
+
+  setVal("edit_last_rewatch_date", show.last_rewatch_date ?? "");
+}
+
+function toIntOrNull2(v) {
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? Math.trunc(n) : null;
+}
+
+async function saveShowEdits() {
+  if (!CURRENT_SHOW?.id) return;
+
+  const editMsg = el("editMsg");
+  if (editMsg) editMsg.textContent = "Saving…";
+
+  const payload = {
+    status: el("edit_status")?.value || CURRENT_SHOW.status,
+    rating_stars: toIntOrNull2(el("edit_rating")?.value),
+    last_watched: el("edit_last_watched")?.value || null,
+    current_season: toIntOrNull2(el("edit_current_season")?.value),
+    current_episode: toIntOrNull2(el("edit_current_episode")?.value),
+    description: el("edit_description")?.value?.trim() || null,
+    notes: el("edit_notes")?.value?.trim() || null,
+
+    rewatch_count: toIntOrNull2(el("edit_rewatch_count")?.value) ?? 0,
+    is_rewatching: (el("edit_is_rewatching")?.value === "true"),
+    last_rewatch_date: el("edit_last_rewatch_date")?.value || null
+  };
+
+  const { error } = await supabase
+    .from("shows")
+    .update(payload)
+    .eq("id", CURRENT_SHOW.id);
+
+  if (error) {
+    if (editMsg) editMsg.textContent = `Error: ${error.message}`;
+    return;
+  }
+
+  if (editMsg) editMsg.textContent = "Saved!";
+  setEditMode(false);
+
+  // Reload detail + cache list so Collection/Browse stay consistent
+  await loadShowDetail(CURRENT_SHOW.id);
+  await loadShows();
 }
 
 
@@ -1035,6 +1124,19 @@ syncTypeVisibility();
  el("collectionGroup")?.addEventListener("change", renderCollection);
 el("collectionSort")?.addEventListener("change", renderCollection);
 el("collectionGroup")?.addEventListener("change", renderCollectionCards);
+ el("editShowBtn")?.addEventListener("click", () => {
+  fillEditForm(CURRENT_SHOW);
+  setEditMode(true);
+});
+
+el("cancelShowBtn")?.addEventListener("click", () => {
+  setEditMode(false);
+  const editMsg = el("editMsg");
+  if (editMsg) editMsg.textContent = "";
+});
+
+el("saveShowBtn")?.addEventListener("click", saveShowEdits);
+
 el("collectionSort")?.addEventListener("change", renderCollectionCards);
 el("backToCollection")?.addEventListener("click", () => {
   window.location.hash = "#collection";
