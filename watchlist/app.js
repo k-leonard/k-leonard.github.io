@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const DEV_MODE = false; // <-- set to false when Supabase is back
+const DEV_MODE = true; // <-- set to false when Supabase is back
 console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
  
 
