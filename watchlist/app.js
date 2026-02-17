@@ -1129,7 +1129,10 @@ async function loadShowDetail(showId) {
       seasons, episodes, episode_length_min, rewatch_count,
 is_rewatching,
 last_rewatch_date,
-
+    notes,
+    description,
+    image_url,
+    mal_id,
       movies, movie_length_min,
       ovas, ova_length_min,
       current_season, current_episode,
