@@ -292,26 +292,44 @@
 </section>
 
 <!-- SHOW DETAILS (ONLY ONE, NOT NESTED) -->
-<section class="card view" id="view-show" style="display:none;">
-  <div class="row" style="justify-content: space-between;">
-    <div>
-      <h2 id="showTitle">Show</h2>
-      <p class="muted" id="showMeta"></p>
-    </div>
+<div class="row" style="justify-content: space-between;">
+  <div>
+    <h2 id="showTitle">Show</h2>
+    <p class="muted" id="showMeta"></p>
+  </div>
 
+  <div class="row">
     <button id="backToCollection" type="button" class="secondary">← Back</button>
+    <button id="inlineEditBtn" type="button" class="secondary">Edit</button>
+    <button id="inlineSaveBtn" type="button" style="display:none;">Save</button>
+    <button id="inlineCancelBtn" type="button" class="secondary" style="display:none;">Cancel</button>
+  </div>
+</div>
+
+<p id="showDetailMsg" class="muted" style="margin-top:8px;"></p>
+
+<div class="grid" style="margin-top:12px;">
+  <div class="card innerCard">
+    <h3 style="margin-top:0;">Description</h3>
+    <div id="showDescriptionBlock"></div>
   </div>
 
-  <div id="showDetailMsg" class="muted" style="margin-top:8px;"></div>
-<div class="card innerCard" style="margin-top:12px;">
-  <div class="row" style="justify-content: space-between; align-items:center;">
-    <h3 style="margin:0;">Edit</h3>
-    <div class="row">
-      <button id="editShowBtn" type="button" class="secondary">Edit</button>
-      <button id="saveShowBtn" type="button" style="display:none;">Save</button>
-      <button id="cancelShowBtn" type="button" class="secondary" style="display:none;">Cancel</button>
-    </div>
+  <div class="card innerCard">
+    <h3 style="margin-top:0;">Your Info</h3>
+    <div id="showFactsBlock"></div>
   </div>
+</div>
+
+<div class="card innerCard" style="margin-top:12px;">
+  <h3 style="margin-top:0;">Tags</h3>
+  <div id="showTags"></div>
+</div>
+
+<div class="card innerCard" style="margin-top:12px;">
+  <h3 style="margin-top:0;">Notes</h3>
+  <div id="showNotesBlock"></div>
+</div>
+
 
   <p id="editMsg" class="muted" style="margin-top:8px;"></p>
 
@@ -409,8 +427,6 @@
 
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-  // TODO: replace with your real values (Project Settings → API)
   const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 
