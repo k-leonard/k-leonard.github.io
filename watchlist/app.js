@@ -839,7 +839,7 @@ searchEl.addEventListener("input", (e) => {
     renderChips();
   }
   };
-}
+
 
 function updateHomeCounts() {
   const counts = { 
