@@ -631,6 +631,78 @@ if (sels && user_id) {
 
   await loadShows(); // keep Collection/Browse updated
 }
+
+// -------------------
+// Poster Cards
+// -------------------
+
+const FALLBACK_POSTER = "./assets/poster-placeholder.png";
+
+function getPosterUrl(item) {
+  // adjust this to match your column names
+  // common: item.poster_url, item.poster, item.image_url
+  return item.poster_url && item.poster_url.trim() ? item.poster_url : FALLBACK_POSTER;
+}
+function cardHTML(item) {
+  const poster = getPosterUrl(item);
+
+  // adjust fields to your schema
+  const title = item.title || item.name || "Untitled";
+  const type = item.type || "";         // TV / Movie / TV & Movie
+  const ongoing = item.ongoing || "";   // Yes / No / On Hiatus / To Be Released
+  const released = item.date_released ? formatDate(item.date_released) : "";
+
+  return `
+    <article class="media-card" data-id="${item.id}">
+      <img class="media-card__poster"
+           src="${escapeAttr(poster)}"
+           alt="${escapeAttr(title)} poster"
+           loading="lazy"
+           onerror="this.onerror=null;this.src='${FALLBACK_POSTER}';" />
+
+      <div class="media-card__body">
+        <div class="media-title">${escapeHTML(title)}</div>
+
+        <div class="media-meta">
+          ${type ? `<div>Type: ${escapeHTML(type)}</div>` : ""}
+          ${ongoing ? `<div>Ongoing: ${escapeHTML(ongoing)}</div>` : ""}
+          ${released ? `<div>Released: ${escapeHTML(released)}</div>` : ""}
+        </div>
+
+        <div class="media-tags">
+          ${item.is_anime ? `<span class="tag">Anime</span>` : ""}
+          ${item.status ? `<span class="tag">${escapeHTML(item.status)}</span>` : ""}
+        </div>
+
+        <div class="media-actions">
+          <button class="btn small" data-action="edit">Edit</button>
+          <button class="btn small" data-action="delete">Delete</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderCollection(items) {
+  const grid = document.getElementById("collectionGrid");
+  grid.innerHTML = items.map(cardHTML).join("");
+
+  // If you need button clicks, do event delegation:
+  grid.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+
+    const card = e.target.closest(".media-card");
+    const id = card ? card.dataset.id : null;
+    const action = btn.dataset.action;
+
+    if (!id) return;
+
+    if (action === "edit") openEditModal(id);
+    if (action === "delete") confirmDelete(id);
+  }, { once: true }); // remove this if you re-render often; or attach once globally
+}
+
 // --------------------
 // Browse filter helpers
 // --------------------
@@ -896,60 +968,60 @@ function getCollectionRows() {
   return rows;
 }
 
-function renderCollection() {
-  const wrap = el("collectionList");
-  const note = el("collectionMsg");
-  if (!wrap) return;
+// function renderCollection() {
+//   const wrap = el("collectionList");
+//   const note = el("collectionMsg");
+//   if (!wrap) return;
 
-  const rows = getCollectionRows();
+//   const rows = getCollectionRows();
 
-  if (!rows.length) {
-    wrap.innerHTML = "";
-    if (note) note.textContent = "No items yet (try switching filters or add a show).";
-    return;
-  }
+//   if (!rows.length) {
+//     wrap.innerHTML = "";
+//     if (note) note.textContent = "No items yet (try switching filters or add a show).";
+//     return;
+//   }
 
-  if (note) note.textContent = "";
+//   if (note) note.textContent = "";
 
-  wrap.innerHTML = rows.map(r => {
-    const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
-    const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
-    const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
-  const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
-    const progress =
-      r.status === "Watching" && (r.current_season || r.current_episode)
-        ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
-        : "";
+//   wrap.innerHTML = rows.map(r => {
+//     const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
+//     const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
+//     const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
+//   const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
+//     const progress =
+//       r.status === "Watching" && (r.current_season || r.current_episode)
+//         ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
+//         : "";
 
-    return `
-      <div class="card" style="margin: 10px 0;">
-        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-          <div>
-            <div style="font-weight:700; font-size:16px;">${escapeHtml(r.title)}</div>
-            <div class="muted" style="margin-top:4px;">
-              ${escapeHtml(r.category || "")}${r.show_type ? " • " + escapeHtml(r.show_type) : ""}
-              ${r.ongoing ? " • " + escapeHtml(r.ongoing) : ""}
-            </div>
-          </div>
+//     return `
+//       <div class="card" style="margin: 10px 0;">
+//         <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+//           <div>
+//             <div style="font-weight:700; font-size:16px;">${escapeHtml(r.title)}</div>
+//             <div class="muted" style="margin-top:4px;">
+//               ${escapeHtml(r.category || "")}${r.show_type ? " • " + escapeHtml(r.show_type) : ""}
+//               ${r.ongoing ? " • " + escapeHtml(r.ongoing) : ""}
+//             </div>
+//           </div>
 
-          <div style="text-align:right;">
-            <div style="font-weight:600;">${escapeHtml(r.status || "")}</div>
-            <div class="muted">${escapeHtml(starsDisplay(r.rating_stars))}</div>
-            ${progress ? `<div class="muted" style="margin-top:4px;">${escapeHtml(progress)}</div>` : ""}
-          </div>
-        </div>
+//           <div style="text-align:right;">
+//             <div style="font-weight:600;">${escapeHtml(r.status || "")}</div>
+//             <div class="muted">${escapeHtml(starsDisplay(r.rating_stars))}</div>
+//             ${progress ? `<div class="muted" style="margin-top:4px;">${escapeHtml(progress)}</div>` : ""}
+//           </div>
+//         </div>
 
-        <div class="muted" style="margin-top:10px; display:grid; gap:6px;">
-          ${platforms.length ? `<div><b>Where:</b> ${escapeHtml(platforms.join(", "))}</div>` : ""}
-          ${genres.length ? `<div><b>Genres:</b> ${escapeHtml(genres.join(", "))}</div>` : ""}
-          ${tropes.length ? `<div><b>Tropes:</b> ${escapeHtml(tropes.join(", "))}</div>` : ""}
-          ${studios.length ? `<div><b>Studios:</b> ${escapeHtml(studios.join(", "))}</div>` : ""}
-          ${r.last_watched ? `<div><b>Last watched:</b> ${escapeHtml(r.last_watched)}</div>` : ""}
-        </div>
-      </div>
-    `;
-  }).join("");
-}
+//         <div class="muted" style="margin-top:10px; display:grid; gap:6px;">
+//           ${platforms.length ? `<div><b>Where:</b> ${escapeHtml(platforms.join(", "))}</div>` : ""}
+//           ${genres.length ? `<div><b>Genres:</b> ${escapeHtml(genres.join(", "))}</div>` : ""}
+//           ${tropes.length ? `<div><b>Tropes:</b> ${escapeHtml(tropes.join(", "))}</div>` : ""}
+//           ${studios.length ? `<div><b>Studios:</b> ${escapeHtml(studios.join(", "))}</div>` : ""}
+//           ${r.last_watched ? `<div><b>Last watched:</b> ${escapeHtml(r.last_watched)}</div>` : ""}
+//         </div>
+//       </div>
+//     `;
+//   }).join("");
+// }
 
 
 // --------------------
