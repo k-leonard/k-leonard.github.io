@@ -832,7 +832,7 @@ searchEl.addEventListener("input", (e) => {
     clear: () => {
       selected.clear();
       renderChips();
-    }
+    },
     setSelectedRows: (rows) => {
     selected.clear();
     (rows || []).forEach(r => selected.set(r.id, r.name));
