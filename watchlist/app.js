@@ -17,8 +17,7 @@ const msg = el("msg"); // <-- add this
 const authMsg = el("authMsg");
 const browseMsg = el("msg");
 const homeMsg = el("homeMsg");
-const description = formData.get("description")?.trim() || null;
-const image_url = null;
+
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
   if (browseMsg) browseMsg.textContent = text;
@@ -943,11 +942,12 @@ async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
     msg.textContent = "You must be logged in.";
     return;
   }
-
+ 
   const title = formData.get("title").trim();
   const status = formData.get("status");
   const rating_stars = parseRatingStars(formData.get("my_rating"));
-
+  const description = formData.get("description")?.trim() || null;
+const image_url = null;
   const category = formData.get("category") || "Non-anime";
   const show_type = formData.get("show_type") || null;
   const ongoing = formData.get("ongoing") || null;
