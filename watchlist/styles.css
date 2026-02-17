@@ -309,3 +309,11 @@ input[type="checkbox"]{
   margin-bottom: 10px;
 }
 .hidden{ display:none; }
+.poster{
+  width: 160px;
+  max-width: 100%;
+  border-radius: 12px;
+  display: block;
+  margin-bottom: 10px;
+}
+.hidden{ display:none; }
