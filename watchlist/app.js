@@ -110,6 +110,24 @@ function syncProgressVisibility() {
     if (e) e.value = "";
   }
 }
+async function fetchAnimeFromJikan(title) {
+  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
+  const json = await res.json();
+
+  const results = json?.data || [];
+  if (!results.length) return null;
+
+  // Pick best match (simple: first result). Later you can improve ranking.
+  const a = results[0];
+
+  return {
+    mal_id: a.mal_id ?? null,
+    image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
+    description: a.synopsis ?? null
+  };
+}
 
 function syncTypeVisibility() {
   const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
@@ -1386,6 +1404,45 @@ el("cancelShowBtn")?.addEventListener("click", () => {
   setEditMode(false);
   const editMsg = el("editMsg");
   if (editMsg) editMsg.textContent = "";
+});
+el("fetchAnimeBtn")?.addEventListener("click", async () => {
+  if (!CURRENT_SHOW?.id) return;
+
+  const msgEl = el("showDetailMsg");
+  if (msgEl) msgEl.textContent = "Fetching anime info…";
+
+  try {
+    const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+    if (!info) {
+      if (msgEl) msgEl.textContent = "No match found.";
+      return;
+    }
+
+    // Decide whether to overwrite description or only fill if empty:
+    const payload = {
+      mal_id: info.mal_id,
+      image_url: info.image_url
+    };
+
+    // only fill description if you don’t already have one
+    if (!CURRENT_SHOW.description?.trim()) payload.description = info.description;
+
+    const { error } = await supabase
+      .from("shows")
+      .update(payload)
+      .eq("id", CURRENT_SHOW.id);
+
+    if (error) {
+      if (msgEl) msgEl.textContent = `Error: ${error.message}`;
+      return;
+    }
+
+    if (msgEl) msgEl.textContent = "Fetched!";
+    await loadShowDetail(CURRENT_SHOW.id);
+    await loadShows();
+  } catch (e) {
+    if (msgEl) msgEl.textContent = `Error: ${e.message}`;
+  }
 });
 
 el("saveShowBtn")?.addEventListener("click", saveShowEdits);
