@@ -17,6 +17,10 @@ const msg = el("msg"); // <-- add this
 const authMsg = el("authMsg");
 const browseMsg = el("msg");
 const homeMsg = el("homeMsg");
+let PLATFORM_ROWS = [];
+let GENRE_ROWS = [];
+let TROPE_ROWS = [];
+let STUDIO_ROWS = [];
 
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
@@ -440,7 +444,38 @@ function renderShowDetailBlocks(show, mode) {
         ${numberRow("# OVAs", "edit_ovas", show.ovas ?? "", 0)}
         ${numberRow("OVA length (min)", "edit_ova_length_min", show.ova_length_min ?? "", 0)}
       </div>
+  <!-- ✅ TAG EDITING -->
+    <div class="card innerCard" style="grid-column:1/-1; margin-top:10px;">
+      <h4 style="margin:0 0 10px 0;">Edit Tags</h4>
 
+      <div class="multiselect">
+        <label>Studios</label>
+        <button type="button" id="editStudioBtn" class="secondary">Select studios</button>
+        <div id="editStudioMenu" class="menu hidden"></div>
+        <div id="editStudioChips" class="chips"></div>
+      </div>
+
+      <div class="multiselect">
+        <label>Platforms</label>
+        <button type="button" id="editPlatformBtn" class="secondary">Select platforms</button>
+        <div id="editPlatformMenu" class="menu hidden"></div>
+        <div id="editPlatformChips" class="chips"></div>
+      </div>
+
+      <div class="multiselect">
+        <label>Genres</label>
+        <button type="button" id="editGenreBtn" class="secondary">Select genres</button>
+        <div id="editGenreMenu" class="menu hidden"></div>
+        <div id="editGenreChips" class="chips"></div>
+      </div>
+
+      <div class="multiselect">
+        <label>Tropes</label>
+        <button type="button" id="editTropeBtn" class="secondary">Select tropes</button>
+        <div id="editTropeMenu" class="menu hidden"></div>
+        <div id="editTropeChips" class="chips"></div>
+      </div>
+    </div>
     </div>
   `;
 
@@ -472,6 +507,53 @@ function renderShowDetailBlocks(show, mode) {
   statusSel?.addEventListener("change", syncEditVisibility);
   typeSel?.addEventListener("change", syncEditVisibility);
   syncEditVisibility();
+ // --- build edit multiselects
+window.EDIT_TAG_SELECTS = {
+  studios: setupDbMultiSelect({ buttonId:"editStudioBtn", menuId:"editStudioMenu", chipsId:"editStudioChips", tableName:"studios" }),
+  platforms: setupDbMultiSelect({ buttonId:"editPlatformBtn", menuId:"editPlatformMenu", chipsId:"editPlatformChips", tableName:"platforms" }),
+  genres: setupDbMultiSelect({ buttonId:"editGenreBtn", menuId:"editGenreMenu", chipsId:"editGenreChips", tableName:"genres" }),
+  tropes: setupDbMultiSelect({ buttonId:"editTropeBtn", menuId:"editTropeMenu", chipsId:"editTropeChips", tableName:"tropes" })
+};
+
+// load option lists (from cached globals)
+window.EDIT_TAG_SELECTS.studios.setRows(STUDIO_ROWS);
+window.EDIT_TAG_SELECTS.platforms.setRows(PLATFORM_ROWS);
+window.EDIT_TAG_SELECTS.genres.setRows(GENRE_ROWS);
+window.EDIT_TAG_SELECTS.tropes.setRows(TROPE_ROWS);
+
+// preselect current show tags (requires your joins include ids)
+const curStudios = (show.show_studios || []).map(x => x.studios).filter(Boolean);
+const curPlatforms = (show.show_platforms || []).map(x => x.platforms).filter(Boolean);
+const curGenres = (show.show_genres || []).map(x => x.genres).filter(Boolean);
+const curTropes = (show.show_tropes || []).map(x => x.tropes).filter(Boolean);
+
+window.EDIT_TAG_SELECTS.studios.setSelectedRows(curStudios);
+window.EDIT_TAG_SELECTS.platforms.setSelectedRows(curPlatforms);
+window.EDIT_TAG_SELECTS.genres.setSelectedRows(curGenres);
+window.EDIT_TAG_SELECTS.tropes.setSelectedRows(curTropes);
+
+}
+async function replaceJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
+  // delete existing
+  const del = await supabase
+    .from(joinTable)
+    .delete()
+    .eq("user_id", user_id)
+    .eq("show_id", show_id);
+
+  if (del.error) throw new Error(`Delete ${joinTable}: ${del.error.message}`);
+
+  // insert new
+  if (!ids || !ids.length) return;
+
+  const rows = ids.map(id => ({
+    user_id,
+    show_id,
+    [fkColumn]: id
+  }));
+
+  const ins = await supabase.from(joinTable).insert(rows);
+  if (ins.error) throw new Error(`Insert ${joinTable}: ${ins.error.message}`);
 }
 
 function setInlineEditMode(on) {
@@ -526,6 +608,15 @@ async function saveInlineEdits() {
     .from("shows")
     .update(payload)
     .eq("id", CURRENT_SHOW.id);
+const user_id = await getUserId();
+
+const sels = window.EDIT_TAG_SELECTS;
+if (sels && user_id) {
+  await replaceJoinRows({ joinTable:"show_studios", user_id, show_id: CURRENT_SHOW.id, fkColumn:"studio_id", ids: sels.studios.getIds() });
+  await replaceJoinRows({ joinTable:"show_platforms", user_id, show_id: CURRENT_SHOW.id, fkColumn:"platform_id", ids: sels.platforms.getIds() });
+  await replaceJoinRows({ joinTable:"show_genres", user_id, show_id: CURRENT_SHOW.id, fkColumn:"genre_id", ids: sels.genres.getIds() });
+  await replaceJoinRows({ joinTable:"show_tropes", user_id, show_id: CURRENT_SHOW.id, fkColumn:"trope_id", ids: sels.tropes.getIds() });
+}
 
   if (error) {
     if (msgEl) msgEl.textContent = `Error: ${error.message}`;
@@ -742,6 +833,11 @@ searchEl.addEventListener("input", (e) => {
       selected.clear();
       renderChips();
     }
+    setSelectedRows: (rows) => {
+    selected.clear();
+    (rows || []).forEach(r => selected.set(r.id, r.name));
+    renderChips();
+  }
   };
 }
 
@@ -1044,10 +1140,11 @@ last_rewatch_date,     description,
     movies, movie_length_min,
     ovas, ova_length_min,
     current_season, current_episode,
-    show_platforms(platforms(name)),
-    show_genres(genres(name)),
-    show_tropes(tropes(name)),
-     show_studios(studios(name))
+show_platforms(platform_id, platforms(id, name)),
+show_genres(genre_id, genres(id, name)),
+show_tropes(trope_id, tropes(id, name)),
+show_studios(studio_id, studios(id, name))
+
     `)
     .order("created_at", { ascending: false });
 
@@ -1140,10 +1237,10 @@ last_rewatch_date,
       movies, movie_length_min,
       ovas, ova_length_min,
       current_season, current_episode,
-      show_platforms(platforms(name)),
-      show_genres(genres(name)),
-      show_tropes(tropes(name)),
-      show_studios(studios(name))
+   show_platforms(platform_id, platforms(id, name)),
+show_genres(genre_id, genres(id, name)),
+show_tropes(trope_id, tropes(id, name)),
+show_studios(studio_id, studios(id, name))
     `)
     .eq("id", showId)
     .eq("user_id", user_id)   // prevents seeing other users’ rows + helps RLS consistency
@@ -1546,7 +1643,10 @@ const [p, g, t, s] = await Promise.all([
   loadOptionRows("tropes"),
   loadOptionRows("studios")
 ]);
-
+PLATFORM_ROWS = p;
+GENRE_ROWS = g;
+TROPE_ROWS = t;
+STUDIO_ROWS = s;
 
   platformSelect.setRows(p);
   genreSelect.setRows(g);
@@ -1573,7 +1673,10 @@ const [p, g, t, s] = await Promise.all([
   loadOptionRows("tropes"),
   loadOptionRows("studios")
 ]);
-
+PLATFORM_ROWS = p;
+GENRE_ROWS = g;
+TROPE_ROWS = t;
+STUDIO_ROWS = s;
 
   platformSelect.setRows(p);
   genreSelect.setRows(g);
