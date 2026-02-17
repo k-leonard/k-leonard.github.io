@@ -1040,6 +1040,15 @@ last_rewatch_date,
     msg.textContent = `Error: ${error.message}`;
     return;
   }
+const poster = el("showPoster");
+if (poster) {
+  if (data.image_url) {
+    poster.src = data.image_url;
+    poster.style.display = "";
+  } else {
+    poster.style.display = "none";
+  }
+}
 
   ALL_SHOWS_CACHE = data || [];
   rerenderFiltered();
