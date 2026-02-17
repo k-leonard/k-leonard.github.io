@@ -335,6 +335,15 @@ function renderShowDetailBlocks(show, mode) {
   if (!facts || !desc || !notes) return;
 
   if (mode === "view") {
+    const poster = el("showPoster");
+  if (poster) {
+    if (show.image_url) {
+      poster.src = show.image_url;
+      poster.classList.remove("hidden");
+    } else {
+      poster.classList.add("hidden");
+    }
+  }
     desc.innerHTML = `<p class="muted">${escapeHtml(show.description?.trim() || "(No description yet.)")}</p>`;
     notes.innerHTML = `<p class="muted">${escapeHtml(show.notes?.trim() || "(No notes.)")}</p>`;
 
@@ -527,6 +536,8 @@ async function saveInlineEdits() {
   setInlineEditMode(false);
 
   await loadShowDetail(CURRENT_SHOW.id);
+ console.log("SHOW DETAIL DATA:", data);
+
   await loadShows(); // keep Collection/Browse updated
 }
 // --------------------
