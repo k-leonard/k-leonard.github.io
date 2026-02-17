@@ -1697,5 +1697,3 @@ STUDIO_ROWS = s;
 }
 
 init();
-
-
