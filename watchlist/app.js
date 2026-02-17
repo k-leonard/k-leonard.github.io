@@ -416,6 +416,37 @@ function renderShowDetailBlocks(show, mode) {
 
     </div>
   `;
+
+
+  // wire conditional visibility
+  const statusSel = el("edit_status");
+  const typeSel = el("edit_show_type");
+
+  function syncEditVisibility() {
+    const status = statusSel?.value || "";
+    const type = typeSel?.value || "";
+    const isWatching = status === "Watching";
+
+    const isTV = type === "TV" || type === "TV & Movie";
+    const isMovie = type === "Movie" || type === "TV & Movie";
+    const isAnime = (show.category === "Anime");
+
+    const prog = el("editProgressBlock");
+    const tv = el("editTvBlock");
+    const mv = el("editMovieBlock");
+    const ova = el("editOvaBlock");
+
+    if (prog) prog.style.display = isWatching ? "grid" : "none";
+    if (tv) tv.style.display = isTV ? "grid" : "none";
+    if (mv) mv.style.display = isMovie ? "grid" : "none";
+    if (ova) ova.style.display = isAnime ? "grid" : "none";
+  }
+
+  statusSel?.addEventListener("change", syncEditVisibility);
+  typeSel?.addEventListener("change", syncEditVisibility);
+  syncEditVisibility();
+}
+
 function setInlineEditMode(on) {
   EDIT_MODE = on;
 
@@ -480,36 +511,6 @@ async function saveInlineEdits() {
   await loadShowDetail(CURRENT_SHOW.id);
   await loadShows(); // keep Collection/Browse updated
 }
-
-  // wire conditional visibility
-  const statusSel = el("edit_status");
-  const typeSel = el("edit_show_type");
-
-  function syncEditVisibility() {
-    const status = statusSel?.value || "";
-    const type = typeSel?.value || "";
-    const isWatching = status === "Watching";
-
-    const isTV = type === "TV" || type === "TV & Movie";
-    const isMovie = type === "Movie" || type === "TV & Movie";
-    const isAnime = (show.category === "Anime");
-
-    const prog = el("editProgressBlock");
-    const tv = el("editTvBlock");
-    const mv = el("editMovieBlock");
-    const ova = el("editOvaBlock");
-
-    if (prog) prog.style.display = isWatching ? "grid" : "none";
-    if (tv) tv.style.display = isTV ? "grid" : "none";
-    if (mv) mv.style.display = isMovie ? "grid" : "none";
-    if (ova) ova.style.display = isAnime ? "grid" : "none";
-  }
-
-  statusSel?.addEventListener("change", syncEditVisibility);
-  typeSel?.addEventListener("change", syncEditVisibility);
-  syncEditVisibility();
-}
-
 // --------------------
 // Browse filter helpers
 // --------------------
