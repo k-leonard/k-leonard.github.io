@@ -1,1 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About | Your Name</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Optional: simple skip link for accessibility -->
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <!-- Minimal header (no tabs/nav) -->
+  <header class="site-header">
+    <div class="wrap">
+      <a class="site-title" href="/">Your Name</a>
+    </div>
+  </header>
+
+  <main id="content" class="wrap">
+    <h1 class="page-title">About</h1>
+
+    <section class="bio-block" aria-labelledby="bio-50">
+      <h2 id="bio-50">Press Bio (50 words)</h2>
+      <p>
+        <!-- Replace with your own 50-word bio -->
+        Your 50-word press bio goes here. Keep it tight: who you are,
+        what you write/do, notable publications/roles, and one line of credibility.
+      </p>
+    </section>
+
+    <section class="bio-block" aria-labelledby="bio-100">
+      <h2 id="bio-100">Press Bio (100 words)</h2>
+      <p>
+        <!-- Replace with your own 100-word bio -->
+        Your 100-word press bio goes here. Expand with awards, education,
+        current work, research interests, or what you’re known for.
+      </p>
+    </section>
+
+    <figure class="author-photo">
+      <!-- Use a local file like images/author.jpg -->
+      <img
+        src="images/author.jpg"
+        alt="Portrait of Your Name"
+        loading="lazy"
+        width="900"
+        height="1100"
+      />
+      <figcaption class="muted">
+        Photo: Photographer Name, Year
+      </figcaption>
+    </figure>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap muted small">
+      © <span id="year"></span> Your Name
+    </div>
+  </footer>
+
+  <script>
+    // tiny convenience for the footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
 
