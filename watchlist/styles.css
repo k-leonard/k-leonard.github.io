@@ -317,3 +317,67 @@ input[type="checkbox"]{
   margin-bottom: 10px;
 }
 .hidden{ display:none; }
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.media-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.25);
+}
+
+.media-card__poster {
+  width: 100%;
+  aspect-ratio: 2 / 3; /* poster shape */
+  object-fit: cover;
+  display: block;
+  background: rgba(255,255,255,0.06); /* nice while loading */
+}
+
+.media-card__body {
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.media-title {
+  font-weight: 650;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.media-meta {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.media-tags {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+}
+
+.media-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
