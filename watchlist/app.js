@@ -17,7 +17,8 @@ const msg = el("msg"); // <-- add this
 const authMsg = el("authMsg");
 const browseMsg = el("msg");
 const homeMsg = el("homeMsg");
-
+const description = formData.get("description")?.trim() || null;
+const image_url = null;
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
   if (browseMsg) browseMsg.textContent = text;
@@ -1054,15 +1055,7 @@ last_rewatch_date,     description,
     msg.textContent = `Error: ${error.message}`;
     return;
   }
-const poster = el("showPoster");
-if (poster) {
-  if (data.image_url) {
-    poster.src = data.image_url;
-    poster.style.display = "";
-  } else {
-    poster.style.display = "none";
-  }
-}
+
 
   ALL_SHOWS_CACHE = data || [];
   rerenderFiltered();
