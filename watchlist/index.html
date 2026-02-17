@@ -1,5 +1,5 @@
 <!doctype html>
-<html> 
+<html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,10 +34,9 @@
     </section>
 
     <!-- HOME -->
-    <section class="card " id="view-home" style="display:none;">
+    <section class="card" id="view-home" style="display:none;">
       <h2>Home</h2>
 
-      <!-- optional: we’ll wire these later -->
       <div class="homeGrid">
         <div class="miniCard">
           <div class="kpiLabel muted">To Watch</div>
@@ -56,156 +55,154 @@
           <div class="kpiValue" id="kpiWatched">–</div>
         </div>
       </div>
-    <p id="homeMsg" class="muted"></p>
+
+      <p id="homeMsg" class="muted"></p>
 
       <section class="card innerCard" id="app" style="display:none; margin-top:14px;">
         <h3>Add show</h3>
 
-       <form id="addForm" class="grid">
-  <input name="title" placeholder="Title" required />
+        <form id="addForm" class="grid">
+          <input name="title" placeholder="Title" required />
 
-  <!-- STATUS -->
-  <select name="status" id="status">
-    <option>To Be Watched</option>
-    <option>Watching</option>
-    <option>Watched</option>
-    <option>Dropped</option>
-    <option>Waiting for Next Season</option>
-  </select>
+          <!-- STATUS -->
+          <select name="status" id="status">
+            <option>To Be Watched</option>
+            <option>Watching</option>
+            <option>Watched</option>
+            <option>Dropped</option>
+            <option>Waiting for Next Season</option>
+          </select>
 
-  <!-- Watching-only block -->
-  <div id="progressBlock" class="progressBlock" style="display:none;">
-    <label class="field">
-      <span>Current season</span>
-      <input type="number" name="current_season" min="1" step="1" />
-    </label>
+          <!-- Watching-only block -->
+          <div id="progressBlock" class="progressBlock" style="display:none;">
+            <label class="field">
+              <span>Current season</span>
+              <input type="number" name="current_season" min="1" step="1" />
+            </label>
 
-    <label class="field">
-      <span>Current episode</span>
-      <input type="number" name="current_episode" min="1" step="1" />
-    </label>
-  </div>
+            <label class="field">
+              <span>Current episode</span>
+              <input type="number" name="current_episode" min="1" step="1" />
+            </label>
+          </div>
 
-  <!-- CATEGORY -->
-  <select name="category" id="category">
-    <option value="Anime">Anime</option>
-    <option value="Non-anime" selected>Non-anime</option>
-  </select>
+          <!-- CATEGORY -->
+          <select name="category" id="category">
+            <option value="Anime">Anime</option>
+            <option value="Non-anime" selected>Non-anime</option>
+          </select>
 
-  <!-- TYPE (ONLY ONE) -->
-  <select name="show_type" id="show_type">
-    <option value="">Type (optional)</option>
-    <option value="TV">TV</option>
-    <option value="Movie">Movie</option>
-    <option value="TV &amp; Movie">TV &amp; Movie</option>
-  </select>
+          <!-- TYPE (ONLY ONE) -->
+          <select name="show_type" id="show_type">
+            <option value="">Type (optional)</option>
+            <option value="TV">TV</option>
+            <option value="Movie">Movie</option>
+            <option value="TV &amp; Movie">TV &amp; Movie</option>
+          </select>
 
-  <!-- Ongoing -->
-  <select name="ongoing" id="ongoing">
-    <option value="">Is the Show Ongoing? (optional)</option>
-    <option>Yes</option>
-    <option>No</option>
-    <option>On Hiatus</option>
-    <option>To Be Released</option>
-  </select>
+          <!-- Ongoing -->
+          <select name="ongoing" id="ongoing">
+            <option value="">Is the Show Ongoing? (optional)</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>On Hiatus</option>
+            <option>To Be Released</option>
+          </select>
 
-  <label class="field">
-    <span>Date Released</span>
-    <input type="date" name="release_date" />
-  </label>
+          <label class="field">
+            <span>Date Released</span>
+            <input type="date" name="release_date" />
+          </label>
 
-  <!-- TV-only block -->
-  <div id="tvBlock" class="typeBlock" style="display:none;">
-    <label class="field">
-      <span># Seasons</span>
-      <input type="number" name="seasons" min="0" step="1" />
-    </label>
+          <!-- TV-only block -->
+          <div id="tvBlock" class="typeBlock" style="display:none;">
+            <label class="field">
+              <span># Seasons</span>
+              <input type="number" name="seasons" min="0" step="1" />
+            </label>
 
-    <label class="field">
-      <span># Episodes</span>
-      <input type="number" name="episodes" min="0" step="1" />
-    </label>
+            <label class="field">
+              <span># Episodes</span>
+              <input type="number" name="episodes" min="0" step="1" />
+            </label>
 
-    <label class="field">
-      <span>Episode length (min)</span>
-      <input type="number" name="episode_length_min" min="0" step="1" />
-    </label>
-  </div>
+            <label class="field">
+              <span>Episode length (min)</span>
+              <input type="number" name="episode_length_min" min="0" step="1" />
+            </label>
+          </div>
 
-  <!-- Movie-only block -->
-  <div id="movieBlock" class="typeBlock" style="display:none;">
-    <label class="field">
-      <span># Movies</span>
-      <input type="number" name="movies" min="0" step="1" />
-    </label>
+          <!-- Movie-only block -->
+          <div id="movieBlock" class="typeBlock" style="display:none;">
+            <label class="field">
+              <span># Movies</span>
+              <input type="number" name="movies" min="0" step="1" />
+            </label>
 
-    <label class="field">
-      <span>Movie length (min)</span>
-      <input type="number" name="movie_length_min" min="0" step="1" />
-    </label>
-  </div>
+            <label class="field">
+              <span>Movie length (min)</span>
+              <input type="number" name="movie_length_min" min="0" step="1" />
+            </label>
+          </div>
 
-  <!-- Anime-only block -->
-  <div id="ovaBlock" class="ovaBlock" style="display:none;">
-    <label class="field">
-      <span># OVAs</span>
-      <input type="number" name="ovas" min="0" step="1" />
-    </label>
+          <!-- Anime-only block -->
+          <div id="ovaBlock" class="ovaBlock" style="display:none;">
+            <label class="field">
+              <span># OVAs</span>
+              <input type="number" name="ovas" min="0" step="1" />
+            </label>
 
-    <label class="field">
-      <span>OVA length (min)</span>
-      <input type="number" name="ova_length_min" min="0" step="1" />
-    </label>
-  </div>
+            <label class="field">
+              <span>OVA length (min)</span>
+              <input type="number" name="ova_length_min" min="0" step="1" />
+            </label>
+          </div>
 
-  <!-- Rating -->
-  <div class="starField">
-    <label>My rating</label>
-    <div class="stars" id="ratingStars">
-      <span class="star" data-value="1">☆</span>
-      <span class="star" data-value="2">☆</span>
-      <span class="star" data-value="3">☆</span>
-      <span class="star" data-value="4">☆</span>
-      <span class="star" data-value="5">☆</span>
-      <span class="starClear secondary" id="clearRating">Clear</span>
-    </div>
-    <input type="hidden" name="my_rating" id="my_rating" />
-  </div>
+          <!-- Rating -->
+          <div class="starField">
+            <label>My rating</label>
+            <div class="stars" id="ratingStars">
+              <span class="star" data-value="1">☆</span>
+              <span class="star" data-value="2">☆</span>
+              <span class="star" data-value="3">☆</span>
+              <span class="star" data-value="4">☆</span>
+              <span class="star" data-value="5">☆</span>
+              <span class="starClear secondary" id="clearRating">Clear</span>
+            </div>
+            <input type="hidden" name="my_rating" id="my_rating" />
+          </div>
 
-<div class="multiselect">
-  <label>Studio</label>
-  <button type="button" id="studioBtn" class="secondary">Select studios</button>
-  <div id="studioMenu" class="menu hidden"></div>
-  <div id="studioChips" class="chips"></div>
-</div>
+          <div class="multiselect">
+            <label>Studio</label>
+            <button type="button" id="studioBtn" class="secondary">Select studios</button>
+            <div id="studioMenu" class="menu hidden"></div>
+            <div id="studioChips" class="chips"></div>
+          </div>
 
+          <div class="multiselect">
+            <label>Where to Watch</label>
+            <button type="button" id="platformBtn" class="secondary">Select platforms</button>
+            <div id="platformMenu" class="menu hidden"></div>
+            <div id="platformChips" class="chips"></div>
+          </div>
 
+          <div class="multiselect">
+            <label>Genres</label>
+            <button type="button" id="genreBtn" class="secondary">Select genres</button>
+            <div id="genreMenu" class="menu hidden"></div>
+            <div id="genreChips" class="chips"></div>
+          </div>
 
-  <div class="multiselect">
-    <label>Where to Watch</label>
-    <button type="button" id="platformBtn" class="secondary">Select platforms</button>
-    <div id="platformMenu" class="menu hidden"></div>
-    <div id="platformChips" class="chips"></div>
-  </div>
+          <div class="multiselect">
+            <label>Tropes</label>
+            <button type="button" id="tropeBtn" class="secondary">Select tropes</button>
+            <div id="tropeMenu" class="menu hidden"></div>
+            <div id="tropeChips" class="chips"></div>
+          </div>
 
-  <div class="multiselect">
-    <label>Genres</label>
-    <button type="button" id="genreBtn" class="secondary">Select genres</button>
-    <div id="genreMenu" class="menu hidden"></div>
-    <div id="genreChips" class="chips"></div>
-  </div>
-
-  <div class="multiselect">
-    <label>Tropes</label>
-    <button type="button" id="tropeBtn" class="secondary">Select tropes</button>
-    <div id="tropeMenu" class="menu hidden"></div>
-    <div id="tropeChips" class="chips"></div>
-  </div>
-
-  <textarea name="notes" placeholder="Notes"></textarea>
-  <button type="submit">Add</button>
-</form>
-
+          <textarea name="notes" placeholder="Notes"></textarea>
+          <button type="submit">Add</button>
+        </form>
       </section>
     </section>
 
@@ -266,55 +263,54 @@
       <p id="msg" class="muted"></p>
     </section>
 
-  <!-- COLLECTION -->
-<section class="card view" id="view-collection" style="display:none;">
-  <h2>My Collection</h2>
-  <p class="muted">
-    This will be your “library view” (everything you’ve watched / rated), with a toggle for Anime vs Non-anime.
-  </p>
+    <!-- COLLECTION -->
+    <section class="card view" id="view-collection" style="display:none;">
+      <h2>My Collection</h2>
+      <p class="muted">
+        This will be your “library view” (everything you’ve watched / rated), with a toggle for Anime vs Non-anime.
+      </p>
 
-  <div class="row">
-    <select id="collectionGroup">
-      <option value="">All</option>
-      <option value="Anime">Anime</option>
-      <option value="Non-anime">Non-anime</option>
-    </select>
+      <div class="row">
+        <select id="collectionGroup">
+          <option value="">All</option>
+          <option value="Anime">Anime</option>
+          <option value="Non-anime">Non-anime</option>
+        </select>
 
-    <select id="collectionSort">
-      <option value="recent">Recently watched</option>
-      <option value="rating">Highest rated</option>
-      <option value="alpha">A → Z</option>
-    </select>
-  </div>
+        <select id="collectionSort">
+          <option value="recent">Recently watched</option>
+          <option value="rating">Highest rated</option>
+          <option value="alpha">A → Z</option>
+        </select>
+      </div>
 
-  <div id="collectionList" style="margin-top: 10px;"></div>
-  <p id="collectionMsg" class="muted"></p>
-</section>
+      <div id="collectionList" style="margin-top: 10px;"></div>
+      <p id="collectionMsg" class="muted"></p>
+    </section>
 
-      <!-- SHOW DETAILS (ONLY ONE, NOT NESTED) -->
+    <!-- SHOW DETAILS -->
     <section class="card view" id="view-show" style="display:none;">
       <div class="row" style="justify-content: space-between;">
         <div>
           <h2 id="showTitle">Show</h2>
           <p class="muted" id="showMeta"></p>
         </div>
-      
+
         <div class="row">
           <button id="backToCollection" type="button" class="secondary">← Back</button>
           <button id="fetchAnimeBtn" type="button" class="secondary">Fetch anime info</button>
           <button id="inlineEditBtn" type="button" class="secondary">Edit</button>
-
           <button id="inlineSaveBtn" type="button" style="display:none;">Save</button>
           <button id="inlineCancelBtn" type="button" class="secondary" style="display:none;">Cancel</button>
         </div>
       </div>
-      
+
       <p id="showDetailMsg" class="muted" style="margin-top:8px;"></p>
 
       <div class="grid" style="margin-top:12px;">
         <div class="card innerCard">
           <h3 style="margin-top:0;">Description</h3>
-                <img id="showPoster" class="poster hidden" alt="Poster" />
+          <img id="showPoster" class="poster hidden" alt="Poster" />
           <div id="showDescriptionBlock"></div>
         </div>
 
@@ -323,100 +319,96 @@
           <div id="showFactsBlock"></div>
         </div>
       </div>
-      
+
       <div class="card innerCard" style="margin-top:12px;">
         <h3 style="margin-top:0;">Tags</h3>
         <div id="showTags"></div>
       </div>
-      
+
       <div class="card innerCard" style="margin-top:12px;">
         <h3 style="margin-top:0;">Notes</h3>
         <div id="showNotesBlock"></div>
       </div>
-      
-      
-        <p id="editMsg" class="muted" style="margin-top:8px;"></p>
-      </section>
-        <form id="editForm" class="grid" style="display:none; margin-top:10px;">
+
+      <p id="editMsg" class="muted" style="margin-top:8px;"></p>
+
+      <!-- IMPORTANT: edit form is inside view-show -->
+      <form id="editForm" class="grid" style="display:none; margin-top:10px;">
+        <label class="field">
+          <span>Status</span>
+          <select name="status" id="edit_status">
+            <option>To Be Watched</option>
+            <option>Watching</option>
+            <option>Watched</option>
+            <option>Dropped</option>
+            <option>Waiting for Next Season</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Rating (0–5)</span>
+          <input type="number" name="rating_stars" id="edit_rating" min="0" max="5" step="1" />
+        </label>
+
+        <label class="field">
+          <span>Last Watched</span>
+          <input type="date" name="last_watched" id="edit_last_watched" />
+        </label>
+
+        <label class="field">
+          <span>Current Season</span>
+          <input type="number" name="current_season" id="edit_current_season" min="1" step="1" />
+        </label>
+
+        <label class="field">
+          <span>Current Episode</span>
+          <input type="number" name="current_episode" id="edit_current_episode" min="1" step="1" />
+        </label>
+
+        <label class="field" style="grid-column: 1 / -1;">
+          <span>Description</span>
+          <textarea name="description" id="edit_description" rows="3"></textarea>
+        </label>
+
+        <label class="field" style="grid-column: 1 / -1;">
+          <span>Notes</span>
+          <textarea name="notes" id="edit_notes" rows="3"></textarea>
+        </label>
+
+        <div class="card innerCard" style="grid-column:1 / -1;">
+          <h4 style="margin:0 0 8px 0;">Rewatch</h4>
+
           <label class="field">
-            <span>Status</span>
-            <select name="status" id="edit_status">
-              <option>To Be Watched</option>
-              <option>Watching</option>
-              <option>Watched</option>
-              <option>Dropped</option>
-              <option>Waiting for Next Season</option>
+            <span>Rewatch Count</span>
+            <input type="number" name="rewatch_count" id="edit_rewatch_count" min="0" step="1" />
+          </label>
+
+          <label class="field">
+            <span>Currently Rewatching?</span>
+            <select name="is_rewatching" id="edit_is_rewatching">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
             </select>
           </label>
-      
-          <label class="field">
-            <span>Rating (0–5)</span>
-            <input type="number" name="rating_stars" id="edit_rating" min="0" max="5" step="1" />
-          </label>
-      
-          <label class="field">
-            <span>Last Watched</span>
-            <input type="date" name="last_watched" id="edit_last_watched" />
-          </label>
-      
-          <label class="field">
-            <span>Current Season</span>
-            <input type="number" name="current_season" id="edit_current_season" min="1" step="1" />
-          </label>
-      
-          <label class="field">
-            <span>Current Episode</span>
-            <input type="number" name="current_episode" id="edit_current_episode" min="1" step="1" />
-          </label>
-      
-          <label class="field" style="grid-column: 1 / -1;">
-            <span>Description</span>
 
-            <textarea name="description" id="edit_description" rows="3"></textarea>
+          <label class="field">
+            <span>Last Rewatch Date</span>
+            <input type="date" name="last_rewatch_date" id="edit_last_rewatch_date" />
           </label>
-      
-          <label class="field" style="grid-column: 1 / -1;">
-            <span>Notes</span>
-            <textarea name="notes" id="edit_notes" rows="3"></textarea>
-          </label>
-      
-          <div class="card innerCard" style="grid-column:1 / -1;">
-            <h4 style="margin:0 0 8px 0;">Rewatch</h4>
-      
-            <label class="field">
-              <span>Rewatch Count</span>
-              <input type="number" name="rewatch_count" id="edit_rewatch_count" min="0" step="1" />
-            </label>
-      
-            <label class="field">
-              <span>Currently Rewatching?</span>
-              <select name="is_rewatching" id="edit_is_rewatching">
-                <option value="false">No</option>
-                <option value="true">Yes</option>
-              </select>
-            </label>
-      
-            <label class="field">
-              <span>Last Rewatch Date</span>
-              <input type="date" name="last_rewatch_date" id="edit_last_rewatch_date" />
-            </label>
-          </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </section>
   </main>
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-  const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 
-  // Make it available to app.js
-  window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+    // Make it available to app.js
+    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
 
-<script type="module" src="./app.js"></script>
-
-
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
