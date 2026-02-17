@@ -301,3 +301,11 @@ input[type="checkbox"]{
 .factRow:last-child{ border-bottom: 0; }
 .factLabel{ font-size: 12px; }
 .factValue{ font-size: 14px; }
+.poster{
+  width: 160px;
+  max-width: 100%;
+  border-radius: 12px;
+  display: block;
+  margin-bottom: 10px;
+}
+.hidden{ display:none; }
