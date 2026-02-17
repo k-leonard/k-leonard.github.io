@@ -986,7 +986,9 @@ const current_episode = toIntOrNull(formData.get("current_episode"));
       ovas,
       ova_length_min,
      current_season,
-current_episode
+current_episode,
+         description,
+    image_url
     }])
     .select("id")
     .single();
@@ -1024,7 +1026,8 @@ async function loadShows() {
        id, user_id, title, status, rating_stars, last_watched, created_at,
     category, show_type, ongoing, release_date, rewatch_count,
 is_rewatching,
-last_rewatch_date,
+last_rewatch_date,     description,
+    image_url,
     seasons, episodes, episode_length_min,
     movies, movie_length_min,
     ovas, ova_length_min,
