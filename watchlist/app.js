@@ -1,14 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const DEV_MODE = false; // <-- set to false when Supabase is back
+const DEV_MODE = false; //allows me to still work on aspects if supabase is down, although i do think there are rendering issues i need to address
 console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
  
-
+// -------------------
+// Constants
+// -------------------
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let CURRENT_SHOW = null;
-
+let EDIT_MODE = false; 
 const el = (id) => document.getElementById(id);
 const msg = el("msg"); // <-- add this
 
@@ -258,6 +260,254 @@ function renderCollectionCards() {
       route();
     });
   });
+}
+//---------------------
+// inline render helpers
+//--------------------
+function v(val) {
+  return (val === null || val === undefined || val === "") ? "—" : String(val);
+}
+
+function inputRow(label, id, type, value) {
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <input id="${id}" type="${type}" value="${escapeHtml(value ?? "")}" />
+    </label>
+  `;
+}
+
+function numberRow(label, id, value, min = 0) {
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <input id="${id}" type="number" min="${min}" step="1" value="${value ?? ""}" />
+    </label>
+  `;
+}
+
+function dateRow(label, id, value) {
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <input id="${id}" type="date" value="${value ?? ""}" />
+    </label>
+  `;
+}
+
+function selectRow(label, id, options, value) {
+  const opts = options.map(o => {
+    const sel = String(o.value) === String(value) ? "selected" : "";
+    return `<option value="${escapeHtml(o.value)}" ${sel}>${escapeHtml(o.label)}</option>`;
+  }).join("");
+  return `
+    <label class="field">
+      <span>${escapeHtml(label)}</span>
+      <select id="${id}">${opts}</select>
+    </label>
+  `;
+}
+
+// the actual function
+function renderShowDetailBlocks(show, mode) {
+  const facts = el("showFactsBlock");
+  const desc = el("showDescriptionBlock");
+  const notes = el("showNotesBlock");
+
+  if (!facts || !desc || !notes) return;
+
+  if (mode === "view") {
+    desc.innerHTML = `<p class="muted">${escapeHtml(show.description?.trim() || "(No description yet.)")}</p>`;
+    notes.innerHTML = `<p class="muted">${escapeHtml(show.notes?.trim() || "(No notes.)")}</p>`;
+
+    facts.innerHTML = `
+      <div class="factRow"><div class="factLabel muted">Status</div><div class="factValue">${escapeHtml(v(show.status))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Ongoing</div><div class="factValue">${escapeHtml(v(show.ongoing))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Type</div><div class="factValue">${escapeHtml(v(show.show_type))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Release date</div><div class="factValue">${escapeHtml(v(show.release_date))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Last watched</div><div class="factValue">${escapeHtml(v(show.last_watched))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Rating</div><div class="factValue">${escapeHtml(show.rating_stars ? starsDisplay(show.rating_stars) : "—")}</div></div>
+
+      <hr style="border:none;border-top:1px solid #eef0f6; margin:10px 0;" />
+
+      <div class="factRow"><div class="factLabel muted">Current season</div><div class="factValue">${escapeHtml(v(show.current_season))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Current episode</div><div class="factValue">${escapeHtml(v(show.current_episode))}</div></div>
+
+      <hr style="border:none;border-top:1px solid #eef0f6; margin:10px 0;" />
+
+      <div class="factRow"><div class="factLabel muted"># Seasons</div><div class="factValue">${escapeHtml(v(show.seasons))}</div></div>
+      <div class="factRow"><div class="factLabel muted"># Episodes</div><div class="factValue">${escapeHtml(v(show.episodes))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Episode length</div><div class="factValue">${escapeHtml(v(show.episode_length_min))}</div></div>
+
+      <div class="factRow"><div class="factLabel muted"># Movies</div><div class="factValue">${escapeHtml(v(show.movies))}</div></div>
+      <div class="factRow"><div class="factLabel muted">Movie length</div><div class="factValue">${escapeHtml(v(show.movie_length_min))}</div></div>
+
+      <div class="factRow"><div class="factLabel muted"># OVAs</div><div class="factValue">${escapeHtml(v(show.ovas))}</div></div>
+      <div class="factRow"><div class="factLabel muted">OVA length</div><div class="factValue">${escapeHtml(v(show.ova_length_min))}</div></div>
+    `;
+    return;
+  }
+
+  // EDIT MODE
+  desc.innerHTML = `
+    <label class="field">
+      <span>Description</span>
+      <textarea id="edit_description" rows="4">${escapeHtml(show.description ?? "")}</textarea>
+    </label>
+  `;
+
+  notes.innerHTML = `
+    <label class="field">
+      <span>Notes</span>
+      <textarea id="edit_notes" rows="4">${escapeHtml(show.notes ?? "")}</textarea>
+    </label>
+  `;
+
+  facts.innerHTML = `
+    <div class="grid">
+
+      ${selectRow("Status", "edit_status", [
+        { value: "To Be Watched", label: "To Be Watched" },
+        { value: "Watching", label: "Watching" },
+        { value: "Watched", label: "Watched" },
+        { value: "Dropped", label: "Dropped" },
+        { value: "Waiting for Next Season", label: "Waiting for Next Season" }
+      ], show.status)}
+
+      ${selectRow("Ongoing", "edit_ongoing", [
+        { value: "", label: "—" },
+        { value: "Yes", label: "Yes" },
+        { value: "No", label: "No" },
+        { value: "On Hiatus", label: "On Hiatus" },
+        { value: "To Be Released", label: "To Be Released" }
+      ], show.ongoing ?? "")}
+
+      ${selectRow("Type", "edit_show_type", [
+        { value: "", label: "—" },
+        { value: "TV", label: "TV" },
+        { value: "Movie", label: "Movie" },
+        { value: "TV & Movie", label: "TV & Movie" }
+      ], show.show_type ?? "")}
+
+      ${dateRow("Release date", "edit_release_date", show.release_date ?? "")}
+      ${dateRow("Last watched", "edit_last_watched", show.last_watched ?? "")}
+      ${numberRow("Rating (0–5)", "edit_rating_stars", show.rating_stars ?? "", 0)}
+
+      <div id="editProgressBlock" style="grid-column:1/-1; display:none;">
+        ${numberRow("Current season", "edit_current_season", show.current_season ?? "", 1)}
+        ${numberRow("Current episode", "edit_current_episode", show.current_episode ?? "", 1)}
+      </div>
+
+      <div id="editTvBlock" style="grid-column:1/-1; display:none;" class="progressBlock">
+        ${numberRow("# Seasons", "edit_seasons", show.seasons ?? "", 0)}
+        ${numberRow("# Episodes", "edit_episodes", show.episodes ?? "", 0)}
+        ${numberRow("Episode length (min)", "edit_episode_length_min", show.episode_length_min ?? "", 0)}
+      </div>
+
+      <div id="editMovieBlock" style="grid-column:1/-1; display:none;" class="progressBlock">
+        ${numberRow("# Movies", "edit_movies", show.movies ?? "", 0)}
+        ${numberRow("Movie length (min)", "edit_movie_length_min", show.movie_length_min ?? "", 0)}
+      </div>
+
+      <div id="editOvaBlock" style="grid-column:1/-1; display:none;" class="progressBlock">
+        ${numberRow("# OVAs", "edit_ovas", show.ovas ?? "", 0)}
+        ${numberRow("OVA length (min)", "edit_ova_length_min", show.ova_length_min ?? "", 0)}
+      </div>
+
+    </div>
+  `;
+function setInlineEditMode(on) {
+  EDIT_MODE = on;
+
+  const editBtn = el("inlineEditBtn");
+  const saveBtn = el("inlineSaveBtn");
+  const cancelBtn = el("inlineCancelBtn");
+
+  if (editBtn) editBtn.style.display = on ? "none" : "";
+  if (saveBtn) saveBtn.style.display = on ? "" : "none";
+  if (cancelBtn) cancelBtn.style.display = on ? "" : "none";
+
+  if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, on ? "edit" : "view");
+}
+
+async function saveInlineEdits() {
+  if (!CURRENT_SHOW?.id) return;
+
+  const msgEl = el("showDetailMsg");
+  if (msgEl) msgEl.textContent = "Saving…";
+
+  const payload = {
+    status: el("edit_status")?.value || CURRENT_SHOW.status,
+    ongoing: (el("edit_ongoing")?.value || null),
+    show_type: (el("edit_show_type")?.value || null),
+
+    release_date: el("edit_release_date")?.value || null,
+    last_watched: el("edit_last_watched")?.value || null,
+
+    rating_stars: toIntOrNull(el("edit_rating_stars")?.value),
+
+    current_season: toIntOrNull(el("edit_current_season")?.value),
+    current_episode: toIntOrNull(el("edit_current_episode")?.value),
+
+    seasons: toIntOrNull(el("edit_seasons")?.value),
+    episodes: toIntOrNull(el("edit_episodes")?.value),
+    episode_length_min: toIntOrNull(el("edit_episode_length_min")?.value),
+
+    movies: toIntOrNull(el("edit_movies")?.value),
+    movie_length_min: toIntOrNull(el("edit_movie_length_min")?.value),
+
+    // only for anime; otherwise store nulls
+    ovas: (CURRENT_SHOW.category === "Anime") ? toIntOrNull(el("edit_ovas")?.value) : null,
+    ova_length_min: (CURRENT_SHOW.category === "Anime") ? toIntOrNull(el("edit_ova_length_min")?.value) : null,
+
+    description: el("edit_description")?.value?.trim() || null,
+    notes: el("edit_notes")?.value?.trim() || null
+  };
+
+  const { error } = await supabase
+    .from("shows")
+    .update(payload)
+    .eq("id", CURRENT_SHOW.id);
+
+  if (error) {
+    if (msgEl) msgEl.textContent = `Error: ${error.message}`;
+    return;
+  }
+
+  if (msgEl) msgEl.textContent = "Saved!";
+  setInlineEditMode(false);
+
+  await loadShowDetail(CURRENT_SHOW.id);
+  await loadShows(); // keep Collection/Browse updated
+}
+
+  // wire conditional visibility
+  const statusSel = el("edit_status");
+  const typeSel = el("edit_show_type");
+
+  function syncEditVisibility() {
+    const status = statusSel?.value || "";
+    const type = typeSel?.value || "";
+    const isWatching = status === "Watching";
+
+    const isTV = type === "TV" || type === "TV & Movie";
+    const isMovie = type === "Movie" || type === "TV & Movie";
+    const isAnime = (show.category === "Anime");
+
+    const prog = el("editProgressBlock");
+    const tv = el("editTvBlock");
+    const mv = el("editMovieBlock");
+    const ova = el("editOvaBlock");
+
+    if (prog) prog.style.display = isWatching ? "grid" : "none";
+    if (tv) tv.style.display = isTV ? "grid" : "none";
+    if (mv) mv.style.display = isMovie ? "grid" : "none";
+    if (ova) ova.style.display = isAnime ? "grid" : "none";
+  }
+
+  statusSel?.addEventListener("change", syncEditVisibility);
+  typeSel?.addEventListener("change", syncEditVisibility);
+  syncEditVisibility();
 }
 
 // --------------------
@@ -918,7 +1168,7 @@ labelVal("Last rewatch date", data.last_rewatch_date),
     `;
   }
  CURRENT_SHOW = data;
-
+renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
 }
 
 function setEditMode(on) {
@@ -1128,7 +1378,9 @@ el("collectionGroup")?.addEventListener("change", renderCollectionCards);
   fillEditForm(CURRENT_SHOW);
   setEditMode(true);
 });
-
+el("inlineEditBtn")?.addEventListener("click", () => setInlineEditMode(true));
+ el("inlineCancelBtn")?.addEventListener("click", () => setInlineEditMode(false));
+el("inlineSaveBtn")?.addEventListener("click", saveInlineEdits);
 el("cancelShowBtn")?.addEventListener("click", () => {
   setEditMode(false);
   const editMsg = el("editMsg");
