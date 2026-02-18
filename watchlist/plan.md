@@ -1,8 +1,8 @@
 # checklist of things to do for this project
 
-[v ] fix collection representaiton when altering filters
+- [x] fix collection representaiton when altering filters
 
-[v] add more filters to collection, like release date?
+- [x] add more filters to collection, like release date?
 
 
 [] fix up the browse tab(e.g the filters on the side, perhaps a bit like AO3, add more filters like date perhaps?
@@ -11,6 +11,8 @@
 - the close button isn't working
 - want the options vertical list style (ao3 style)
 - perhaps have count next to the selections (like ao3?) probably improvement for later
+
+
 [] over all fix aesthetic, looks kinda mental hospitcal core right now
 - decide on aethetic. Dark anime aesthetic? Clean AO3 aesthetic? Or modern glass UI?
 -add slide animation easing
