@@ -10,7 +10,7 @@
     * the close button isn't working
     * want the options vertical list style (ao3 style)
     * perhaps have count next to the selections (like ao3?) probably improvement for later
-    * make it so i can click on the title of a show from the browse screen and it will take me to the extended show listing
+    * make it so i can click on the title of a show from the browse screen and it will take me to the extended show listing in the collection
 
 
 - [ ] over all fix aesthetic, looks kinda mental hospitcal core right now
@@ -32,4 +32,5 @@
 
 - [ ] perhaps make it so that on the show info page ratings are shown as stars, and when i go to edit them instead of entering a number i have the same star click method i do when i enter a show for the first time
 
-- [ ]
+- [ ] MOVE DELETE BUTTON AND ADD POPUP CONFIRMATION OF DELETEION (there are very few reasons as to why a show would need to be deleted)
+- [ ] add in way to check if name already exists when adding a new show
