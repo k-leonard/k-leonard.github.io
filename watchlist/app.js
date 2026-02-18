@@ -1672,7 +1672,7 @@ el("fetchAnimeBtn")?.addEventListener("click", async () => {
 
 el("saveShowBtn")?.addEventListener("click", saveShowEdits);
 
-el("collectionSort")?.addEventListener("change", renderCollectionCards);
+el("collectionSort")?.addEventListener("change", renderCollection);
 el("backToCollection")?.addEventListener("click", () => {
   window.location.hash = "#collection";
   route();
