@@ -236,42 +236,46 @@
 
   <div class="filters-drawer__body">
     <!-- Move your existing filter controls here -->
-    <label class="field">
-      <span>Status</span>
-      <select id="statusFilter"multiple></select>
-    </label>
+<!-- STATUS -->
+<div class="filterBlock">
+  <div class="filterTitle">Status</div>
+  <div id="statusFilterBox" class="checkboxList"></div>
+</div>
 
-    <label class="field">
-      <span>Platform</span>
-      <select id="platformFilter"multiple></select>
-    </label>
+<!-- PLATFORM -->
+<div class="filterBlock">
+  <div class="filterTitle">Platform</div>
+  <input id="platformFilterSearch" class="filterSearch" type="text" placeholder="Search platforms…" />
+  <div id="platformFilterBox" class="checkboxList"></div>
+</div>
 
-    <label class="field">
-      <span>Genre</span>
-      <select id="genreFilter"multiple></select>
-    </label>
+<!-- GENRE -->
+<div class="filterBlock">
+  <div class="filterTitle">Genre</div>
+  <input id="genreFilterSearch" class="filterSearch" type="text" placeholder="Search genres…" />
+  <div id="genreFilterBox" class="checkboxList"></div>
+</div>
 
-    <label class="field">
-      <span>Trope</span>
-      <select id="tropeFilter"multiple></select>
-    </label>
+<!-- TROPE -->
+<div class="filterBlock">
+  <div class="filterTitle">Trope</div>
+  <input id="tropeFilterSearch" class="filterSearch" type="text" placeholder="Search tropes…" />
+  <div id="tropeFilterBox" class="checkboxList"></div>
+</div>
 
-    <label class="field">
-      <span>Studio</span>
-      <input id="studioFilter" type="text" placeholder="Type studio name…" />
-    </label>
+<!-- STUDIO -->
+<div class="filterBlock">
+  <div class="filterTitle">Studio</div>
+  <input id="studioFilterSearch" class="filterSearch" type="text" placeholder="Search studios…" />
+  <div id="studioFilterBox" class="checkboxList"></div>
+</div>
 
-    <label class="field">
-      <span>Min Rating</span>
-      <select id="minRatingFilter">
-        <option value="">Any</option>
-        <option value="1">1+</option>
-        <option value="2">2+</option>
-        <option value="3">3+</option>
-        <option value="4">4+</option>
-        <option value="5">5</option>
-      </select>
-    </label>
+<!-- MIN RATING can stay a select or become checkboxes; here's checkboxes -->
+<div class="filterBlock">
+  <div class="filterTitle">Min Rating</div>
+  <div id="minRatingBox" class="checkboxList"></div>
+</div>
+
 
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button id="clearFilters" class="secondary" type="button">Clear</button>
