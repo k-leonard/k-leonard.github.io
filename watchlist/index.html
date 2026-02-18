@@ -463,30 +463,7 @@
           <span>Notes</span>
           <textarea name="notes" id="edit_notes" rows="3"></textarea>
         </label>
-
-        <div class="card innerCard" style="grid-column:1 / -1;">
-          <h4 style="margin:0 0 8px 0;">Rewatch</h4>
-
-          <label class="field">
-            <span>Rewatch Count</span>
-            <input type="number" name="rewatch_count" id="edit_rewatch_count" min="0" step="1" />
-          </label>
-
-          <label class="field">
-            <span>Currently Rewatching?</span>
-            <select name="is_rewatching" id="edit_is_rewatching">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span>Last Rewatch Date</span>
-            <input type="date" name="last_rewatch_date" id="edit_last_rewatch_date" />
-          </label>
-        </div>
-      </form>
-    </section>
+  </section>
     <!-- DANGER ZONE (place at bottom of show detail / edit page) -->
 <section class="danger-zone" aria-labelledby="dangerZoneTitle">
   <h3 id="dangerZoneTitle">Danger Zone</h3>
@@ -545,6 +522,28 @@
       </button>
     </div>
   </div>
+        <div class="card innerCard" style="grid-column:1 / -1;">
+          <h4 style="margin:0 0 8px 0;">Rewatch</h4>
+
+          <label class="field">
+            <span>Rewatch Count</span>
+            <input type="number" name="rewatch_count" id="edit_rewatch_count" min="0" step="1" />
+          </label>
+
+          <label class="field">
+            <span>Currently Rewatching?</span>
+            <select name="is_rewatching" id="edit_is_rewatching">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Last Rewatch Date</span>
+            <input type="date" name="last_rewatch_date" id="edit_last_rewatch_date" />
+          </label>
+        </div>
+      </form>
 </div>
 
   </main>
