@@ -214,6 +214,8 @@ function route() {
     const id = params.get("id");
     if (id) loadShowDetail(Number(id));
   }
+   if (name === "browse") rerenderFiltered();
+  if (name === "collection") renderCollection();
 }
 
 
