@@ -1589,7 +1589,17 @@ function renderTable(rows) {
       <td>${escapeHtml(tropes.join(", "))}</td>
       <td>${escapeHtml(studios.join(", "))}</td>
       <td>${r.last_watched ?? ""}</td>
-      <td><button data-id="${r.id}" class="danger">Delete</button></td>
+      <td>
+  <button
+    type="button"
+    class="danger"
+    data-delete-id="${r.id}"
+    data-delete-title="${escapeHtml(r.title)}"
+  >
+    Delete
+  </button>
+</td>
+
     `;
     tbody.appendChild(tr);
   }
