@@ -377,7 +377,7 @@
       <p id="collectionMsg" class="muted"></p>
     </section>
 
-    <!-- SHOW DETAILS -->
+    <!-- <!-- SHOW DETAILS -->
     <section class="card view" id="view-show" style="display:none;">
       <div class="row" style="justify-content: space-between;">
         <div>
@@ -486,7 +486,120 @@
         </div>
         <!-- Where the "Danger Zone" delete button will be injected -->
 <div id="showDangerZone"></div>
-  </section>
+  </section> -->
+<!-- SHOW DETAILS -->
+<section class="card view" id="view-show" style="display:none;">
+  <div class="row" style="justify-content: space-between;">
+    <div>
+      <h2 id="showTitle">Show</h2>
+      <p class="muted" id="showMeta"></p>
+    </div>
+
+    <div class="row">
+      <button id="backToCollection" type="button" class="secondary">← Back</button>
+      <button id="fetchAnimeBtn" type="button" class="secondary">Fetch anime info</button>
+      <button id="inlineEditBtn" type="button" class="secondary">Edit</button>
+      <button id="inlineSaveBtn" type="button" style="display:none;">Save</button>
+      <button id="inlineCancelBtn" type="button" class="secondary" style="display:none;">Cancel</button>
+    </div>
+  </div>
+
+  <p id="showDetailMsg" class="muted" style="margin-top:8px;"></p>
+
+  <div class="grid" style="margin-top:12px;">
+    <div class="card innerCard">
+      <h3 style="margin-top:0;">Description</h3>
+      <img id="showPoster" class="poster hidden" alt="Poster" />
+      <div id="showDescriptionBlock"></div>
+    </div>
+
+    <div class="card innerCard">
+      <h3 style="margin-top:0;">Your Info</h3>
+      <div id="showFactsBlock"></div>
+    </div>
+  </div>
+
+  <div class="card innerCard" style="margin-top:12px;">
+    <h3 style="margin-top:0;">Tags</h3>
+    <div id="showTags"></div>
+  </div>
+
+  <div class="card innerCard" style="margin-top:12px;">
+    <h3 style="margin-top:0;">Notes</h3>
+    <div id="showNotesBlock"></div>
+  </div>
+
+  <p id="editMsg" class="muted" style="margin-top:8px;"></p>
+
+  <!-- IMPORTANT: edit form is inside view-show -->
+  <form id="editForm" class="grid" style="display:none; margin-top:10px;">
+    <label class="field">
+      <span>Status</span>
+      <select name="status" id="edit_status">
+        <option>To Be Watched</option>
+        <option>Watching</option>
+        <option>Watched</option>
+        <option>Dropped</option>
+        <option>Waiting for Next Season</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Rating (0–5)</span>
+      <input type="number" name="rating_stars" id="edit_rating" min="0" max="5" step="1" />
+    </label>
+
+    <label class="field">
+      <span>Last Watched</span>
+      <input type="date" name="last_watched" id="edit_last_watched" />
+    </label>
+
+    <label class="field">
+      <span>Current Season</span>
+      <input type="number" name="current_season" id="edit_current_season" min="1" step="1" />
+    </label>
+
+    <label class="field">
+      <span>Current Episode</span>
+      <input type="number" name="current_episode" id="edit_current_episode" min="1" step="1" />
+    </label>
+
+    <label class="field" style="grid-column: 1 / -1;">
+      <span>Description</span>
+      <textarea name="description" id="edit_description" rows="3"></textarea>
+    </label>
+
+    <label class="field" style="grid-column: 1 / -1;">
+      <span>Notes</span>
+      <textarea name="notes" id="edit_notes" rows="3"></textarea>
+    </label>
+
+    <div class="card innerCard" style="grid-column:1 / -1;">
+      <h4 style="margin:0 0 8px 0;">Rewatch</h4>
+
+      <label class="field">
+        <span>Rewatch Count</span>
+        <input type="number" name="rewatch_count" id="edit_rewatch_count" min="0" step="1" />
+      </label>
+
+      <label class="field">
+        <span>Currently Rewatching?</span>
+        <select name="is_rewatching" id="edit_is_rewatching">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Last Rewatch Date</span>
+        <input type="date" name="last_rewatch_date" id="edit_last_rewatch_date" />
+      </label>
+    </div>
+  </form>
+
+  <!-- ✅ Danger Zone belongs INSIDE view-show, AFTER your content/forms -->
+  <div id="showDangerZone"></div>
+</section>
 
       </form>
 </div>
