@@ -1,6 +1,6 @@
 # checklist of things to do for this project
 
-[ ] fix collection representaiton when altering filters
+[v ] fix collection representaiton when altering filters
 
 [] add more filters to collection, like release date?
 [] fix up the browse tab(e.g the filters on the side, perhaps a bit like AO3, add more filters like date perhaps?
