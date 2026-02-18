@@ -381,3 +381,68 @@ input[type="checkbox"]{
   display: flex;
   gap: 8px;
 }
+
+/* Top bar layout */
+.browse-topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 0;
+}
+
+.browse-searchWrap{
+  flex:1;
+  display:flex;
+  justify-content:center;
+}
+
+#q{
+  width:min(720px, 100%);
+}
+
+/* Drawer overlay */
+.filters-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  z-index:90;
+}
+
+.hidden{ display:none !important; }
+
+/* Drawer panel */
+.filters-drawer{
+  position:fixed;
+  top:0;
+  left:0;
+  height:100vh;
+  width:min(360px, 88vw);
+  background:rgba(10,10,12,0.98);
+  border-right:1px solid rgba(255,255,255,0.12);
+  z-index:100;
+  transform:translateX(-102%);
+  transition:transform 180ms ease;
+  padding:14px;
+  overflow:auto;
+}
+
+.filters-drawer.open{
+  transform:translateX(0);
+}
+
+.filters-drawer__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,0.10);
+  margin-bottom:10px;
+}
+
+.filters-drawer__body{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
