@@ -4,6 +4,13 @@
 
 - [x] add more filters to collection, like release date?
 
+* Main item
+    * Sub-item 1
+    * Sub-item 2
+        * Sub-sub-item
+* Another main item
+    1. Mixed lists work
+    2. With proper indentation
 
 - [ ] fix up the browse tab(e.g the filters on the side, perhaps a bit like AO3, add more filters like date perhaps?
         - add back in the labels up top to the search
