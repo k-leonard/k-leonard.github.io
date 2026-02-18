@@ -559,4 +559,94 @@ input[type="checkbox"]{
   background: #ffffff;
   z-index: 1;
 }
+/* Danger zone section */
+.danger-zone {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.danger-zone__text {
+  opacity: 0.85;
+  margin: 8px 0 12px;
+}
+
+/* Buttons (adapt to your existing button system) */
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.btn-danger-outline {
+  background: transparent;
+  border-color: rgba(255, 80, 80, 0.6);
+  color: rgba(255, 120, 120, 1);
+}
+
+.btn-danger {
+  background: rgba(255, 80, 80, 0.9);
+  border-color: rgba(255, 80, 80, 1);
+  color: #fff;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: none; /* toggled via JS */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modal-backdrop.is-open {
+  display: flex;
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: rgba(20, 20, 24, 0.98);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.modal__label {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  opacity: 0.9;
+}
+
+.modal__input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
 
