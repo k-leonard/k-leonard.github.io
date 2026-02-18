@@ -404,9 +404,11 @@ input[type="checkbox"]{
 .filters-overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.45);
+  background:rgba(0,0,0,0.35);  /* softer than 0.45 */
+  backdrop-filter: blur(2px);   /* subtle glass effect */
   z-index:90;
 }
+
 
 .hidden{ display:none !important; }
 
@@ -414,21 +416,27 @@ input[type="checkbox"]{
 .filters-drawer{
   position:fixed;
   top:0;
-  left:0;
+  right:0;                 /* 👈 move to left */
   height:100vh;
-  width:min(360px, 88vw);
-  background:rgba(10,10,12,0.98);
-  border-right:1px solid rgba(255,255,255,0.12);
+  width:min(360px, 90vw);
   z-index:100;
-  transform:translateX(-102%);
+
+  /* softer background */
+ background:#f4f6fb;
+  color:#1a1c25;
+
+ border-right:1px solid #d9dde8;
+  transform:translateX(-102%);   /* 👈 hide to the left */
   transition:transform 180ms ease;
-  padding:14px;
+
+  padding:16px;
   overflow:auto;
 }
 
 .filters-drawer.open{
   transform:translateX(0);
 }
+
 
 .filters-drawer__header{
   display:flex;
@@ -451,38 +459,33 @@ input[type="checkbox"]{
 }
 
 .filterBlock{ margin:10px 0; }
-.filterTitle{ font-weight:700; margin-bottom:6px; }
+.filterTitle{
+  font-weight:700;
+  color:#ffffff;
+  letter-spacing:0.3px;
+}
 
 .filterSearch{
-  width:100%;
-  margin-bottom:6px;
-  padding:8px 10px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.14);
-  background:rgba(255,255,255,0.06);
-  color:inherit;
+  background:#303553;
+  border:1px solid rgba(255,255,255,0.08);
+  color:#ffffff;
+}
+
+.filterSearch::placeholder{
+  color:rgba(255,255,255,0.5);
 }
 
 .checkboxList{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  max-height:220px;   /* drawer-friendly scroll */
-  overflow:auto;
-  padding:6px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(255,255,255,0.03);
+  background:#ffffff;
+  border:1px solid #e3e6f2;
 }
 
-.checkboxRow{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  cursor:pointer;
-  user-select:none;
+.checkboxRow span{
+  color:#2a2d38;
 }
 
-.checkboxRow input{ cursor:pointer; }
+.checkboxRow input{
+  accent-color:#5b6cff;
+}
 .checkboxRow span{ font-size:0.92rem; }
 
