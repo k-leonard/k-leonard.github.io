@@ -234,6 +234,42 @@ function wireTabs() {
     });
   });
 }
+function wireBrowseFilterDrawer() {
+  const toggleBtn = el("filtersToggle");
+  const closeBtn = el("filtersClose");
+  const panel = el("browseFiltersPanel");
+  const overlay = el("filtersOverlay");
+
+  if (!toggleBtn || !panel || !overlay) return;
+
+  function open() {
+    panel.classList.add("open");
+    overlay.classList.remove("hidden");
+    panel.setAttribute("aria-hidden", "false");
+    toggleBtn.setAttribute("aria-expanded", "true");
+  }
+
+  function close() {
+    panel.classList.remove("open");
+    overlay.classList.add("hidden");
+    panel.setAttribute("aria-hidden", "true");
+    toggleBtn.setAttribute("aria-expanded", "false");
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    const isOpen = panel.classList.contains("open");
+    if (isOpen) close();
+    else open();
+  });
+
+  closeBtn?.addEventListener("click", close);
+  overlay.addEventListener("click", close);
+
+  // Escape to close
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && panel.classList.contains("open")) close();
+  });
+}
 
 // function renderCollectionCards() {
 //   const wrap = el("collectionList");
@@ -1605,6 +1641,7 @@ await loadShows();
   // Router wiring (MUST run in DEV_MODE too)
   // --------------------
   wireTabs();
+ wireBrowseFilterDrawer();
   window.addEventListener("hashchange", route);
   wireCollectionClicks();
   if (!window.location.hash) window.location.hash = "#home";
