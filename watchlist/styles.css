@@ -450,3 +450,39 @@ input[type="checkbox"]{
   padding: 6px;
 }
 
+.filterBlock{ margin:10px 0; }
+.filterTitle{ font-weight:700; margin-bottom:6px; }
+
+.filterSearch{
+  width:100%;
+  margin-bottom:6px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.06);
+  color:inherit;
+}
+
+.checkboxList{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:220px;   /* drawer-friendly scroll */
+  overflow:auto;
+  padding:6px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.03);
+}
+
+.checkboxRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.checkboxRow input{ cursor:pointer; }
+.checkboxRow span{ font-size:0.92rem; }
+
