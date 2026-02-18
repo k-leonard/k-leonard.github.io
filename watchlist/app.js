@@ -1767,7 +1767,7 @@ studioSelect.setRows(s);
 
   await loadShows();       // fills ALL_SHOWS_CACHE
   updateHomeCounts();      // (you’ll add this below)
-renderCollectionCards();
+renderCollection();
 }
 
 supabase.auth.onAuthStateChange(async (_event, session2) => {
