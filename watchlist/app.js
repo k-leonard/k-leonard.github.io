@@ -190,7 +190,7 @@ function debounce(fn, ms) {
   };
 }
 // --------------------
-// Hash Router (Home / Browse / Collection/ Show Tab)
+// Hash Router (Home / Browse / / Show Tab)
 // --------------------
 function route() {
   const raw = (window.location.hash || "#home").slice(1);
@@ -235,54 +235,54 @@ function wireTabs() {
   });
 }
 
-function renderCollectionCards() {
-  const wrap = el("collectionList");
-  if (!wrap) return;
+// function renderCollectionCards() {
+//   const wrap = el("collectionList");
+//   if (!wrap) return;
 
-  if (!ALL_SHOWS_CACHE.length) {
-    wrap.textContent = "No shows yet.";
-    return;
-  }
+//   if (!ALL_SHOWS_CACHE.length) {
+//     wrap.textContent = "No shows yet.";
+//     return;
+//   }
 
-  // basic sorting options
-  const sort = el("collectionSort")?.value || "recent";
-  const group = el("collectionGroup")?.value || "";
+//   // basic sorting options
+//   const sort = el("collectionSort")?.value || "recent";
+//   const group = el("collectionGroup")?.value || "";
 
-  let rows = ALL_SHOWS_CACHE.slice();
+//   let rows = ALL_SHOWS_CACHE.slice();
 
-  if (group) rows = rows.filter(r => r.category === group);
+//   if (group) rows = rows.filter(r => r.category === group);
 
-  if (sort === "alpha") {
-    rows.sort((a, b) => String(a.title).localeCompare(String(b.title)));
-  } else if (sort === "rating") {
-    rows.sort((a, b) => (b.rating_stars ?? -1) - (a.rating_stars ?? -1));
-  } else {
-    // recent (created_at newest first) - if created_at exists
-    rows.sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
-  }
+//   if (sort === "alpha") {
+//     rows.sort((a, b) => String(a.title).localeCompare(String(b.title)));
+//   } else if (sort === "rating") {
+//     rows.sort((a, b) => (b.rating_stars ?? -1) - (a.rating_stars ?? -1));
+//   } else {
+//     // recent (created_at newest first) - if created_at exists
+//     rows.sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
+//   }
 
-  wrap.innerHTML = rows.map(r => {
-    const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
-    const status = r.status || "";
-    const type = r.show_type || "";
-    const cat = r.category || "";
-    return `
-      <button class="collectionCard" type="button" data-id="${r.id}">
-        <div class="collectionTitle">${escapeHtml(r.title)}</div>
-        <div class="collectionMeta muted">${escapeHtml([cat, type, status].filter(Boolean).join(" • "))}</div>
-        <div class="collectionMeta">${escapeHtml(rating)}</div>
-      </button>
-    `;
-  }).join("");
+//   wrap.innerHTML = rows.map(r => {
+//     const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
+//     const status = r.status || "";
+//     const type = r.show_type || "";
+//     const cat = r.category || "";
+//     return `
+//       <button class="collectionCard" type="button" data-id="${r.id}">
+//         <div class="collectionTitle">${escapeHtml(r.title)}</div>
+//         <div class="collectionMeta muted">${escapeHtml([cat, type, status].filter(Boolean).join(" • "))}</div>
+//         <div class="collectionMeta">${escapeHtml(rating)}</div>
+//       </button>
+//     `;
+//   }).join("");
 
-  wrap.querySelectorAll(".collectionCard").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
-      window.location.hash = `#show?id=${id}`;
-      route();
-    });
-  });
-}
+//   wrap.querySelectorAll(".collectionCard").forEach(btn => {
+//     btn.addEventListener("click", () => {
+//       const id = btn.dataset.id;
+//       window.location.hash = `#show?id=${id}`;
+//       route();
+//     });
+//   });
+// }
 //---------------------
 // inline render helpers
 //--------------------
@@ -1767,7 +1767,7 @@ studioSelect.setRows(s);
 
   await loadShows();       // fills ALL_SHOWS_CACHE
   updateHomeCounts();      // (you’ll add this below)
-  // optional: renderCollectionCards(); etc
+renderCollectionCards();
 }
 
 supabase.auth.onAuthStateChange(async (_event, session2) => {
