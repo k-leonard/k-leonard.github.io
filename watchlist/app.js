@@ -633,75 +633,113 @@ if (sels && user_id) {
 }
 
 // -------------------
-// Poster Cards
+// Poster Cards (fixed for your schema)
 // -------------------
-
 const FALLBACK_POSTER = "./assets/poster-placeholder.png";
 
 function getPosterUrl(item) {
-  // adjust this to match your column names
-  // common: item.poster_url, item.poster, item.image_url
-  return item.poster_url && item.poster_url.trim() ? item.poster_url : FALLBACK_POSTER;
+  // You store this as image_url in DB
+  const s = String(item?.image_url ?? "").trim();
+  return s ? s : FALLBACK_POSTER;
 }
-function cardHTML(item) {
-  const poster = getPosterUrl(item);
 
-  // adjust fields to your schema
-  const title = item.title || item.name || "Untitled";
-  const type = item.type || "";         // TV / Movie / TV & Movie
-  const ongoing = item.ongoing || "";   // Yes / No / On Hiatus / To Be Released
-  const released = item.date_released ? formatDate(item.date_released) : "";
+// Clickable poster card template
+function collectionCardHTML(r) {
+  const poster = getPosterUrl(r);
+
+  const title = r.title || "Untitled";
+  const cat = r.category || "";
+  const type = r.show_type || "";
+  const status = r.status || "";
+  const ongoing = r.ongoing || "";
+  const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
+
+  // Optional progress for Watching
+  const progress =
+    (status === "Watching" && (r.current_season || r.current_episode))
+      ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
+      : "";
 
   return `
-    <article class="media-card" data-id="${item.id}">
-      <img class="media-card__poster"
-           src="${escapeAttr(poster)}"
-           alt="${escapeAttr(title)} poster"
-           loading="lazy"
-           onerror="this.onerror=null;this.src='${FALLBACK_POSTER}';" />
-
+    <article class="media-card" data-id="${r.id}" role="button" tabindex="0">
+      <img
+        class="media-card__poster"
+        src="${escapeHtml(poster)}"
+        alt="${escapeHtml(title)} poster"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='${FALLBACK_POSTER}';"
+      />
       <div class="media-card__body">
-        <div class="media-title">${escapeHTML(title)}</div>
+        <div class="media-title">${escapeHtml(title)}</div>
 
         <div class="media-meta">
-          ${type ? `<div>Type: ${escapeHTML(type)}</div>` : ""}
-          ${ongoing ? `<div>Ongoing: ${escapeHTML(ongoing)}</div>` : ""}
-          ${released ? `<div>Released: ${escapeHTML(released)}</div>` : ""}
-        </div>
-
-        <div class="media-tags">
-          ${item.is_anime ? `<span class="tag">Anime</span>` : ""}
-          ${item.status ? `<span class="tag">${escapeHTML(item.status)}</span>` : ""}
+          ${[cat, type].filter(Boolean).length ? `<div>${escapeHtml([cat, type].filter(Boolean).join(" • "))}</div>` : ""}
+          ${status ? `<div>Status: ${escapeHtml(status)}</div>` : ""}
+          ${ongoing ? `<div>Ongoing: ${escapeHtml(ongoing)}</div>` : ""}
+          ${progress ? `<div>${escapeHtml(progress)}</div>` : ""}
+          ${rating ? `<div>${escapeHtml(rating)}</div>` : ""}
         </div>
 
         <div class="media-actions">
-          <button class="btn small" data-action="edit">Edit</button>
-          <button class="btn small" data-action="delete">Delete</button>
+          <button class="btn small" type="button" data-action="open">Open</button>
         </div>
       </div>
     </article>
   `;
 }
 
-function renderCollection(items) {
-  const grid = document.getElementById("collectionGrid");
-  grid.innerHTML = items.map(cardHTML).join("");
+/**
+ * IMPORTANT: make renderCollection take NO args,
+ * because your app calls renderCollection() in loadShows().
+ * It pulls rows from your existing getCollectionRows().
+ */
+function renderCollection() {
+  const wrap = el("collectionList");     // keep your existing container
+  const note = el("collectionMsg");
+  if (!wrap) return;
 
-  // If you need button clicks, do event delegation:
-  grid.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-action]");
-    if (!btn) return;
+  const rows = getCollectionRows();
 
+  if (!rows.length) {
+    wrap.innerHTML = "";
+    if (note) note.textContent = "No items yet (try switching filters or add a show).";
+    return;
+  }
+  if (note) note.textContent = "";
+
+  wrap.innerHTML = rows.map(collectionCardHTML).join("");
+}
+
+// ✅ Attach ONE click handler (event delegation) ONCE
+function wireCollectionClicks() {
+  const wrap = el("collectionList");
+  if (!wrap) return;
+
+  wrap.addEventListener("click", (e) => {
+    const openBtn = e.target.closest("button[data-action='open']");
     const card = e.target.closest(".media-card");
-    const id = card ? card.dataset.id : null;
-    const action = btn.dataset.action;
+    const target = openBtn || card;
+    if (!target) return;
 
+    const id = card?.dataset?.id;
     if (!id) return;
 
-    if (action === "edit") openEditModal(id);
-    if (action === "delete") confirmDelete(id);
-  }, { once: true }); // remove this if you re-render often; or attach once globally
+    window.location.hash = `#show?id=${id}`;
+    route();
+  });
+
+  // Optional: keyboard open
+  wrap.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const card = e.target.closest(".media-card");
+    if (!card) return;
+    e.preventDefault();
+    const id = card.dataset.id;
+    window.location.hash = `#show?id=${id}`;
+    route();
+  });
 }
+
 
 // --------------------
 // Browse filter helpers
@@ -1230,7 +1268,6 @@ show_studios(studio_id, studios(id, name))
   rerenderFiltered();
   updateHomeCounts();
  renderCollection();
- renderCollectionCards();
 }
 
 // --------------------
@@ -1563,7 +1600,7 @@ await loadShows();
   // --------------------
   wireTabs();
   window.addEventListener("hashchange", route);
-
+  wireCollectionClicks();
   if (!window.location.hash) window.location.hash = "#home";
 
   console.log("Router ready. Current hash =", window.location.hash);
@@ -1580,7 +1617,7 @@ syncTypeVisibility();
 
  el("collectionGroup")?.addEventListener("change", renderCollection);
 el("collectionSort")?.addEventListener("change", renderCollection);
-el("collectionGroup")?.addEventListener("change", renderCollectionCards);
+// el("collectionGroup")?.addEventListener("change", renderCollectionCards);
  el("editShowBtn")?.addEventListener("click", () => {
   fillEditForm(CURRENT_SHOW);
   setEditMode(true);
