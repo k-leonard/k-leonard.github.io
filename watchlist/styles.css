@@ -445,4 +445,8 @@ input[type="checkbox"]{
   flex-direction:column;
   gap:10px;
 }
+.filters-drawer select[multiple]{
+  height: 140px;       /* tweak */
+  padding: 6px;
+}
 
