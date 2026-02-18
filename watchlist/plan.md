@@ -13,6 +13,8 @@
     2. With proper indentation
 
 - [ ] fix up the browse tab(e.g the filters on the side, perhaps a bit like AO3, add more filters like date perhaps?
+    * Sub-item 1
+    * Sub-item 2
         - add back in the labels up top to the search
         - the filters are kinda in the middle of the screen, move fully right
         - the close button isn't working
