@@ -193,6 +193,57 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...args), ms);
   };
 }
+
+// --------------------
+// Filter helper functions
+// --------------------
+function uniqSorted(arr) {
+  return Array.from(new Set((arr || []).filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b)));
+}
+
+function buildCheckboxList({ boxId, items, name, searchInputId, onChange }) {
+  const box = el(boxId);
+  if (!box) return;
+
+  function render(filterText = "") {
+    const f = filterText.trim().toLowerCase();
+    const list = f ? items.filter(x => String(x).toLowerCase().includes(f)) : items;
+
+    box.innerHTML = list.map(val => `
+      <label class="checkboxRow">
+        <input type="checkbox" name="${name}" value="${escapeHtml(val)}" />
+        <span>${escapeHtml(val)}</span>
+      </label>
+    `).join("");
+
+    // When any checkbox changes, rerender results
+    box.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener("change", onChange);
+    });
+  }
+
+  // initial render
+  render("");
+
+  // wire search-within (optional)
+  if (searchInputId) {
+    const s = el(searchInputId);
+    if (s) {
+      s.addEventListener("input", debounce(() => render(s.value), 120));
+    }
+  }
+}
+
+function getCheckedValues(name) {
+  return Array.from(document.querySelectorAll(`input[type="checkbox"][name="${name}"]:checked`))
+    .map(cb => cb.value)
+    .filter(Boolean);
+}
+
+function clearCheckboxGroup(name) {
+  document.querySelectorAll(`input[type="checkbox"][name="${name}"]`).forEach(cb => { cb.checked = false; });
+}
+
 // --------------------
 // Hash Router (Home / Browse / / Show Tab)
 // --------------------
@@ -816,55 +867,56 @@ function rowHasName(list, key, wanted) {
 function applyClientFilters(rows) {
   const q = (el("q")?.value || "").trim().toLowerCase();
 
-  const statuses = getMultiSelectValues("statusFilter");     // ✅ array
-  const platforms = getMultiSelectValues("platformFilter");  // ✅ array
-  const genres = getMultiSelectValues("genreFilter");        // ✅ array
-  const tropes = getMultiSelectValues("tropeFilter");        // ✅ array
+  const statuses = getCheckedValues("statusFilter");
+  const platformsWanted = getCheckedValues("platformFilter");
+  const genresWanted = getCheckedValues("genreFilter");
+  const tropesWanted = getCheckedValues("tropeFilter");
+  const studiosWanted = getCheckedValues("studioFilter");
 
-  const studio = (el("studioFilter")?.value || "").trim().toLowerCase();
-  const minRating = el("minRatingFilter")?.value ? Number(el("minRatingFilter").value) : null;
+  const minRatingVal =
+    document.querySelector('input[type="radio"][name="minRatingFilter"]:checked')?.value || "";
+  const minRating = minRatingVal ? Number(minRatingVal) : null;
 
   return (rows || []).filter(r => {
     if (q && !String(r.title || "").toLowerCase().includes(q)) return false;
 
-    // Status: match any selected
+    // Status: match ANY selected
     if (statuses.length && !statuses.includes(r.status)) return false;
 
-    // Studio: contains match (unchanged)
-    if (studio) {
-      const studioNames = (r.show_studios || [])
-        .map(x => x.studios?.name)
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      if (!studioNames.includes(studio)) return false;
-    }
-
-    // Rating: minimum
+    // Min rating
     if (minRating != null) {
       const rs = r.rating_stars == null ? 0 : Number(r.rating_stars);
       if (rs < minRating) return false;
     }
 
-    // Platforms / Genres / Tropes: match ANY selected
-    if (platforms.length) {
+    // Platforms: match ANY selected
+    if (platformsWanted.length) {
       const rowPlatforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
-      if (!platforms.some(p => rowPlatforms.includes(p))) return false;
+      if (!platformsWanted.some(p => rowPlatforms.includes(p))) return false;
     }
 
-    if (genres.length) {
+    // Genres: match ANY selected
+    if (genresWanted.length) {
       const rowGenres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
-      if (!genres.some(g => rowGenres.includes(g))) return false;
+      if (!genresWanted.some(g => rowGenres.includes(g))) return false;
     }
 
-    if (tropes.length) {
+    // Tropes: match ANY selected
+    if (tropesWanted.length) {
       const rowTropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
-      if (!tropes.some(t => rowTropes.includes(t))) return false;
+      if (!tropesWanted.some(t => rowTropes.includes(t))) return false;
+    }
+
+    // Studios: match ANY selected
+    if (studiosWanted.length) {
+      const rowStudios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
+      if (!studiosWanted.some(s => rowStudios.includes(s))) return false;
     }
 
     return true;
   });
 }
+
 
 
 function rerenderFiltered() {
@@ -1648,8 +1700,7 @@ await loadShows();
 
   // Browse controls (new)
   const rerender = debounce(rerenderFiltered, 150);
-  ["q","statusFilter","platformFilter","genreFilter","tropeFilter","studioFilter","minRatingFilter"]
-    .forEach(id => {
+el("q")?.addEventListener("input", rerender).forEach(id => {
       const node = el(id);
       if (!node) return;
       const evt = (id === "q" || id === "studioFilter") ? "input" : "change";
@@ -1658,15 +1709,20 @@ await loadShows();
 
 el("clearFilters")?.addEventListener("click", () => {
   if (el("q")) el("q").value = "";
-  ["statusFilter","platformFilter","genreFilter","tropeFilter"].forEach(id => {
-    const s = el(id);
-    if (!s) return;
-    Array.from(s.options).forEach(o => (o.selected = false));
-  });
-  if (el("studioFilter")) el("studioFilter").value = "";
-  if (el("minRatingFilter")) el("minRatingFilter").value = "";
+
+  clearCheckboxGroup("statusFilter");
+  clearCheckboxGroup("platformFilter");
+  clearCheckboxGroup("genreFilter");
+  clearCheckboxGroup("tropeFilter");
+  clearCheckboxGroup("studioFilter");
+
+  // reset min rating radio to Any
+  const any = document.querySelector('input[type="radio"][name="minRatingFilter"][value=""]');
+  if (any) any.checked = true;
+
   rerenderFiltered();
 });
+
 
 
   // Refresh button
@@ -1844,9 +1900,79 @@ studioSelect.setRows(s);
   fillSelect("platformFilter", p, "platforms");
   fillSelect("genreFilter", g, "genres");
   fillSelect("tropeFilter", t, "tropes");
+function buildBrowseFiltersUI() {
+  // Status is not from a lookup table, so hardcode your known statuses
+  const STATUS_ITEMS = [
+    "To Be Watched",
+    "Watching",
+    "Waiting for Next Season",
+    "Watched",
+    "Dropped"
+  ];
+
+  buildCheckboxList({
+    boxId: "statusFilterBox",
+    items: STATUS_ITEMS,
+    name: "statusFilter",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "platformFilterBox",
+    items: (PLATFORM_ROWS || []).map(r => r.name),
+    name: "platformFilter",
+    searchInputId: "platformFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "genreFilterBox",
+    items: (GENRE_ROWS || []).map(r => r.name),
+    name: "genreFilter",
+    searchInputId: "genreFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "tropeFilterBox",
+    items: (TROPE_ROWS || []).map(r => r.name),
+    name: "tropeFilter",
+    searchInputId: "tropeFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "studioFilterBox",
+    items: (STUDIO_ROWS || []).map(r => r.name),
+    name: "studioFilter",
+    searchInputId: "studioFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  // Min rating: I'd recommend RADIO (single choice) instead of checkboxes
+  buildMinRatingRadios();
+}
+
+function buildMinRatingRadios() {
+  const box = el("minRatingBox");
+  if (!box) return;
+
+  const opts = ["", "1", "2", "3", "4", "5"]; // "" = Any
+  box.innerHTML = opts.map(v => `
+    <label class="checkboxRow">
+      <input type="radio" name="minRatingFilter" value="${v}" ${v === "" ? "checked" : ""}/>
+      <span>${v === "" ? "Any" : `${v}+`}</span>
+    </label>
+  `).join("");
+
+  box.querySelectorAll('input[type="radio"][name="minRatingFilter"]').forEach(r => {
+    r.addEventListener("change", rerenderFiltered);
+  });
+}
 
   await loadShows();       // fills ALL_SHOWS_CACHE
   updateHomeCounts();      // (you’ll add this below)
+ buildBrowseFiltersUI();  
 renderCollection();
 }
 
@@ -1872,11 +1998,80 @@ STUDIO_ROWS = s;
   tropeSelect.setRows(t);
  studioSelect.setRows(s);
 
+function buildBrowseFiltersUI() {
+  // Status is not from a lookup table, so hardcode your known statuses
+  const STATUS_ITEMS = [
+    "To Be Watched",
+    "Watching",
+    "Waiting for Next Season",
+    "Watched",
+    "Dropped"
+  ];
+
+  buildCheckboxList({
+    boxId: "statusFilterBox",
+    items: STATUS_ITEMS,
+    name: "statusFilter",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "platformFilterBox",
+    items: (PLATFORM_ROWS || []).map(r => r.name),
+    name: "platformFilter",
+    searchInputId: "platformFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "genreFilterBox",
+    items: (GENRE_ROWS || []).map(r => r.name),
+    name: "genreFilter",
+    searchInputId: "genreFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "tropeFilterBox",
+    items: (TROPE_ROWS || []).map(r => r.name),
+    name: "tropeFilter",
+    searchInputId: "tropeFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "studioFilterBox",
+    items: (STUDIO_ROWS || []).map(r => r.name),
+    name: "studioFilter",
+    searchInputId: "studioFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  // Min rating: I'd recommend RADIO (single choice) instead of checkboxes
+  buildMinRatingRadios();
+}
+
+function buildMinRatingRadios() {
+  const box = el("minRatingBox");
+  if (!box) return;
+
+  const opts = ["", "1", "2", "3", "4", "5"]; // "" = Any
+  box.innerHTML = opts.map(v => `
+    <label class="checkboxRow">
+      <input type="radio" name="minRatingFilter" value="${v}" ${v === "" ? "checked" : ""}/>
+      <span>${v === "" ? "Any" : `${v}+`}</span>
+    </label>
+  `).join("");
+
+  box.querySelectorAll('input[type="radio"][name="minRatingFilter"]').forEach(r => {
+    r.addEventListener("change", rerenderFiltered);
+  });
+}
 
   fillSelect("platformFilter", p, "platforms");
   fillSelect("genreFilter", g, "genres");
   fillSelect("tropeFilter", t, "tropes");
-
+buildBrowseFiltersUI();  
   await loadShows();
   updateHomeCounts();
 
