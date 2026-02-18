@@ -221,9 +221,21 @@
 
   <button id="refresh" class="secondary" type="button">Refresh</button>
 </div>
-<table id="table">
+<table id="table" class="browseTable">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Rating</th>
+      <th>Platforms</th>
+      <th>Genres</th>
+      <th>Studio</th>
+      <th></th> <!-- for delete/edit buttons -->
+    </tr>
+  </thead>
   <tbody></tbody>
 </table>
+
 <!-- Overlay for drawer -->
 <div id="filtersOverlay" class="filters-overlay hidden" tabindex="-1"></div>
 
