@@ -528,4 +528,35 @@ input[type="checkbox"]{
 .muted{
   color: #6b7280 !important;
 }
+.browseTable{
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.browseTable th{
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  border-bottom: 2px solid #e5e7eb;
+  color: #374151;
+}
+
+.browseTable td{
+  padding: 10px 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.browseTable tr:hover td{
+  background: #f9fafb;
+}
+.browseTable thead th{
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 1;
+}
 
