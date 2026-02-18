@@ -74,7 +74,11 @@ function showAuthedUI(isAuthed) {
   // Authed: router decides which view shows
   route();
 }
-
+function getMultiSelectValues(id) {
+  const sel = el(id);
+  if (!sel) return [];
+  return Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean);
+}
 function toIntOrNull(v) {
   const s = String(v ?? "").trim();
   if (!s) return null;
@@ -785,13 +789,23 @@ function wireCollectionClicks() {
 function fillSelect(selectId, rows, label) {
   const sel = el(selectId);
   if (!sel) return;
-  const current = sel.value;
+
+  // preserve existing selected values (works for multiple + single)
+  const prev = new Set(Array.from(sel.selectedOptions || []).map(o => o.value));
+
+  // For multiple selects, you usually DON'T want the "All ..." option.
+  const isMulti = sel.hasAttribute("multiple");
+
   sel.innerHTML =
-    `<option value="">All ${label}</option>` +
+    (isMulti ? "" : `<option value="">All ${label}</option>`) +
     (rows || [])
       .map(r => `<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}</option>`)
       .join("");
-  sel.value = current || "";
+
+  // restore selections
+  Array.from(sel.options).forEach(opt => {
+    if (prev.has(opt.value)) opt.selected = true;
+  });
 }
 
 function rowHasName(list, key, wanted) {
@@ -801,38 +815,57 @@ function rowHasName(list, key, wanted) {
 
 function applyClientFilters(rows) {
   const q = (el("q")?.value || "").trim().toLowerCase();
-  const status = el("statusFilter")?.value || "";
-  const platform = el("platformFilter")?.value || "";
-  const genre = el("genreFilter")?.value || "";
-  const trope = el("tropeFilter")?.value || "";
+
+  const statuses = getMultiSelectValues("statusFilter");     // ✅ array
+  const platforms = getMultiSelectValues("platformFilter");  // ✅ array
+  const genres = getMultiSelectValues("genreFilter");        // ✅ array
+  const tropes = getMultiSelectValues("tropeFilter");        // ✅ array
+
   const studio = (el("studioFilter")?.value || "").trim().toLowerCase();
   const minRating = el("minRatingFilter")?.value ? Number(el("minRatingFilter").value) : null;
 
   return (rows || []).filter(r => {
     if (q && !String(r.title || "").toLowerCase().includes(q)) return false;
-    if (status && r.status !== status) return false;
-if (studio) {
-  const studioNames = (r.show_studios || [])
-    .map(x => x.studios?.name)
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
 
-  if (!studioNames.includes(studio)) return false;
-}
+    // Status: match any selected
+    if (statuses.length && !statuses.includes(r.status)) return false;
 
+    // Studio: contains match (unchanged)
+    if (studio) {
+      const studioNames = (r.show_studios || [])
+        .map(x => x.studios?.name)
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!studioNames.includes(studio)) return false;
+    }
+
+    // Rating: minimum
     if (minRating != null) {
       const rs = r.rating_stars == null ? 0 : Number(r.rating_stars);
       if (rs < minRating) return false;
     }
 
-    if (platform && !rowHasName(r.show_platforms, "platforms", platform)) return false;
-    if (genre && !rowHasName(r.show_genres, "genres", genre)) return false;
-    if (trope && !rowHasName(r.show_tropes, "tropes", trope)) return false;
+    // Platforms / Genres / Tropes: match ANY selected
+    if (platforms.length) {
+      const rowPlatforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
+      if (!platforms.some(p => rowPlatforms.includes(p))) return false;
+    }
+
+    if (genres.length) {
+      const rowGenres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
+      if (!genres.some(g => rowGenres.includes(g))) return false;
+    }
+
+    if (tropes.length) {
+      const rowTropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
+      if (!tropes.some(t => rowTropes.includes(t))) return false;
+    }
 
     return true;
   });
 }
+
 
 function rerenderFiltered() {
   renderTable(applyClientFilters(ALL_SHOWS_CACHE));
@@ -1623,16 +1656,18 @@ await loadShows();
       node.addEventListener(evt, rerender);
     });
 
-  el("clearFilters")?.addEventListener("click", () => {
-    if (el("q")) el("q").value = "";
-    if (el("statusFilter")) el("statusFilter").value = "";
-    if (el("platformFilter")) el("platformFilter").value = "";
-    if (el("genreFilter")) el("genreFilter").value = "";
-    if (el("tropeFilter")) el("tropeFilter").value = "";
-    if (el("studioFilter")) el("studioFilter").value = "";
-    if (el("minRatingFilter")) el("minRatingFilter").value = "";
-    rerenderFiltered();
+el("clearFilters")?.addEventListener("click", () => {
+  if (el("q")) el("q").value = "";
+  ["statusFilter","platformFilter","genreFilter","tropeFilter"].forEach(id => {
+    const s = el(id);
+    if (!s) return;
+    Array.from(s.options).forEach(o => (o.selected = false));
   });
+  if (el("studioFilter")) el("studioFilter").value = "";
+  if (el("minRatingFilter")) el("minRatingFilter").value = "";
+  rerenderFiltered();
+});
+
 
   // Refresh button
   el("refresh").addEventListener("click", () => {
