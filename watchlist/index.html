@@ -464,64 +464,9 @@
           <textarea name="notes" id="edit_notes" rows="3"></textarea>
         </label>
   </section>
-    <!-- DANGER ZONE (place at bottom of show detail / edit page) -->
-<section class="danger-zone" aria-labelledby="dangerZoneTitle">
-  <h3 id="dangerZoneTitle">Danger Zone</h3>
-  <p class="danger-zone__text">
-    Deleting a show is permanent and should only be used in rare cases.
-  </p>
+<!-- Where the "Danger Zone" delete button will be injected -->
+<div id="showDangerZone"></div>
 
-  <button
-    id="openDeleteShowModalBtn"
-    type="button"
-    class="btn btn-danger-outline"
-  >
-    Delete show
-  </button>
-</section>
-
-<!-- DELETE CONFIRMATION MODAL -->
-<div id="deleteShowModal" class="modal-backdrop" aria-hidden="true">
-  <div
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="deleteShowTitle"
-    aria-describedby="deleteShowDesc"
-  >
-    <h2 id="deleteShowTitle">Delete this show?</h2>
-    <p id="deleteShowDesc">
-      This will permanently remove <strong id="deleteShowName">this show</strong> from your list.
-      This can’t be undone.
-    </p>
-
-    <!-- Optional “extra friction” input -->
-    <label class="modal__label" for="deleteConfirmInput">
-      Type <strong>DELETE</strong> to confirm:
-    </label>
-    <input
-      id="deleteConfirmInput"
-      class="modal__input"
-      type="text"
-      autocomplete="off"
-      placeholder="DELETE"
-    />
-
-    <div class="modal__actions">
-      <button id="cancelDeleteShowBtn" type="button" class="btn btn-secondary">
-        Cancel
-      </button>
-
-      <button
-        id="confirmDeleteShowBtn"
-        type="button"
-        class="btn btn-danger"
-        disabled
-      >
-        Yes, delete
-      </button>
-    </div>
-  </div>
         <div class="card innerCard" style="grid-column:1 / -1;">
           <h4 style="margin:0 0 8px 0;">Rewatch</h4>
 
@@ -558,5 +503,32 @@
   </script>
 
   <script type="module" src="./app.js"></script>
+  <!-- =========================
+     DELETE SHOW MODAL (global)
+     ========================= -->
+<div id="deleteModalBackdrop" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" aria-describedby="deleteModalDesc">
+    <h2 id="deleteModalTitle">Delete show?</h2>
+
+    <p id="deleteModalDesc">
+      This will permanently delete <strong id="deleteModalShowName">this show</strong>.
+      This cannot be undone.
+    </p>
+
+    <!-- “Friction” confirmation: type DELETE -->
+    <label for="deleteModalConfirmInput" class="modal-label">
+      Type <strong>DELETE</strong> to confirm:
+    </label>
+    <input id="deleteModalConfirmInput" class="modal-input" type="text" autocomplete="off" placeholder="DELETE" />
+
+    <div class="modal-actions">
+      <button id="deleteModalCancelBtn" type="button" class="btn secondary">Cancel</button>
+      <button id="deleteModalConfirmBtn" type="button" class="btn danger" disabled>Yes, delete</button>
+    </div>
+
+    <p id="deleteModalMsg" class="muted" style="margin-top:10px;"></p>
+  </div>
+</div>
+
 </body>
 </html>
