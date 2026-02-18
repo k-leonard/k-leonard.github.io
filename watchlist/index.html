@@ -209,8 +209,76 @@
     <!-- BROWSE -->
     <section class="card view" id="view-browse" style="display:none;">
       <h2>Browse</h2>
+<!-- Browse Top Bar -->
+<div class="browse-topbar">
+  <button id="filtersToggle" class="secondary" type="button" aria-expanded="false" aria-controls="browseFiltersPanel">
+    Filters
+  </button>
 
-      <div class="filters">
+  <div class="browse-searchWrap">
+    <input id="q" type="text" placeholder="Search…" />
+  </div>
+
+  <button id="refresh" class="secondary" type="button">Refresh</button>
+</div>
+
+<!-- Overlay for drawer -->
+<div id="filtersOverlay" class="filters-overlay hidden" tabindex="-1"></div>
+
+<!-- Drawer -->
+<aside id="browseFiltersPanel" class="filters-drawer" aria-hidden="true">
+  <div class="filters-drawer__header">
+    <div style="font-weight:700;">Filters</div>
+    <button id="filtersClose" class="secondary" type="button">Close</button>
+  </div>
+
+  <div class="filters-drawer__body">
+    <!-- Move your existing filter controls here -->
+    <label class="field">
+      <span>Status</span>
+      <select id="statusFilter"></select>
+    </label>
+
+    <label class="field">
+      <span>Platform</span>
+      <select id="platformFilter"></select>
+    </label>
+
+    <label class="field">
+      <span>Genre</span>
+      <select id="genreFilter"></select>
+    </label>
+
+    <label class="field">
+      <span>Trope</span>
+      <select id="tropeFilter"></select>
+    </label>
+
+    <label class="field">
+      <span>Studio</span>
+      <input id="studioFilter" type="text" placeholder="Type studio name…" />
+    </label>
+
+    <label class="field">
+      <span>Min Rating</span>
+      <select id="minRatingFilter">
+        <option value="">Any</option>
+        <option value="1">1+</option>
+        <option value="2">2+</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+        <option value="5">5</option>
+      </select>
+    </label>
+
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button id="clearFilters" class="secondary" type="button">Clear</button>
+    </div>
+  </div>
+</aside>
+      <p id="msg" class="muted"></p>
+    </section>
+      <!-- <div class="filters">
         <input id="q" placeholder="Search title…" />
 
         <select id="statusFilter">
@@ -261,7 +329,7 @@
       </table>
 
       <p id="msg" class="muted"></p>
-    </section>
+    </section> -->
 
     <!-- COLLECTION -->
     <section class="card view" id="view-collection" style="display:none;">
