@@ -990,6 +990,12 @@ function getCollectionRows() {
     rows.sort((a, b) => String(a.title || "").localeCompare(String(b.title || "")));
   } else if (sort === "rating") {
     rows.sort((a, b) => (Number(b.rating_stars || 0) - Number(a.rating_stars || 0)));
+    } else if (sort === "release_newest" || sort === "release_oldest") {
+  rows.sort((a, b) => {
+    const ad = a.release_date ? Date.parse(a.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
+    const bd = b.release_date ? Date.parse(b.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
+    return (sort === "release_oldest") ? (ad - bd) : (bd - ad);
+  });
   } else {
     // recent = most recently watched, else newest created
     rows.sort((a, b) => {
