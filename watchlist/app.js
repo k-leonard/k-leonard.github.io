@@ -1700,12 +1700,13 @@ await loadShows();
 
   // Browse controls (new)
   const rerender = debounce(rerenderFiltered, 150);
-el("q")?.addEventListener("input", rerender).forEach(id => {
-      const node = el(id);
-      if (!node) return;
-      const evt = (id === "q" || id === "studioFilter") ? "input" : "change";
-      node.addEventListener(evt, rerender);
-    });
+el("q")?.addEventListener("input", rerender);
+ // .forEach(id => {
+ //      const node = el(id);
+ //      if (!node) return;
+ //      const evt = (id === "q" || id === "studioFilter") ? "input" : "change";
+ //      node.addEventListener(evt, rerender);
+ //    });
 
 el("clearFilters")?.addEventListener("click", () => {
   if (el("q")) el("q").value = "";
