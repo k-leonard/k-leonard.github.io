@@ -193,6 +193,128 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...args), ms);
   };
 }
+// ===============================
+// DELETE MODAL STATE + HELPERS
+// ===============================
+
+// Holds what we are about to delete (so any delete button can open the same modal)
+let PENDING_DELETE = {
+  showId: null,
+  showTitle: "",
+  // optional: where to navigate after delete
+  redirectHash: "#collection"
+};
+
+// Cache modal DOM elements (safe: will be null if HTML not present)
+const deleteBackdrop = el("deleteModalBackdrop");
+const deleteShowNameEl = el("deleteModalShowName");
+const deleteConfirmInput = el("deleteModalConfirmInput");
+const deleteCancelBtn = el("deleteModalCancelBtn");
+const deleteConfirmBtn = el("deleteModalConfirmBtn");
+const deleteModalMsg = el("deleteModalMsg");
+
+let lastFocusedBeforeModal = null;
+
+/**
+ * Open the deletion modal and set which show we are deleting.
+ * This does NOT delete anything. It only prepares UI.
+ */
+function openDeleteModal({ showId, showTitle, redirectHash }) {
+  if (!deleteBackdrop) return;
+
+  // Save focus so we can restore it when modal closes
+  lastFocusedBeforeModal = document.activeElement;
+
+  PENDING_DELETE.showId = Number(showId);
+  PENDING_DELETE.showTitle = String(showTitle || "");
+  PENDING_DELETE.redirectHash = redirectHash || "#collection";
+
+  // Fill show name in the message
+  if (deleteShowNameEl) deleteShowNameEl.textContent = PENDING_DELETE.showTitle || "this show";
+
+  // Reset modal UI
+  if (deleteConfirmInput) deleteConfirmInput.value = "";
+  if (deleteConfirmBtn) deleteConfirmBtn.disabled = true;
+  if (deleteModalMsg) deleteModalMsg.textContent = "";
+
+  // Show modal
+  deleteBackdrop.classList.remove("hidden");
+  deleteBackdrop.setAttribute("aria-hidden", "false");
+
+  // Put cursor in input for fast confirm
+  setTimeout(() => deleteConfirmInput?.focus(), 0);
+}
+
+/** Close the delete modal and clean up. */
+function closeDeleteModal() {
+  if (!deleteBackdrop) return;
+
+  deleteBackdrop.classList.add("hidden");
+  deleteBackdrop.setAttribute("aria-hidden", "true");
+
+  // Restore focus if possible
+  if (lastFocusedBeforeModal && lastFocusedBeforeModal.focus) {
+    lastFocusedBeforeModal.focus();
+  }
+}
+
+/**
+ * Wire modal controls (Cancel button, typing DELETE enables confirm, escape/backdrop click closes).
+ * Call this ONCE in init().
+ */
+function wireDeleteModal() {
+  if (!deleteBackdrop) return;
+
+  // Cancel
+  deleteCancelBtn?.addEventListener("click", closeDeleteModal);
+
+  // Clicking backdrop closes (but clicking the modal content does not)
+  deleteBackdrop.addEventListener("click", (e) => {
+    if (e.target === deleteBackdrop) closeDeleteModal();
+  });
+
+  // ESC closes
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !deleteBackdrop.classList.contains("hidden")) {
+      closeDeleteModal();
+    }
+  });
+
+  // Enable confirm button only when user types DELETE
+  deleteConfirmInput?.addEventListener("input", () => {
+    const ok = deleteConfirmInput.value.trim().toUpperCase() === "DELETE";
+    if (deleteConfirmBtn) deleteConfirmBtn.disabled = !ok;
+  });
+
+  // Confirm delete
+  deleteConfirmBtn?.addEventListener("click", async () => {
+    const id = PENDING_DELETE.showId;
+    if (!id) return;
+
+    // Lock the UI
+    deleteConfirmBtn.disabled = true;
+    if (deleteModalMsg) deleteModalMsg.textContent = "Deleting…";
+
+    try {
+      await deleteShow(id);      // calls your existing delete function (we’ll improve it below)
+      await loadShows();         // refresh caches + collection + browse
+
+      // If the deleted show was currently open in detail view, bounce user out
+      if (window.location.hash.startsWith("#show") && CURRENT_SHOW?.id === id) {
+        window.location.hash = PENDING_DELETE.redirectHash || "#collection";
+        route();
+      }
+
+      closeDeleteModal();
+    } catch (err) {
+      console.error(err);
+      if (deleteModalMsg) deleteModalMsg.textContent = `Delete failed: ${err.message || err}`;
+      // re-enable only if they still have DELETE typed
+      const ok = deleteConfirmInput?.value.trim().toUpperCase() === "DELETE";
+      deleteConfirmBtn.disabled = !ok;
+    }
+  });
+}
 
 // --------------------
 // Filter helper functions
@@ -1358,9 +1480,45 @@ current_episode,
  
 
 async function deleteShow(id) {
-  const { error } = await supabase.from("shows").delete().eq("id", id);
-  if (error) msg.textContent = `Error: ${error.message}`;
+  const user_id = await getUserId();
+  if (!user_id) throw new Error("Not logged in.");
+
+  // If your DB has ON DELETE CASCADE on join tables, these deletes are optional.
+  // But doing them manually makes deletion more reliable if cascade isn't set.
+  const joinTables = [
+    "show_platforms",
+    "show_genres",
+    "show_tropes",
+    "show_studios"
+  ];
+
+  for (const jt of joinTables) {
+    const delJoin = await supabase
+      .from(jt)
+      .delete()
+      .eq("user_id", user_id)
+      .eq("show_id", id);
+
+    if (delJoin.error) {
+      console.warn(`Join delete failed for ${jt}:`, delJoin.error);
+      // We don't hard fail here because the show delete might still succeed with cascade.
+    }
+  }
+
+  // Delete the show row (locked to current user)
+  const { error } = await supabase
+    .from("shows")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user_id);
+
+  if (error) {
+    // surface in main msg too, but ALSO throw so modal can show error
+    if (msg) msg.textContent = `Error: ${error.message}`;
+    throw error;
+  }
 }
+
 
 async function loadShows() {
   if (DEV_MODE) return;
@@ -1436,13 +1594,20 @@ function renderTable(rows) {
     tbody.appendChild(tr);
   }
 
-  tbody.querySelectorAll("button[data-id]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = Number(btn.dataset.id);
-      await deleteShow(id);
-      await loadShows();
+// Delete buttons now open modal (NO immediate deletion)
+tbody.querySelectorAll("button[data-delete-id]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const id = Number(btn.dataset.deleteId);
+    const title = btn.dataset.deleteTitle || "this show";
+
+    openDeleteModal({
+      showId: id,
+      showTitle: title,
+      redirectHash: "#browse" // if user deletes from browse, returning here makes sense
     });
   });
+});
+
  tbody.querySelectorAll("button[data-open-id]").forEach(btn => {
   btn.addEventListener("click", () => {
     const id = btn.dataset.openId;
@@ -1555,6 +1720,35 @@ labelVal("Last rewatch date", data.last_rewatch_date),
   }
  CURRENT_SHOW = data;
 renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
+ renderShowDangerZone(CURRENT_SHOW);
+}
+/**
+ * Renders the delete button at the bottom of the show detail page.
+ * This is where "real deletion" should live (rare action).
+ */
+function renderShowDangerZone(show) {
+  const dz = el("showDangerZone");
+  if (!dz) return;
+
+  dz.innerHTML = `
+    <section class="danger-zone">
+      <h3>Danger Zone</h3>
+      <p>Deleting a show is permanent and should only be used in rare cases.</p>
+      <button id="dangerDeleteShowBtn" type="button" class="danger">
+        Delete show
+      </button>
+    </section>
+  `;
+
+  // Wire the button to open the modal
+  const btn = el("dangerDeleteShowBtn");
+  btn?.addEventListener("click", () => {
+    openDeleteModal({
+      showId: show.id,
+      showTitle: show.title,
+      redirectHash: "#collection" // after deleting from detail, go back to collection
+    });
+  });
 }
 
 function setEditMode(on) {
@@ -1751,6 +1945,7 @@ el("clearFilters")?.addEventListener("click", () => {
  wireBrowseFilterDrawer();
   window.addEventListener("hashchange", route);
   wireCollectionClicks();
+ wireDeleteModal();
   if (!window.location.hash) window.location.hash = "#home";
 
   console.log("Router ready. Current hash =", window.location.hash);
