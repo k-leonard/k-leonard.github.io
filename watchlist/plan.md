@@ -10,6 +10,7 @@
     * the close button isn't working
     * want the options vertical list style (ao3 style)
     * perhaps have count next to the selections (like ao3?) probably improvement for later
+    * make it so i can click on the title of a show from the browse screen and it will take me to the extended show listing
 
 
 - [ ] over all fix aesthetic, looks kinda mental hospitcal core right now
