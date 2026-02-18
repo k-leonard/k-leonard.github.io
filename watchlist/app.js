@@ -1418,7 +1418,12 @@ function renderTable(rows) {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${escapeHtml(r.title)}</td>
+      <td>
+  <button type="button" class="linklike" data-open-id="${r.id}">
+    ${escapeHtml(r.title)}
+  </button>
+</td>
+
       <td>${escapeHtml(r.status)}</td>
       <td>${escapeHtml(starsDisplay(r.rating_stars))}</td>
       <td>${escapeHtml(platforms.join(", "))}</td>
@@ -1438,6 +1443,14 @@ function renderTable(rows) {
       await loadShows();
     });
   });
+ tbody.querySelectorAll("button[data-open-id]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.openId;
+    window.location.hash = `#show?id=${id}`;
+    route(); // ensures view updates immediately
+  });
+});
+
 }
 function labelVal(label, val) {
   const v = (val === null || val === undefined || val === "") ? "—" : String(val);
