@@ -487,6 +487,66 @@
         </div>
       </form>
     </section>
+    <!-- DANGER ZONE (place at bottom of show detail / edit page) -->
+<section class="danger-zone" aria-labelledby="dangerZoneTitle">
+  <h3 id="dangerZoneTitle">Danger Zone</h3>
+  <p class="danger-zone__text">
+    Deleting a show is permanent and should only be used in rare cases.
+  </p>
+
+  <button
+    id="openDeleteShowModalBtn"
+    type="button"
+    class="btn btn-danger-outline"
+  >
+    Delete show
+  </button>
+</section>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div id="deleteShowModal" class="modal-backdrop" aria-hidden="true">
+  <div
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteShowTitle"
+    aria-describedby="deleteShowDesc"
+  >
+    <h2 id="deleteShowTitle">Delete this show?</h2>
+    <p id="deleteShowDesc">
+      This will permanently remove <strong id="deleteShowName">this show</strong> from your list.
+      This can’t be undone.
+    </p>
+
+    <!-- Optional “extra friction” input -->
+    <label class="modal__label" for="deleteConfirmInput">
+      Type <strong>DELETE</strong> to confirm:
+    </label>
+    <input
+      id="deleteConfirmInput"
+      class="modal__input"
+      type="text"
+      autocomplete="off"
+      placeholder="DELETE"
+    />
+
+    <div class="modal__actions">
+      <button id="cancelDeleteShowBtn" type="button" class="btn btn-secondary">
+        Cancel
+      </button>
+
+      <button
+        id="confirmDeleteShowBtn"
+        type="button"
+        class="btn btn-danger"
+        disabled
+      >
+        Yes, delete
+      </button>
+    </div>
+  </div>
+</div>
+
   </main>
 
   <script type="module">
