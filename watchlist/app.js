@@ -1,3 +1,5 @@
+console.count("app.js executed");
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const DEV_MODE = false; //allows me to still work on aspects if supabase is down, although i do think there are rendering issues i need to address
