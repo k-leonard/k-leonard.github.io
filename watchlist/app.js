@@ -450,54 +450,6 @@ function wireBrowseFilterDrawer() {
   });
 }
 
-// function renderCollectionCards() {
-//   const wrap = el("collectionList");
-//   if (!wrap) return;
-
-//   if (!ALL_SHOWS_CACHE.length) {
-//     wrap.textContent = "No shows yet.";
-//     return;
-//   }
-
-//   // basic sorting options
-//   const sort = el("collectionSort")?.value || "recent";
-//   const group = el("collectionGroup")?.value || "";
-
-//   let rows = ALL_SHOWS_CACHE.slice();
-
-//   if (group) rows = rows.filter(r => r.category === group);
-
-//   if (sort === "alpha") {
-//     rows.sort((a, b) => String(a.title).localeCompare(String(b.title)));
-//   } else if (sort === "rating") {
-//     rows.sort((a, b) => (b.rating_stars ?? -1) - (a.rating_stars ?? -1));
-//   } else {
-//     // recent (created_at newest first) - if created_at exists
-//     rows.sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
-//   }
-
-//   wrap.innerHTML = rows.map(r => {
-//     const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
-//     const status = r.status || "";
-//     const type = r.show_type || "";
-//     const cat = r.category || "";
-//     return `
-//       <button class="collectionCard" type="button" data-id="${r.id}">
-//         <div class="collectionTitle">${escapeHtml(r.title)}</div>
-//         <div class="collectionMeta muted">${escapeHtml([cat, type, status].filter(Boolean).join(" • "))}</div>
-//         <div class="collectionMeta">${escapeHtml(rating)}</div>
-//       </button>
-//     `;
-//   }).join("");
-
-//   wrap.querySelectorAll(".collectionCard").forEach(btn => {
-//     btn.addEventListener("click", () => {
-//       const id = btn.dataset.id;
-//       window.location.hash = `#show?id=${id}`;
-//       route();
-//     });
-//   });
-// }
 //---------------------
 // inline render helpers
 //--------------------
@@ -1257,60 +1209,6 @@ function getCollectionRows() {
   return rows;
 }
 
-// function renderCollection() {
-//   const wrap = el("collectionList");
-//   const note = el("collectionMsg");
-//   if (!wrap) return;
-
-//   const rows = getCollectionRows();
-
-//   if (!rows.length) {
-//     wrap.innerHTML = "";
-//     if (note) note.textContent = "No items yet (try switching filters or add a show).";
-//     return;
-//   }
-
-//   if (note) note.textContent = "";
-
-//   wrap.innerHTML = rows.map(r => {
-//     const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
-//     const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
-//     const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
-//   const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
-//     const progress =
-//       r.status === "Watching" && (r.current_season || r.current_episode)
-//         ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
-//         : "";
-
-//     return `
-//       <div class="card" style="margin: 10px 0;">
-//         <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-//           <div>
-//             <div style="font-weight:700; font-size:16px;">${escapeHtml(r.title)}</div>
-//             <div class="muted" style="margin-top:4px;">
-//               ${escapeHtml(r.category || "")}${r.show_type ? " • " + escapeHtml(r.show_type) : ""}
-//               ${r.ongoing ? " • " + escapeHtml(r.ongoing) : ""}
-//             </div>
-//           </div>
-
-//           <div style="text-align:right;">
-//             <div style="font-weight:600;">${escapeHtml(r.status || "")}</div>
-//             <div class="muted">${escapeHtml(starsDisplay(r.rating_stars))}</div>
-//             ${progress ? `<div class="muted" style="margin-top:4px;">${escapeHtml(progress)}</div>` : ""}
-//           </div>
-//         </div>
-
-//         <div class="muted" style="margin-top:10px; display:grid; gap:6px;">
-//           ${platforms.length ? `<div><b>Where:</b> ${escapeHtml(platforms.join(", "))}</div>` : ""}
-//           ${genres.length ? `<div><b>Genres:</b> ${escapeHtml(genres.join(", "))}</div>` : ""}
-//           ${tropes.length ? `<div><b>Tropes:</b> ${escapeHtml(tropes.join(", "))}</div>` : ""}
-//           ${studios.length ? `<div><b>Studios:</b> ${escapeHtml(studios.join(", "))}</div>` : ""}
-//           ${r.last_watched ? `<div><b>Last watched:</b> ${escapeHtml(r.last_watched)}</div>` : ""}
-//         </div>
-//       </div>
-//     `;
-//   }).join("");
-// }
 
 
 // --------------------
@@ -1576,11 +1474,12 @@ function renderTable(rows) {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>
-  <button type="button" class="linklike" data-open-id="${r.id}">
+<td>
+  <span class="row-link" data-open-id="${r.id}">
     ${escapeHtml(r.title)}
-  </button>
+  </span>
 </td>
+
 
       <td>${escapeHtml(r.status)}</td>
       <td>${escapeHtml(starsDisplay(r.rating_stars))}</td>
@@ -1593,7 +1492,7 @@ function renderTable(rows) {
     tbody.appendChild(tr);
   }
 
- tbody.querySelectorAll("button[data-open-id]").forEach(btn => {
+ tbody.querySelectorAll("[data-open-id]").forEach(btn => {
   btn.addEventListener("click", () => {
     const id = btn.dataset.openId;
     window.location.hash = `#show?id=${id}`;
