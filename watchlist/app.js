@@ -1604,20 +1604,6 @@ function renderTable(rows) {
     tbody.appendChild(tr);
   }
 
-// Delete buttons now open modal (NO immediate deletion)
-tbody.querySelectorAll("button[data-delete-id]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const id = Number(btn.dataset.deleteId);
-    const title = btn.dataset.deleteTitle || "this show";
-
-    openDeleteModal({
-      showId: id,
-      showTitle: title,
-      redirectHash: "#browse" // if user deletes from browse, returning here makes sense
-    });
-  });
-});
-
  tbody.querySelectorAll("button[data-open-id]").forEach(btn => {
   btn.addEventListener("click", () => {
     const id = btn.dataset.openId;
