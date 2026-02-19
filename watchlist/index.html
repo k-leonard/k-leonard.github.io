@@ -504,7 +504,152 @@
     </div>
 
     <div id="addShowModalBody" class="modalBody">
-      <!-- We will MOVE your existing Add Show form in here via JS -->
+      <section class="card innerCard" id="app"; margin-top:14px;">
+        <h3>Add show</h3>
+
+        <form id="addForm" class="grid">
+          <input name="title" placeholder="Title" required />
+
+          <!-- STATUS -->
+          <select name="status" id="status">
+            <option>To Be Watched</option>
+            <option>Watching</option>
+            <option>Watched</option>
+            <option>Dropped</option>
+            <option>Waiting for Next Season</option>
+          </select>
+
+          <!-- Watching-only block -->
+          <div id="progressBlock" class="progressBlock" style="display:none;">
+            <label class="field">
+              <span>Current season</span>
+              <input type="number" name="current_season" min="1" step="1" />
+            </label>
+
+            <label class="field">
+              <span>Current episode</span>
+              <input type="number" name="current_episode" min="1" step="1" />
+            </label>
+          </div>
+
+          <!-- CATEGORY -->
+          <select name="category" id="category">
+            <option value="Anime">Anime</option>
+            <option value="Non-anime" selected>Non-anime</option>
+          </select>
+
+          <!-- TYPE (ONLY ONE) -->
+          <select name="show_type" id="show_type">
+            <option value="">Type (optional)</option>
+            <option value="TV">TV</option>
+            <option value="Movie">Movie</option>
+            <option value="TV &amp; Movie">TV &amp; Movie</option>
+          </select>
+
+          <!-- Ongoing -->
+          <select name="ongoing" id="ongoing">
+            <option value="">Is the Show Ongoing? (optional)</option>
+            <option>Yes</option>
+            <option>No</option>
+            <option>On Hiatus</option>
+            <option>To Be Released</option>
+          </select>
+
+          <label class="field">
+            <span>Date Released</span>
+            <input type="date" name="release_date" />
+          </label>
+
+          <!-- TV-only block -->
+          <div id="tvBlock" class="typeBlock" style="display:none;">
+            <label class="field">
+              <span># Seasons</span>
+              <input type="number" name="seasons" min="0" step="1" />
+            </label>
+
+            <label class="field">
+              <span># Episodes</span>
+              <input type="number" name="episodes" min="0" step="1" />
+            </label>
+
+            <label class="field">
+              <span>Episode length (min)</span>
+              <input type="number" name="episode_length_min" min="0" step="1" />
+            </label>
+          </div>
+
+          <!-- Movie-only block -->
+          <div id="movieBlock" class="typeBlock" style="display:none;">
+            <label class="field">
+              <span># Movies</span>
+              <input type="number" name="movies" min="0" step="1" />
+            </label>
+
+            <label class="field">
+              <span>Movie length (min)</span>
+              <input type="number" name="movie_length_min" min="0" step="1" />
+            </label>
+          </div>
+
+          <!-- Anime-only block -->
+          <div id="ovaBlock" class="ovaBlock" style="display:none;">
+            <label class="field">
+              <span># OVAs</span>
+              <input type="number" name="ovas" min="0" step="1" />
+            </label>
+
+            <label class="field">
+              <span>OVA length (min)</span>
+              <input type="number" name="ova_length_min" min="0" step="1" />
+            </label>
+          </div>
+
+          <!-- Rating -->
+          <div class="starField">
+            <label>My rating</label>
+            <div class="stars" id="ratingStars">
+              <span class="star" data-value="1">☆</span>
+              <span class="star" data-value="2">☆</span>
+              <span class="star" data-value="3">☆</span>
+              <span class="star" data-value="4">☆</span>
+              <span class="star" data-value="5">☆</span>
+              <span class="starClear secondary" id="clearRating">Clear</span>
+            </div>
+            <input type="hidden" name="my_rating" id="my_rating" />
+          </div>
+
+          <div class="multiselect">
+            <label>Studio</label>
+            <button type="button" id="studioBtn" class="secondary">Select studios</button>
+            <div id="studioMenu" class="menu hidden"></div>
+            <div id="studioChips" class="chips"></div>
+          </div>
+
+          <div class="multiselect">
+            <label>Where to Watch</label>
+            <button type="button" id="platformBtn" class="secondary">Select platforms</button>
+            <div id="platformMenu" class="menu hidden"></div>
+            <div id="platformChips" class="chips"></div>
+          </div>
+
+          <div class="multiselect">
+            <label>Genres</label>
+            <button type="button" id="genreBtn" class="secondary">Select genres</button>
+            <div id="genreMenu" class="menu hidden"></div>
+            <div id="genreChips" class="chips"></div>
+          </div>
+
+          <div class="multiselect">
+            <label>Tropes</label>
+            <button type="button" id="tropeBtn" class="secondary">Select tropes</button>
+            <div id="tropeMenu" class="menu hidden"></div>
+            <div id="tropeChips" class="chips"></div>
+          </div>
+
+          <textarea name="notes" placeholder="Notes"></textarea>
+          <button type="submit">Add</button>
+        </form>
+      </section>
     </div>
   </div>
 </div>
