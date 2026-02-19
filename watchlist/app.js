@@ -2070,28 +2070,49 @@ function buildMinRatingRadios() {
  buildBrowseFiltersUI();  
 renderCollection();
 }
+let optionsLoadPromise = null;
+
+async function ensureOptionRowsLoaded() {
+  if (PLATFORM_ROWS && GENRE_ROWS && TROPE_ROWS && STUDIO_ROWS) return;
+  if (optionsLoadPromise) return optionsLoadPromise;
+
+  optionsLoadPromise = (async () => {
+    const p = await loadOptionRows("platforms");
+    PLATFORM_ROWS = p;
+    platformSelect.setRows(p);
+
+    const g = await loadOptionRows("genres");
+    GENRE_ROWS = g;
+    genreSelect.setRows(g);
+
+    const t = await loadOptionRows("tropes");
+    TROPE_ROWS = t;
+    tropeSelect.setRows(t);
+
+    const s = await loadOptionRows("studios");
+    STUDIO_ROWS = s;
+    studioSelect.setRows(s);
+  })();
+
+  try {
+    await optionsLoadPromise;
+  } finally {
+    optionsLoadPromise = null;
+  }
+}
 
 supabase.auth.onAuthStateChange(async (_event, session2) => {
   showAuthedUI(!!session2);
   if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
-
   if (!session2) return;
 
-const [p, g, t, s] = await Promise.all([
-  loadOptionRows("platforms"),
-  loadOptionRows("genres"),
-  loadOptionRows("tropes"),
-  loadOptionRows("studios")
-]);
-PLATFORM_ROWS = p;
-GENRE_ROWS = g;
-TROPE_ROWS = t;
-STUDIO_ROWS = s;
+  try {
+    await ensureOptionRowsLoaded();
+  } catch (err) {
+    console.error("ensureOptionRowsLoaded failed", err);
+  }
+});
 
-  platformSelect.setRows(p);
-  genreSelect.setRows(g);
-  tropeSelect.setRows(t);
- studioSelect.setRows(s);
 
 function buildBrowseFiltersUI() {
   // Status is not from a lookup table, so hardcode your known statuses
