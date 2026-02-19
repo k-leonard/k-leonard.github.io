@@ -1839,26 +1839,38 @@ setupAddShowModal();
       msg.textContent = "DEV_MODE: not saving to DB.";
       return;
     }
-     const form = e.target;
+const form = e.target;
 const titleInput = form.title;
 const title = titleInput.value.trim();
 
 if (!title) return;
 
+
+const errorEl = document.getElementById("addShowError");
+if (errorEl) errorEl.textContent = "";
+
 const normalizedTitle = title.toLowerCase().trim();
 
-const { data: existing } = await supabase
+// IMPORTANT: only fetch titles (and only for this user)
+const { data: existing, error: dupErr } = await supabase
   .from("shows")
-  .select("id");
+  .select("title")
+  .eq("user_id", (await supabase.auth.getUser()).data.user.id); // safest if you don't already store user id
 
-const duplicate = existing?.some(
-  s => s.title.toLowerCase().trim() === normalizedTitle
+if (dupErr) {
+  console.error("Duplicate check failed:", dupErr);
+  if (errorEl) errorEl.textContent = "Couldn’t validate title uniqueness. Try again.";
+  return;
+}
+
+const duplicate = (existing || []).some(s =>
+  (s.title || "").toLowerCase().trim() === normalizedTitle
 );
 
 if (duplicate) {
-const errorEl = document.getElementById("addShowError");
-errorEl.textContent = "You already added this show.";
-return;
+  if (errorEl) errorEl.textContent = "You already added this show.";
+  titleInput.focus();
+  return;
 }
     await addShow(
       new FormData(e.target),
