@@ -1849,8 +1849,7 @@ const normalizedTitle = title.toLowerCase().trim();
 
 const { data: existing } = await supabase
   .from("shows")
-  .select("id")
-  .eq("user_id", CURRENT_USER_ID);
+  .select("id");
 
 const duplicate = existing?.some(
   s => s.title.toLowerCase().trim() === normalizedTitle
