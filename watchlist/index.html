@@ -612,15 +612,6 @@
 
   </main>
 
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-    const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
-
-    // Make it available to app.js
-    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  </script>
-
   <script type="module" src="./app.js"></script>
   <!-- =========================
      DELETE SHOW MODAL (global)
