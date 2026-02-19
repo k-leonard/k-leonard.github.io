@@ -13,11 +13,11 @@
     * [x] make it so i can click on the title of a show from the browse screen and it will take me to the extended show listing in the collection
 
 - [x] MOVE DELETE BUTTON AND ADD POPUP CONFIRMATION OF DELETEION (there are very few reasons as to why a show would need to be deleted)
-- [ ] 
+
 - [ ] add in way to check if name already exists when adding a new show
 - [ ] make it so that when i click the fetch info it can also grab release date, studios etc
-- [ ]  FIX adding shows, when i try to add a studio it doesn't pop up with any options same with other selects
-      - [ ] perhaps alter the way you add a show, create an add show button and that is when the box pops up,
+- [ ]  FIX adding shows, when i try to add a studio it doesn't pop up with any options same with other selects (works sometimes but then bugs out at a certain point not allowing for accurate user input)
+    * [ ] perhaps alter the way you add a show, create an add show button and that is when the box pops up,
 
 
 
