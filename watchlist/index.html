@@ -15,22 +15,15 @@
         <p class="muted small">My personal tracker for shows</p>
       </div>
 
-      <nav class="tabs" aria-label="Watchlist sections">
-        <a class="tab" href="#home" id="tab-home">Home</a>
-        <a class="tab" href="#browse" id="tab-browse">Browse</a>
-        <a class="tab" href="#collection" id="tab-collection">My Collection</a>
-      </nav>
-      <!-- inside your existing topbar/nav area -->
-<nav class="tabsRow">
+<nav class="tabsRow" aria-label="Watchlist sections">
   <div class="tabsLeft">
-    <!-- your existing tab buttons/links -->
-    <button class="tab" data-go="#home">Home</button>
-    <button class="tab" data-go="#browse">Browse</button>
-    <button class="tab" data-go="#collection">Collection</button>
+    <a class="tab" href="#home" id="tab-home">Home</a>
+    <a class="tab" href="#browse" id="tab-browse">Browse</a>
+    <a class="tab" href="#collection" id="tab-collection">My Collection</a>
   </div>
 
   <div class="tabsRight">
-    <button id="openAddShowBtn" class="btn btn-primary" type="button">
+    <button id="openAddShowBtn" class="secondary" type="button">
       + Add Show
     </button>
   </div>
