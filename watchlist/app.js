@@ -1839,7 +1839,28 @@ setupAddShowModal();
       msg.textContent = "DEV_MODE: not saving to DB.";
       return;
     }
+     const form = e.target;
+const titleInput = form.title;
+const title = titleInput.value.trim();
 
+if (!title) return;
+
+const normalizedTitle = title.toLowerCase().trim();
+
+const { data: existing } = await supabase
+  .from("shows")
+  .select("id")
+  .eq("user_id", CURRENT_USER_ID);
+
+const duplicate = existing?.some(
+  s => s.title.toLowerCase().trim() === normalizedTitle
+);
+
+if (duplicate) {
+const errorEl = document.getElementById("addShowError");
+errorEl.textContent = "You already added this show.";
+return;
+}
     await addShow(
       new FormData(e.target),
       platformSelect.getIds(),
