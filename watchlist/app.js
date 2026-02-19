@@ -2192,7 +2192,7 @@ buildBrowseFiltersUI();
   updateHomeCounts();
 
 
-});
+};
 
 }
 
