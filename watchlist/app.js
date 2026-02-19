@@ -1588,9 +1588,6 @@ function renderTable(rows) {
       <td>${escapeHtml(genres.join(", "))}</td>
       <td>${escapeHtml(tropes.join(", "))}</td>
       <td>${escapeHtml(studios.join(", "))}</td>
-      <td>${r.last_watched ?? ""}</td>
-      <td>
-</td>
 
     `;
     tbody.appendChild(tr);
