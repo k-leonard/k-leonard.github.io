@@ -2194,6 +2194,4 @@ buildBrowseFiltersUI();
 
 };
 
-}
-
 init();
