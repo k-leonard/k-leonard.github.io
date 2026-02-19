@@ -650,3 +650,15 @@ input[type="checkbox"]{
 }
 .danger-zone p { margin: 6px 0 12px; opacity: 0.85; }
 
+/* Clean clickable row title */
+.row-link {
+  cursor: pointer;
+  color: inherit;
+  font-weight: 500;
+}
+
+.row-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
