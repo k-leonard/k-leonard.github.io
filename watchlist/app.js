@@ -195,6 +195,74 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...args), ms);
   };
 }
+
+function setupAddShowModal() {
+  const modal = document.getElementById("addShowModal");
+  const modalBody = document.getElementById("addShowModalBody");
+  const openBtn = document.getElementById("openAddShowBtn");
+  const closeBtn = document.getElementById("closeAddShowBtn");
+
+  const addShowSection = document.getElementById("app"); // your existing add-show card section
+
+  if (!modal || !modalBody || !openBtn || !closeBtn || !addShowSection) {
+    console.warn("Add Show modal setup: missing elements");
+    return;
+  }
+
+  // placeholder so we can put the section back where it was
+  const placeholder = document.createElement("div");
+  placeholder.id = "addShowPlaceholder";
+
+  function openModal() {
+    // If you implemented ensureOptionRowsLoaded() earlier, this prevents "dead" selects
+    Promise.resolve()
+      .then(async () => {
+        if (typeof ensureOptionRowsLoaded === "function") {
+          await ensureOptionRowsLoaded();
+        }
+      })
+      .then(() => {
+        // move the add-show section into the modal
+        if (!placeholder.parentNode) {
+          addShowSection.parentNode.insertBefore(placeholder, addShowSection);
+        }
+        modalBody.appendChild(addShowSection);
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+
+        // optional: focus first input
+        const first = addShowSection.querySelector('input[name="title"]');
+        if (first) first.focus();
+      })
+      .catch(err => console.error("openModal failed:", err));
+  }
+
+  function closeModal() {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+
+    // move the add-show section back
+    if (placeholder.parentNode) {
+      placeholder.parentNode.replaceChild(addShowSection, placeholder);
+    }
+  }
+
+  openBtn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+
+  // click outside closes
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // escape closes
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) {
+      closeModal();
+    }
+  });
+}
 // ===============================
 // DELETE MODAL STATE + HELPERS
 // ===============================
@@ -1760,7 +1828,7 @@ console.log("studio elements:", !!el("studioBtn"), !!el("studioMenu"), !!el("stu
     if (!email) return;
     sendMagicLink(email);
   });
-
+setupAddShowModal();
   logoutBtn.addEventListener("click", logout);
 
   // Add form
