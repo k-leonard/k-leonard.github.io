@@ -566,16 +566,22 @@ function wireTabs() {
   d("wireTabs()", { foundNav: !!nav });
   if (!nav) return;
 
-  nav.addEventListener("click", (e2) => {
-    const a = e2.target.closest('a.tab[href^="#"]');
+  nav.addEventListener("click", (e) => {
+    // ✅ If the user clicked the logout button, let logout handle it only
+    if (e.target.closest("#logout")) {
+      d("tabsRow click: ignored (logout)");
+      return;
+    }
+
+    const a = e.target.closest('a.tab[href^="#"]');
     d("tabsRow click", { foundAnchor: !!a, href: a?.getAttribute("href") });
+
     if (!a) return;
 
-    e2.preventDefault();
+    e.preventDefault();
     const hash = a.getAttribute("href");
     window.location.hash = hash;
     route();
-    snap("after tab click");
   });
 }
 
@@ -678,12 +684,26 @@ async function getUserId() {
   return data.user?.id || null;
 }
 
-async function logout() {
+async function logout(ev) {
   d("logout() clicked");
+  if (ev?.preventDefault) ev.preventDefault();
+  if (ev?.stopPropagation) ev.stopPropagation();
+
   snap("before logout");
 
-  const r = await supabase.auth.signOut();
-  d("signOut result:", r);
+  try {
+    // IMPORTANT: local scope clears session on the client even if the network call fails
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) w("supabase.auth.signOut error:", error);
+    else d("supabase.auth.signOut ok (local)");
+  } catch (err) {
+    e("supabase.auth.signOut threw:", err);
+  }
+
+  // Always force UI reset even if signOut fails
+  CURRENT_SHOW = null;
+  EDIT_MODE = false;
+  ALL_SHOWS_CACHE = [];
 
   showAuthedUI(false);
   window.location.hash = "#home";
