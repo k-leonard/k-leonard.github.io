@@ -11,8 +11,6 @@ console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// If already logged in, skip login page
-const { data: { session } } = await supabase.auth.getSession();
 
 // if (session) {
 //   window.location.href = "./watchlist.html";
@@ -2090,12 +2088,6 @@ console.log("studio elements:", !!el("studioBtn"), !!el("studioMenu"), !!el("stu
     clearId: "clearRating"
   });
 
-  // Login button
-  el("sendLink").addEventListener("click", () => {
-    const email = el("email").value.trim();
-    if (!email) return;
-    sendMagicLink(email);
-  });
 setupAddShowModal();
   logoutBtn.addEventListener("click", logout);
 el("collectionViewCompact")?.addEventListener("click", () => {
@@ -2451,15 +2443,6 @@ studioSelect.setRows(s);
   fillSelect("platformFilter", p, "platforms");
   fillSelect("genreFilter", g, "genres");
   fillSelect("tropeFilter", t, "tropes");
-function buildBrowseFiltersUI() {
-  // Status is not from a lookup table, so hardcode your known statuses
-  const STATUS_ITEMS = [
-    "To Be Watched",
-    "Watching",
-    "Waiting for Next Season",
-    "Watched",
-    "Dropped"
-  ];
 
   buildCheckboxList({
     boxId: "statusFilterBox",
@@ -2637,9 +2620,8 @@ buildBrowseFiltersUI();
   updateHomeCounts();
 
 
-};
-
-init();
+//init();
+document.addEventListener("DOMContentLoaded", init);
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
@@ -2666,6 +2648,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    window.location.href = "./watchlist.html";
+     showAuthedUI(true);
+  window.location.hash = "#collection";
+  route()
   });
 });
