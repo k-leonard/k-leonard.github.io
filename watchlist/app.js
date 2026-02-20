@@ -978,9 +978,6 @@ function collectionCardHTML(r) {
           ${rating ? `<div>${escapeHtml(rating)}</div>` : ""}
         </div>
 
-        <div class="media-actions">
-          <button class="btn small" type="button" data-action="open">Open</button>
-        </div>
       </div>
     </article>
   `;
