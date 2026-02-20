@@ -781,7 +781,18 @@ function renderShowDetailBlocks(show, mode) {
 
       ${dateRow("Release date", "edit_release_date", show.release_date ?? "")}
       ${dateRow("Last watched", "edit_last_watched", show.last_watched ?? "")}
-      ${numberRow("Rating (0–5)", "edit_rating_stars", show.rating_stars ?? "", 0)}
+      <div class="starField" style="grid-column: 1 / -1;">
+  <label>My rating</label>
+  <div class="stars" id="editRatingStars">
+    <span class="star" data-value="1">☆</span>
+    <span class="star" data-value="2">☆</span>
+    <span class="star" data-value="3">☆</span>
+    <span class="star" data-value="4">☆</span>
+    <span class="star" data-value="5">☆</span>
+    <span class="starClear secondary" id="editClearRating">Clear</span>
+  </div>
+  <input type="hidden" id="edit_rating_stars" value="${escapeHtml(show.rating_stars ?? "")}" />
+</div>
 
       <div id="editProgressBlock" style="grid-column:1/-1; display:none;">
         ${numberRow("Current season", "edit_current_season", show.current_season ?? "", 1)}
@@ -866,6 +877,21 @@ function renderShowDetailBlocks(show, mode) {
   statusSel?.addEventListener("change", syncEditVisibility);
   typeSel?.addEventListener("change", syncEditVisibility);
   syncEditVisibility();
+ // Wire edit-mode star rating UI
+const editStarUI = setupStarRating({
+  containerId: "editRatingStars",
+  inputId: "edit_rating_stars",
+  clearId: "editClearRating"
+});
+editStarUI.set(show.rating_stars || 0);
+// Pre-paint with existing value
+const existing = Number(show.rating_stars || 0);
+if (existing) {
+  // simulate setting by directly updating hidden input, then "paint"
+  // easiest: click-style set via helper: re-run setupStarRating already paints on mouse events,
+  // so we just set the hidden value and trigger a repaint by calling clear then re-click isn't ideal.
+  // Instead: small patch—see below.
+}
  // --- build edit multiselects
 window.EDIT_TAG_SELECTS = {
   studios: setupDbMultiSelect({ buttonId:"editStudioBtn", menuId:"editStudioMenu", chipsId:"editStudioChips", tableName:"studios" }),
@@ -1441,9 +1467,13 @@ function setupStarRating({ containerId, inputId, clearId }) {
     btn.addEventListener("click", () => set(Number(btn.dataset.value)));
   });
 
-  clearBtn.addEventListener("click", () => set(0));
-  return { clear: () => set(0) };
+    clearBtn.addEventListener("click", () => set(0));
+  return {
+    clear: () => set(0),
+    set: (n) => set(Number(n) || 0)
+  };
 }
+
 
 
 // --------------------
