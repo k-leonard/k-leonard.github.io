@@ -2431,18 +2431,18 @@ const [p, g, t, s] = await Promise.all([
   loadOptionRows("tropes"),
   loadOptionRows("studios")
 ]);
-PLATFORM_ROWS = p;
-GENRE_ROWS = g;
-TROPE_ROWS = t;
-STUDIO_ROWS = s;
-
-  platformSelect.setRows(p);
-  genreSelect.setRows(g);
-  tropeSelect.setRows(t);
-studioSelect.setRows(s);
-  fillSelect("platformFilter", p, "platforms");
-  fillSelect("genreFilter", g, "genres");
-  fillSelect("tropeFilter", t, "tropes");
+ PLATFORM_ROWS = p;
+ GENRE_ROWS = g;
+ TROPE_ROWS = t;
+ STUDIO_ROWS = s;
+ 
+   platformSelect.setRows(p);
+   genreSelect.setRows(g);
+   tropeSelect.setRows(t);
+ studioSelect.setRows(s);
+   fillSelect("platformFilter", p, "platforms");
+   fillSelect("genreFilter", g, "genres");
+   fillSelect("tropeFilter", t, "tropes");
 
   buildCheckboxList({
     boxId: "statusFilterBox",
@@ -2612,9 +2612,9 @@ function buildMinRatingRadios() {
   });
 }
 
-  fillSelect("platformFilter", p, "platforms");
-  fillSelect("genreFilter", g, "genres");
-  fillSelect("tropeFilter", t, "tropes");
+  // fillSelect("platformFilter", p, "platforms");
+  // fillSelect("genreFilter", g, "genres");
+  // fillSelect("tropeFilter", t, "tropes");
 buildBrowseFiltersUI();  
   await loadShows();
   updateHomeCounts();
