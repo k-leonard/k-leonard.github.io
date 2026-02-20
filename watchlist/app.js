@@ -19,10 +19,10 @@ const msg = el("msg"); // <-- add this
 const authMsg = el("authMsg");
 const browseMsg = el("msg");
 const homeMsg = el("homeMsg");
-let PLATFORM_ROWS = [];
-let GENRE_ROWS = [];
-let TROPE_ROWS = [];
-let STUDIO_ROWS = [];
+let PLATFORM_ROWS = null;
+let GENRE_ROWS = null;
+let TROPE_ROWS = null;
+let STUDIO_ROWS = null;
 
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
@@ -38,7 +38,48 @@ let ALL_SHOWS_CACHE = [];
 // --------------------
 // UI helpers
 // --------------------
+async function refreshBrowseFilterOptions() {
+  await ensureOptionRowsLoaded();
 
+  // Re-fetch in case a new option was added
+  PLATFORM_ROWS = await loadOptionRows("platforms");
+  GENRE_ROWS    = await loadOptionRows("genres");
+  TROPE_ROWS    = await loadOptionRows("tropes");
+  STUDIO_ROWS   = await loadOptionRows("studios");
+
+  // Rebuild checkbox lists (preserves checkmarks because your rerender reads checked inputs)
+  buildCheckboxList({
+    boxId: "platformFilterBox",
+    items: (PLATFORM_ROWS || []).map(r => r.name),
+    name: "platformFilter",
+    searchInputId: "platformFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "genreFilterBox",
+    items: (GENRE_ROWS || []).map(r => r.name),
+    name: "genreFilter",
+    searchInputId: "genreFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "tropeFilterBox",
+    items: (TROPE_ROWS || []).map(r => r.name),
+    name: "tropeFilter",
+    searchInputId: "tropeFilterSearch",
+    onChange: rerenderFiltered
+  });
+
+  buildCheckboxList({
+    boxId: "studioFilterBox",
+    items: (STUDIO_ROWS || []).map(r => r.name),
+    name: "studioFilter",
+    searchInputId: "studioFilterSearch",
+    onChange: rerenderFiltered
+  });
+}
 function getCollectionViewMode() {
   return localStorage.getItem("collectionViewMode") || "mode-comfy"; // default
 }
@@ -1252,6 +1293,10 @@ searchEl.addEventListener("input", (e) => {
           selected.set(row.id, row.name);
           renderChips();
           renderMenu("");
+         // If this was a new lookup value, update browse filters immediately
+if (tableName === "tropes" || tableName === "genres" || tableName === "platforms" || tableName === "studios") {
+  refreshBrowseFilterOptions();
+}
         }
       });
     }
@@ -2052,6 +2097,7 @@ tropeSelect.clear();
    studioSelect.clear();
 syncOvaVisibility();
 await loadShows();
+   await refreshBrowseFilterOptions();
 
   });
 
@@ -2385,21 +2431,10 @@ async function ensureOptionRowsLoaded() {
   if (optionsLoadPromise) return optionsLoadPromise;
 
   optionsLoadPromise = (async () => {
-    const p = await loadOptionRows("platforms");
-    PLATFORM_ROWS = p;
-    platformSelect.setRows(p);
-
-    const g = await loadOptionRows("genres");
-    GENRE_ROWS = g;
-    genreSelect.setRows(g);
-
-    const t = await loadOptionRows("tropes");
-    TROPE_ROWS = t;
-    tropeSelect.setRows(t);
-
-    const s = await loadOptionRows("studios");
-    STUDIO_ROWS = s;
-    studioSelect.setRows(s);
+     PLATFORM_ROWS = await loadOptionRows("platforms");
+    GENRE_ROWS    = await loadOptionRows("genres");
+    TROPE_ROWS    = await loadOptionRows("tropes");
+    STUDIO_ROWS   = await loadOptionRows("studios");
   })();
 
   try {
