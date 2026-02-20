@@ -2089,7 +2089,7 @@ console.log("studio elements:", !!el("studioBtn"), !!el("studioMenu"), !!el("stu
   });
 
 setupAddShowModal();
-  logoutBtn.addEventListener("click", logout);
+  logoutBtn?.addEventListener("click", logout);
 el("collectionViewCompact")?.addEventListener("click", () => {
   setCollectionViewMode("mode-compact");
   applyCollectionViewMode();
@@ -2105,7 +2105,7 @@ el("collectionViewComfy")?.addEventListener("click", () => {
  // Apply saved mode on startup
 applyCollectionViewMode();
   // Add form
-  el("addForm").addEventListener("submit", async (e) => {
+  el("addForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (DEV_MODE) {
@@ -2195,7 +2195,7 @@ el("clearFilters")?.addEventListener("click", () => {
 
 
   // Refresh button
-  el("refresh").addEventListener("click", () => {
+  el("refresh")?.addEventListener("click", () => {
     if (DEV_MODE) rerenderFiltered();
     else loadShows();
   });
@@ -2536,8 +2536,13 @@ supabase.auth.onAuthStateChange(async (_event, session2) => {
 
   try {
     await ensureOptionRowsLoaded();
+    buildBrowseFiltersUI();   // builds the checkbox filter UI using PLATFORM_ROWS/etc.
+    await loadShows();        // fills ALL_SHOWS_CACHE
+    updateHomeCounts();       // populates KPIs
+    renderCollection();       // draws collection list/grid
+    route();                  // ensures correct view based on hash
   } catch (err) {
-    console.error("ensureOptionRowsLoaded failed", err);
+    console.error("Post-login bootstrap failed:", err);
   }
 });
 
