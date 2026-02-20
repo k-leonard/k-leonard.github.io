@@ -848,8 +848,39 @@ input[type="checkbox"]{
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* =========================================================
+      Home Page
+   ========================================================= */
+.homeGrid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
 
+@media (max-width: 760px){
+  .homeGrid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
+.miniCard{
+  padding: 12px;
+  border: 1px solid #e9ecf4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.kpiLabel{
+  font-size: 12px;
+}
+
+.kpiValue{
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: 6px;
+}
 /* =========================================================
    LEGACY / OPTIONAL: collectionCard (older card style)
    - Keep if you still render .collectionCard somewhere
