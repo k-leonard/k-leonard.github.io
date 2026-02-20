@@ -17,34 +17,53 @@
   <p id="msg"></p>
 
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const msg = document.getElementById("msg");
+  const msg = document.getElementById("msg");
+  const pw = document.getElementById("pw");
+  const btn = document.getElementById("setPw");
 
-    // Some flows use "code" (PKCE). This will set the session if so.
-    try {
-      await supabase.auth.exchangeCodeForSession(window.location.href);
-    } catch (e) {
-      // ignore
+  function log(...a){ console.log("[reset]", ...a); }
+
+  // 1) Turn the recovery link into an authenticated session
+  try {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+    log("exchangeCodeForSession", { hasSession: !!data?.session, error: error?.message });
+
+    if (error) {
+      msg.textContent = "This reset link is invalid or expired. Please request a new one.";
+    } else {
+      msg.textContent = "Link verified. Enter a new password.";
+    }
+  } catch (e) {
+    log("exchangeCodeForSession threw", e);
+    msg.textContent = "Could not verify reset link. Please request a new one.";
+  }
+
+  // 2) Update password for the user tied to that recovery session
+  btn.addEventListener("click", async () => {
+    const newPw = pw.value.trim();
+    if (!newPw) return;
+
+    btn.disabled = true;
+    msg.textContent = "Updating password…";
+
+    const { data, error } = await supabase.auth.updateUser({ password: newPw });
+
+    log("updateUser", { ok: !error, error: error?.message });
+
+    if (error) {
+      msg.textContent = "Error updating password: " + error.message;
+      btn.disabled = false;
+      return;
     }
 
-    document.getElementById("setPw").addEventListener("click", async () => {
-      const pw = document.getElementById("pw").value;
-      if (!pw) return;
-
-      const { data, error } = await supabase.auth.updateUser({ password: pw });
-
-      if (error) {
-        msg.textContent = "Error: " + error.message;
-        return;
-      }
-
-      msg.textContent = "Password updated. You can go back and log in.";
-    });
-  </script>
+    msg.textContent = "Password updated! You can return to the app and log in.";
+  });
+</script>
 </body>
 </html>
