@@ -1,10 +1,20 @@
 # checklist of things to do for this project
 
 
-- [ ] fix the tropes filtering (I want the tropes filter to update if there are new options entered when entering new anime like the supernatural genre)
-- [ ] perhaps make it so that on the show info page ratings are shown as stars, and when i go to edit them instead of entering a number i have the same star click method i do when i enter a show for the first time
-- [ ] fix home page stats (want them going horizontal across the page)
+- [ ] alter the add show button so when you click the submit button it auto closes the miniwindow and a little popup in the lower right shows up green and says "Show Successfully added!" and the "Show already exists" is a redbanner that falls from the top of the add show mini window so you can't miss it
+   
+- [ ] alter login method (make it username and password)
+
+   
+- [ ] alter filter in browse to account for non anime
+
+   
+- [ ] make it so shows that are "non-anime" do not have a fetch anime info button (perhaps replace with another button to another API) ALSO CHANGE NAME FROM NON ANIME TO SOMETHING ELSE, NARROW DOWN WHAT TYPES OF SHOWS IM PUTTING IN HERE
+      
+- [x] fix home page stats (want them going horizontal across the page)
+
 - [ ] change home page to show recently added shows, recently watched, and a random selection (like a recommendation list but without the complex system behind it)
+      
 - [ ] over all fix aesthetic, looks kinda mental hospitcal core right now
     *  decide on aethetic. Dark anime aesthetic? Clean AO3 aesthetic? Or modern glass UI?
     *  add slide animation easing
@@ -42,3 +52,7 @@
 ~~* [x] perhaps alter the way you add a show, create an add show button and that is when the box pops up~~
 
 ~~- [x] fix collection cards (get rid of open button and standardize size regardless of title length)~~
+
+- [ ] fix the tropes filtering I have to refresh a few times for the options to appear, is there any way to circumvent this.
+- [ ] perhaps make it so that on the show info page ratings are shown as stars, and when i go to edit them instead of entering a number i have the same star click method i do when i enter a show for the first time FIX RATINGS WHEN ENTERING A SHOW THE RATING ISN'T SAVING
+- [ ] make it so when i input a new show and it gets the anime info, it standardizes the title to the english alternative title (if it exists)
