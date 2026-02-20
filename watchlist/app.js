@@ -1533,7 +1533,7 @@ const current_episode = toIntOrNull(formData.get("current_episode"));
       title,
       status,
       last_watched,
-
+rating_stars, 
       category,
       show_type,
       ongoing,
