@@ -1872,13 +1872,15 @@ const JOIN = {
   genres:  { table: "show_genres",  showCol: "show_id", optCol: "genre_id"  },
   tropes:  { table: "show_tropes",  showCol: "show_id", optCol: "trope_id"  }, // use for themes too
 };
-async function addOptionNamesToShow({ showId, optionTable, joinTable, showCol, optCol, names }) {
+async function addOptionNamesToShow({ user_id, showId, optionTable, joinTable, showCol, optCol, names }) {
   const cleanNames = (names || [])
     .map(n => String(n || "").trim())
     .filter(Boolean);
 
   const uniqueNames = Array.from(new Set(cleanNames));
   if (!uniqueNames.length) return;
+
+  if (!user_id) throw new Error(`addOptionNamesToShow: missing user_id for ${joinTable}`);
 
   // 1) ensure each option exists, collect ids
   const ids = [];
@@ -1889,18 +1891,19 @@ async function addOptionNamesToShow({ showId, optionTable, joinTable, showCol, o
   const uniqueIds = Array.from(new Set(ids));
   if (!uniqueIds.length) return;
 
-  // 2) find which ones are already linked
+  // 2) find which ones are already linked (scope by user_id too)
   const { data: existingLinks, error: linkErr } = await supabase
     .from(joinTable)
     .select(optCol)
-    .eq(showCol, showId);
+    .eq(showCol, showId)
+    .eq("user_id", user_id);
 
   if (linkErr) throw linkErr;
 
   const existingSet = new Set((existingLinks || []).map(r => r[optCol]));
   const toInsert = uniqueIds
     .filter(id => !existingSet.has(id))
-    .map(id => ({ [showCol]: showId, [optCol]: id }));
+    .map(id => ({ [showCol]: showId, [optCol]: id, user_id }));
 
   if (!toInsert.length) return;
 
@@ -2101,7 +2104,11 @@ el("fetchAnimeBtn")?.addEventListener("click", async () => {
       if (msgEl) msgEl.textContent = "No match found.";
       return;
     }
-
+const user_id = await getUserId();
+if (!user_id) {
+  if (msgEl) msgEl.textContent = "Not logged in.";
+  return;
+}
     // 1) Build show update payload (ONLY fill release_date if empty)
     const payload = {
       mal_id: info.mal_id ?? null,
@@ -2129,6 +2136,7 @@ el("fetchAnimeBtn")?.addEventListener("click", async () => {
 
     // 2) Merge Studios (add only)
     await addOptionNamesToShow({
+     user_id,
       showId: CURRENT_SHOW.id,
       optionTable: "studios",
       joinTable: JOIN.studios.table,
@@ -2139,6 +2147,7 @@ el("fetchAnimeBtn")?.addEventListener("click", async () => {
 
     // 3) Merge Genres (add only)
     await addOptionNamesToShow({
+     user_id,
       showId: CURRENT_SHOW.id,
       optionTable: "genres",
       joinTable: JOIN.genres.table,
@@ -2149,6 +2158,7 @@ el("fetchAnimeBtn")?.addEventListener("click", async () => {
 
     // 4) Merge Themes as Tropes (add only)
     await addOptionNamesToShow({
+     user_id,
       showId: CURRENT_SHOW.id,
       optionTable: "tropes",
       joinTable: JOIN.tropes.table,
