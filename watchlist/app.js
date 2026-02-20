@@ -104,6 +104,30 @@ let ALL_SHOWS_CACHE = [];
 // --------------------
 // UI helpers
 // --------------------
+
+function withTimeout(promise, ms, label = "timeout") {
+  let t;
+  const timeout = new Promise((_, reject) => {
+    t = setTimeout(() => reject(new Error(`${label} after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(t));
+}
+
+function clearSupabaseLocalAuthTokens() {
+  // Supabase stores tokens in localStorage keys like: sb-<project-ref>-auth-token
+  const keys = Object.keys(localStorage);
+  const removed = [];
+
+  for (const k of keys) {
+    if (k.startsWith("sb-") && (k.includes("auth-token") || k.includes("auth"))) {
+      removed.push(k);
+      localStorage.removeItem(k);
+    }
+  }
+
+  d("clearSupabaseLocalAuthTokens removed:", removed);
+  return removed;
+}
 async function refreshBrowseFilterOptions() {
   await ensureOptionRowsLoaded();
 
@@ -691,25 +715,43 @@ async function logout(ev) {
 
   snap("before logout");
 
+  let signOutOk = false;
+
   try {
-    // IMPORTANT: local scope clears session on the client even if the network call fails
-    const { error } = await supabase.auth.signOut({ scope: "local" });
-    if (error) w("supabase.auth.signOut error:", error);
-    else d("supabase.auth.signOut ok (local)");
+    d("calling supabase.auth.signOut({scope:'local'})…");
+    const res = await withTimeout(
+      supabase.auth.signOut({ scope: "local" }),
+      2500,
+      "signOut"
+    );
+    d("signOut resolved:", res);
+    signOutOk = !res?.error;
+    if (res?.error) w("signOut returned error:", res.error);
   } catch (err) {
-    e("supabase.auth.signOut threw:", err);
+    w("signOut threw/timed out:", err);
   }
 
-  // Always force UI reset even if signOut fails
+  // If signOut didn’t complete, force-clear local tokens anyway
+  if (!signOutOk) {
+    w("signOut not confirmed; forcing local token clear");
+    clearSupabaseLocalAuthTokens();
+  }
+
+  // Always force UI reset
   CURRENT_SHOW = null;
   EDIT_MODE = false;
   ALL_SHOWS_CACHE = [];
 
   showAuthedUI(false);
+
+  // Move user to home + hard refresh to avoid “half logged in” state
   window.location.hash = "#home";
   route();
 
-  snap("after logout");
+  snap("after logout (before reload)");
+
+  // Hard reload ensures Supabase client + UI re-initialize cleanly
+  setTimeout(() => location.reload(), 50);
 }
 
 // --------------------
@@ -1525,7 +1567,12 @@ async function init() {
 
   setupAddShowModal();
 
-  logoutBtn?.addEventListener("click", logout);
+logoutBtn?.addEventListener("click", (ev) => logout(ev));
+  d("logout button sanity", {
+  count: document.querySelectorAll("#logout").length,
+  tag: el("logout")?.tagName,
+  inTabsRow: !!el("logout")?.closest(".tabsRow")
+});
   d("wired logout click:", { exists: !!logoutBtn });
 
   el("collectionViewCompact")?.addEventListener("click", () => {
