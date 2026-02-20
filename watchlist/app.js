@@ -181,24 +181,7 @@ function syncProgressVisibility() {
     if (e) e.value = "";
   }
 }
-// async function fetchAnimeFromJikan(title) {
-//   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
-//   const res = await fetch(url);
-//   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
-//   const json = await res.json();
 
-//   const results = json?.data || [];
-//   if (!results.length) return null;
-
-//   // Pick best match (simple: first result). Later you can improve ranking.
-//   const a = results[0];
-
-//   return {
-//     mal_id: a.mal_id ?? null,
-//     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
-//     description: a.synopsis ?? null
-//   };
-// }
 
 async function fetchAnimeFromJikan(title) {
   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
@@ -225,6 +208,15 @@ async function fetchAnimeFromJikan(title) {
     .map(t => t?.name)
     .filter(Boolean);
 
+   // Prefer English title if present, else fallback to MAL title
+  const canonical_title =
+    (a.title_english && a.title_english.trim()) ||
+    (Array.isArray(a.titles)
+      ? (a.titles.find(x => x?.type === "English")?.title || "").trim()
+      : "") ||
+    (a.title && a.title.trim()) ||
+    null;
+
   return {
     mal_id: a.mal_id ?? null,
     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
@@ -233,7 +225,8 @@ async function fetchAnimeFromJikan(title) {
     release_date,
     studios,
     genres,
-    themes
+    themes,
+       canonical_title
   };
 }
 
@@ -2224,7 +2217,37 @@ if (!user_id) {
       mal_id: info.mal_id ?? null,
       image_url: info.image_url ?? null
     };
+    // 0) If Jikan gives us a nicer English title, optionally standardize it
+    const incomingTitle = (info.canonical_title || "").trim();
+    const currentTitle = (CURRENT_SHOW.title || "").trim();
 
+    if (incomingTitle && incomingTitle !== currentTitle) {
+      // prevent title collisions for this user
+      const user_id = await getUserId();
+      if (user_id) {
+        const { data: existingTitles, error: tErr } = await supabase
+          .from("shows")
+          .select("id,title")
+          .eq("user_id", user_id);
+
+        if (!tErr) {
+          const normalizedIncoming = incomingTitle.toLowerCase().trim();
+
+          const collides = (existingTitles || []).some(r =>
+            r.id !== CURRENT_SHOW.id &&
+            (r.title || "").toLowerCase().trim() === normalizedIncoming
+          );
+
+          if (!collides) {
+            payload.title = incomingTitle;
+          } else {
+            console.warn("Skipped title standardization due to duplicate:", incomingTitle);
+          }
+        } else {
+          console.warn("Could not check title collision:", tErr);
+        }
+      }
+    }
     if (!CURRENT_SHOW.description?.trim() && info.description?.trim()) {
       payload.description = info.description.trim();
     }
