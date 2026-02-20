@@ -1384,28 +1384,28 @@ function setupStarRating({ containerId, inputId, clearId }) {
 // --------------------
 // DB helpers
 // --------------------
-async function getOrCreateOptionRow(tableName, name) {
-  const cleaned = String(name).trim();
-  if (!cleaned) return null;
+// async function getOrCreateOptionRow(tableName, name) {
+//   const cleaned = String(name).trim();
+//   if (!cleaned) return null;
 
-  const ins = await supabase
-    .from(tableName)
-    .insert([{ name: cleaned }], { onConflict: "name", ignoreDuplicates: true });
+//   const ins = await supabase
+//     .from(tableName)
+//     .insert([{ name: cleaned }], { onConflict: "name", ignoreDuplicates: true });
 
-  if (ins.error) console.error(`Insert into ${tableName} failed:`, ins.error);
+//   if (ins.error) console.error(`Insert into ${tableName} failed:`, ins.error);
 
-  const sel = await supabase
-    .from(tableName)
-    .select("id,name")
-    .eq("name", cleaned)
-    .maybeSingle();
+//   const sel = await supabase
+//     .from(tableName)
+//     .select("id,name")
+//     .eq("name", cleaned)
+//     .maybeSingle();
 
-  if (sel.error) {
-    console.error(`Select from ${tableName} failed:`, sel.error);
-    return null;
-  }
-  return sel.data || null;
-}
+//   if (sel.error) {
+//     console.error(`Select from ${tableName} failed:`, sel.error);
+//     return null;
+//   }
+//   return sel.data || null;
+// }
 
 async function loadOptionRows(tableName) {
   const r = await supabase.from(tableName).select("id,name").order("name");
