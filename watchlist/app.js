@@ -1586,7 +1586,10 @@ async function init() {
   });
 
   setupAddShowModal();
-
+  
+await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: new URL("./reset.html", window.location.href).toString()
+});
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
   d("logout button sanity", {
   count: document.querySelectorAll("#logout").length,
@@ -1594,6 +1597,7 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
   inTabsRow: !!el("logout")?.closest(".tabsRow")
 });
   d("wired logout click:", { exists: !!logoutBtn });
+  await handlePasswordRecoveryIfPresent();
   // --------------------
   // LOGIN wiring
   // --------------------
