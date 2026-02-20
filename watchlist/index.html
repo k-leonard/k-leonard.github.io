@@ -34,9 +34,12 @@
     <section class="card" id="authCard">
       <h2>Login</h2>
       <div class="row">
-        <input id="email" type="email" placeholder="you@email.com" />
-        <button id="sendLink">Send magic link</button>
-        <button id="logout" class="secondary" style="display:none;">Logout</button>
+<form id="loginForm">
+  <label for="password">Password</label>
+  <input id="password" type="password" autocomplete="current-password" required />
+  <button type="submit">Log in</button>
+  <p id="loginError" style="display:none;"></p>
+</form>
       </div>
       <p id="authMsg" class="muted"></p>
     </section>
