@@ -1,10 +1,60 @@
 console.count("app.js executed");
 
+// =========================
+// DEBUG KIT (paste near top)
+// =========================
+const DEBUG = true;
+
+function d(...args) {
+  if (!DEBUG) return;
+  console.log("%c[DBG]", "color:#8e44ad;font-weight:700;", ...args);
+}
+function w(...args) {
+  if (!DEBUG) return;
+  console.warn("%c[DBG WARN]", "color:#d35400;font-weight:700;", ...args);
+}
+function e(...args) {
+  if (!DEBUG) return;
+  console.error("%c[DBG ERR]", "color:#c0392b;font-weight:700;", ...args);
+}
+
+// Catch silent failures
+window.addEventListener("error", (ev) => {
+  e("window.error:", ev.message, ev.filename, ev.lineno, ev.colno, ev.error);
+});
+window.addEventListener("unhandledrejection", (ev) => {
+  e("unhandledrejection:", ev.reason);
+});
+
+// Quick DOM snapshot helper
+function snap(label = "snap") {
+  if (!DEBUG) return;
+  const ids = [
+    "app",
+    "authCard","loginForm","logout",
+    "view-home","view-browse","view-collection","view-show",
+    "openAddShowBtn","addShowModal","closeAddShowBtn",
+    "table","collectionList","collectionGrid"
+  ];
+  const state = {};
+  for (const id of ids) {
+    const n = document.getElementById(id);
+    state[id] = n
+      ? { exists:true, display:getComputedStyle(n).display, hidden:n.classList?.contains("hidden") }
+      : { exists:false };
+  }
+  d(label, {
+    hash: window.location.hash,
+    readyState: document.readyState,
+    state
+  });
+}
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const DEV_MODE = false; //allows me to still work on aspects if supabase is down, although i do think there are rendering issues i need to address
+const DEV_MODE = false; // allows me to still work on aspects if supabase is down
 console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
- 
+
 // -------------------
 // Constants
 // -------------------
@@ -12,21 +62,25 @@ const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// if (session) {
-//   window.location.href = "./watchlist.html";
-// }
-let CURRENT_SHOW = null;
-let EDIT_MODE = false; 
-const el = (id) => document.getElementById(id);
-const msg = el("msg"); // <-- add this
+d("Supabase client created");
+supabase.auth.getSession().then(({ data, error }) => {
+  d("getSession (early probe)", { hasSession: !!data?.session, error });
+});
 
+let CURRENT_SHOW = null;
+let EDIT_MODE = false;
+const el = (id) => document.getElementById(id);
+
+const msg = el("msg");        // browse/main msg
 const authMsg = el("authMsg");
 const browseMsg = el("msg");
 const homeMsg = el("homeMsg");
+
 let PLATFORM_ROWS = null;
 let GENRE_ROWS = null;
 let TROPE_ROWS = null;
 let STUDIO_ROWS = null;
+
 const STATUS_ITEMS = [
   "To Be Watched",
   "Watching",
@@ -34,10 +88,12 @@ const STATUS_ITEMS = [
   "Watched",
   "Dropped"
 ];
+
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
   if (browseMsg) browseMsg.textContent = text;
 }
+
 const appSection = el("app");
 const logoutBtn = el("logout");
 const authCard = el("authCard");
@@ -57,7 +113,6 @@ async function refreshBrowseFilterOptions() {
   TROPE_ROWS    = await loadOptionRows("tropes");
   STUDIO_ROWS   = await loadOptionRows("studios");
 
-  // Rebuild checkbox lists (preserves checkmarks because your rerender reads checked inputs)
   buildCheckboxList({
     boxId: "platformFilterBox",
     items: (PLATFORM_ROWS || []).map(r => r.name),
@@ -90,30 +145,33 @@ async function refreshBrowseFilterOptions() {
     onChange: rerenderFiltered
   });
 }
+
 function getCollectionViewMode() {
   return localStorage.getItem("collectionViewMode") || "mode-comfy"; // default
 }
-function applyCollectionViewMode() {
-  const mode = getCollectionViewMode(); // "mode-compact" or "mode-comfy"
 
+function applyCollectionViewMode() {
+  const mode = getCollectionViewMode();
   const targets = [el("collectionList"), el("collectionGrid")].filter(Boolean);
   targets.forEach(wrap => {
     wrap.classList.remove("mode-compact", "mode-comfy");
     wrap.classList.add(mode);
   });
 
-  // optional: visually mark active button
   el("collectionViewCompact")?.classList.toggle("active", mode === "mode-compact");
   el("collectionViewComfy")?.classList.toggle("active", mode === "mode-comfy");
 }
+
 function setCollectionViewMode(mode) {
   localStorage.setItem("collectionViewMode", mode);
 }
+
 function setDisplay(id, show) {
   const node = el(id);
   if (!node) return;
   node.style.display = show ? "" : "none";
 }
+
 async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
   if (!ids || !ids.length) return;
 
@@ -127,31 +185,36 @@ async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
 
   if (r.error) {
     console.error(`${joinTable} insert error:`, r.error, rows);
-    // surface it so you SEE it
     if (msg) msg.textContent = `Error inserting ${joinTable}: ${r.error.message}`;
   }
 }
+
 function showAuthedUI(isAuthed) {
+  d("showAuthedUI called:", { isAuthed });
+
   setDisplay("authCard", !isAuthed);
 
   const logout = el("logout");
   if (logout) logout.style.display = isAuthed ? "" : "none";
 
-   setDisplay("app", isAuthed);
-  // Hide all app views if not authed
+  setDisplay("app", isAuthed);
+
   if (!isAuthed) {
-    ["home", "browse", "collection"].forEach(name => setDisplay(`view-${name}`, false));
+    ["home", "browse", "collection", "show"].forEach(name => setDisplay(`view-${name}`, false));
+    snap("after showAuthedUI(false)");
     return;
   }
 
-  // Authed: router decides which view shows
   route();
+  snap("after showAuthedUI(true)");
 }
+
 function getMultiSelectValues(id) {
   const sel = el(id);
   if (!sel) return [];
   return Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean);
 }
+
 function toIntOrNull(v) {
   const s = String(v ?? "").trim();
   if (!s) return null;
@@ -161,15 +224,15 @@ function toIntOrNull(v) {
 
 function toDateOrNull(v) {
   const s = String(v ?? "").trim();
-  return s ? s : null; // 'YYYY-MM-DD' from <input type="date">
+  return s ? s : null;
 }
+
 function syncOvaVisibility() {
   const cat = el("category")?.value;
   const isAnime = cat === "Anime";
   const block = el("ovaBlock");
   if (block) block.style.display = isAnime ? "" : "none";
 
-  // If switching away from Anime, clear OVA inputs
   if (!isAnime) {
     const ovas = document.querySelector('input[name="ovas"]');
     const ovaLen = document.querySelector('input[name="ova_length_min"]');
@@ -177,6 +240,7 @@ function syncOvaVisibility() {
     if (ovaLen) ovaLen.value = "";
   }
 }
+
 function syncProgressVisibility() {
   const status = el("status")?.value || document.querySelector('select[name="status"]')?.value;
   const isWatching = status === "Watching";
@@ -186,12 +250,11 @@ function syncProgressVisibility() {
 
   if (!isWatching) {
     const s = document.querySelector('input[name="current_season"]');
-    const e = document.querySelector('input[name="current_episode"]');
+    const e2 = document.querySelector('input[name="current_episode"]');
     if (s) s.value = "";
-    if (e) e.value = "";
+    if (e2) e2.value = "";
   }
 }
-
 
 async function fetchAnimeFromJikan(title) {
   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
@@ -202,23 +265,14 @@ async function fetchAnimeFromJikan(title) {
   const results = json?.data || [];
   if (!results.length) return null;
 
-  const a = results[0]; // you can improve matching later
+  const a = results[0];
 
   const release_date = a.aired?.from ? a.aired.from.split("T")[0] : null;
 
-  const studios = (a.studios || [])
-    .map(s => s?.name)
-    .filter(Boolean);
+  const studios = (a.studios || []).map(s => s?.name).filter(Boolean);
+  const genres = (a.genres || []).map(g => g?.name).filter(Boolean);
+  const themes = (a.themes || []).map(t => t?.name).filter(Boolean);
 
-  const genres = (a.genres || [])
-    .map(g => g?.name)
-    .filter(Boolean);
-
-  const themes = (a.themes || [])
-    .map(t => t?.name)
-    .filter(Boolean);
-
-   // Prefer English title if present, else fallback to MAL title
   const canonical_title =
     (a.title_english && a.title_english.trim()) ||
     (Array.isArray(a.titles)
@@ -231,39 +285,14 @@ async function fetchAnimeFromJikan(title) {
     mal_id: a.mal_id ?? null,
     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
     description: a.synopsis ?? null,
-
     release_date,
     studios,
     genres,
     themes,
-       canonical_title
+    canonical_title
   };
 }
 
-async function addNamesToMultiSelect(selectWidget, names, tableName) {
-  if (!names || !names.length) return;
-
-  // normalize + dedupe incoming names
-  const want = Array.from(new Set(names.map(n => n.trim()).filter(Boolean)));
-
-  // current selected ids (do NOT clear them)
-  const existingIds = new Set(selectWidget.getIds());
-
-  // For each name, ensure it exists in the DB, then select it
-  for (const name of want) {
-    const row = await getOrCreateOptionRow(tableName, name); // you already have this function
-    if (row?.id) existingIds.add(row.id);
-  }
-
-  // Apply back to widget (assumes you have setSelectedIds; if not, see note below)
-  if (typeof selectWidget.setSelectedIds === "function") {
-    selectWidget.setSelectedIds([...existingIds]);
-  } else {
-    // fallback: if your widget stores selections internally, you can just "select" each row
-    // If you paste your multiselect code, I'll wire this to your exact API.
-    console.warn("MultiSelect missing setSelectedIds; paste widget code and I'll adapt.");
-  }
-}
 function syncTypeVisibility() {
   const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
 
@@ -276,9 +305,7 @@ function syncTypeVisibility() {
   if (tvBlock) tvBlock.style.display = isTV ? "" : "none";
   if (movieBlock) movieBlock.style.display = isMovie ? "" : "none";
 
-  // Clear hidden fields so you don’t save stale values
   if (!isTV) {
-    document.querySelector('input[name="seasons"]')?.setAttribute("value", "");
     const a = document.querySelector('input[name="seasons"]'); if (a) a.value = "";
     const b = document.querySelector('input[name="episodes"]'); if (b) b.value = "";
     const c = document.querySelector('input[name="episode_length_min"]'); if (c) c.value = "";
@@ -320,6 +347,7 @@ function debounce(fn, ms) {
     t = setTimeout(() => fn(...args), ms);
   };
 }
+
 function setupAddShowModal() {
   const modal = document.getElementById("addShowModal");
   const openBtn = document.getElementById("openAddShowBtn");
@@ -332,7 +360,6 @@ function setupAddShowModal() {
 
   async function openModal() {
     try {
-      // Ensures platforms/genres/tropes/studios are loaded before opening
       if (typeof ensureOptionRowsLoaded === "function") {
         await ensureOptionRowsLoaded();
       }
@@ -340,7 +367,6 @@ function setupAddShowModal() {
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
 
-      // focus title input if present
       const first = modal.querySelector('input[name="title"]');
       if (first) first.focus();
     } catch (err) {
@@ -356,98 +382,26 @@ function setupAddShowModal() {
   openBtn.addEventListener("click", openModal);
   closeBtn.addEventListener("click", closeModal);
 
-  // click outside closes
   modal.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
   });
 
-  // escape closes
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal.classList.contains("is-open")) {
       closeModal();
     }
   });
 }
-// function setupAddShowModal() {
-//   const modal = document.getElementById("addShowModal");
-//   const modalBody = document.getElementById("addShowModalBody");
-//   const openBtn = document.getElementById("openAddShowBtn");
-//   const closeBtn = document.getElementById("closeAddShowBtn");
 
-//   const addShowSection = document.getElementById("addShowCard");
- 
-//   if (!modal || !modalBody || !openBtn || !closeBtn || !addShowSection) {
-//     console.warn("Add Show modal setup: missing elements");
-//     return;
-//   }
-
-//   // placeholder so we can put the section back where it was
-//   const placeholder = document.createElement("div");
-//   placeholder.id = "addShowPlaceholder";
-
-//   function openModal() {
-//     // If you implemented ensureOptionRowsLoaded() earlier, this prevents "dead" selects
-//     Promise.resolve()
-//       .then(async () => {
-//         if (typeof ensureOptionRowsLoaded === "function") {
-//           await ensureOptionRowsLoaded();
-//         }
-//       })
-//       .then(() => {
-//         // move the add-show section into the modal
-//         if (!placeholder.parentNode) {
-//           addShowSection.parentNode.insertBefore(placeholder, addShowSection);
-//         }
-//         modalBody.appendChild(addShowSection);
-
-//         modal.classList.add("is-open");
-//         modal.setAttribute("aria-hidden", "false");
-
-//         // optional: focus first input
-//         const first = addShowSection.querySelector('input[name="title"]');
-//         if (first) first.focus();
-//       })
-//       .catch(err => console.error("openModal failed:", err));
-//   }
-
-//   function closeModal() {
-//     modal.classList.remove("is-open");
-//     modal.setAttribute("aria-hidden", "true");
-
-//     // move the add-show section back
-//     if (placeholder.parentNode) {
-//       placeholder.parentNode.replaceChild(addShowSection, placeholder);
-//     }
-//   }
-
-//   openBtn.addEventListener("click", openModal);
-//   closeBtn.addEventListener("click", closeModal);
-
-//   // click outside closes
-//   modal.addEventListener("click", (e) => {
-//     if (e.target === modal) closeModal();
-//   });
-
-//   // escape closes
-//   document.addEventListener("keydown", (e) => {
-//     if (e.key === "Escape" && modal.classList.contains("is-open")) {
-//       closeModal();
-//     }
-//   });
-// }
 // ===============================
 // DELETE MODAL STATE + HELPERS
 // ===============================
-
-// Holds what we are about to delete (so any delete button can open the same modal)
 let PENDING_DELETE = {
   showId: null,
   showTitle: "",
-  // optional: where to navigate after delete
   redirectHash: "#collection"
 };
 
-// Cache modal DOM elements (safe: will be null if HTML not present)
 const deleteBackdrop = el("deleteModalBackdrop");
 const deleteShowNameEl = el("deleteModalShowName");
 const deleteConfirmInput = el("deleteModalConfirmInput");
@@ -457,91 +411,69 @@ const deleteModalMsg = el("deleteModalMsg");
 
 let lastFocusedBeforeModal = null;
 
-/**
- * Open the deletion modal and set which show we are deleting.
- * This does NOT delete anything. It only prepares UI.
- */
 function openDeleteModal({ showId, showTitle, redirectHash }) {
   if (!deleteBackdrop) return;
 
-  // Save focus so we can restore it when modal closes
   lastFocusedBeforeModal = document.activeElement;
 
   PENDING_DELETE.showId = Number(showId);
   PENDING_DELETE.showTitle = String(showTitle || "");
   PENDING_DELETE.redirectHash = redirectHash || "#collection";
 
-  // Fill show name in the message
   if (deleteShowNameEl) deleteShowNameEl.textContent = PENDING_DELETE.showTitle || "this show";
 
-  // Reset modal UI
   if (deleteConfirmInput) deleteConfirmInput.value = "";
   if (deleteConfirmBtn) deleteConfirmBtn.disabled = true;
   if (deleteModalMsg) deleteModalMsg.textContent = "";
 
-  // Show modal
   deleteBackdrop.classList.remove("hidden");
   deleteBackdrop.setAttribute("aria-hidden", "false");
 
-  // Put cursor in input for fast confirm
   setTimeout(() => deleteConfirmInput?.focus(), 0);
 }
 
-/** Close the delete modal and clean up. */
 function closeDeleteModal() {
   if (!deleteBackdrop) return;
 
   deleteBackdrop.classList.add("hidden");
   deleteBackdrop.setAttribute("aria-hidden", "true");
 
-  // Restore focus if possible
   if (lastFocusedBeforeModal && lastFocusedBeforeModal.focus) {
     lastFocusedBeforeModal.focus();
   }
 }
 
-/**
- * Wire modal controls (Cancel button, typing DELETE enables confirm, escape/backdrop click closes).
- * Call this ONCE in init().
- */
 function wireDeleteModal() {
   if (!deleteBackdrop) return;
 
-  // Cancel
   deleteCancelBtn?.addEventListener("click", closeDeleteModal);
 
-  // Clicking backdrop closes (but clicking the modal content does not)
   deleteBackdrop.addEventListener("click", (e) => {
     if (e.target === deleteBackdrop) closeDeleteModal();
   });
 
-  // ESC closes
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !deleteBackdrop.classList.contains("hidden")) {
       closeDeleteModal();
     }
   });
 
-  // Enable confirm button only when user types DELETE
   deleteConfirmInput?.addEventListener("input", () => {
     const ok = deleteConfirmInput.value.trim().toUpperCase() === "DELETE";
     if (deleteConfirmBtn) deleteConfirmBtn.disabled = !ok;
   });
 
-  // Confirm delete
   deleteConfirmBtn?.addEventListener("click", async () => {
     const id = PENDING_DELETE.showId;
     if (!id) return;
 
-    // Lock the UI
     deleteConfirmBtn.disabled = true;
     if (deleteModalMsg) deleteModalMsg.textContent = "Deleting…";
 
     try {
-      await deleteShow(id);      // calls your existing delete function (we’ll improve it below)
-      await loadShows();         // refresh caches + collection + browse
+      await deleteShow(id);
+      await loadShows();
 
-      // If the deleted show was currently open in detail view, bounce user out
       if (window.location.hash.startsWith("#show") && CURRENT_SHOW?.id === id) {
         window.location.hash = PENDING_DELETE.redirectHash || "#collection";
         route();
@@ -551,7 +483,6 @@ function wireDeleteModal() {
     } catch (err) {
       console.error(err);
       if (deleteModalMsg) deleteModalMsg.textContent = `Delete failed: ${err.message || err}`;
-      // re-enable only if they still have DELETE typed
       const ok = deleteConfirmInput?.value.trim().toUpperCase() === "DELETE";
       deleteConfirmBtn.disabled = !ok;
     }
@@ -561,10 +492,6 @@ function wireDeleteModal() {
 // --------------------
 // Filter helper functions
 // --------------------
-function uniqSorted(arr) {
-  return Array.from(new Set((arr || []).filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b)));
-}
-
 function buildCheckboxList({ boxId, items, name, searchInputId, onChange }) {
   const box = el(boxId);
   if (!box) return;
@@ -580,16 +507,13 @@ function buildCheckboxList({ boxId, items, name, searchInputId, onChange }) {
       </label>
     `).join("");
 
-    // When any checkbox changes, rerender results
     box.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       cb.addEventListener("change", onChange);
     });
   }
 
-  // initial render
   render("");
 
-  // wire search-within (optional)
   if (searchInputId) {
     const s = el(searchInputId);
     if (s) {
@@ -609,12 +533,12 @@ function clearCheckboxGroup(name) {
 }
 
 // --------------------
-// Hash Router (Home / Browse / / Show Tab)
+// Hash Router (Home / Browse / Collection / Show)
 // --------------------
 function route() {
-  const raw = (window.location.hash || "#home").slice(1);
+  d("route()", { hash: window.location.hash });
 
-  // split "show?id=123" -> name="show", query="id=123"
+  const raw = (window.location.hash || "#home").slice(1);
   const [nameRaw] = raw.split("?");
   const views = ["home", "browse", "collection", "show"];
 
@@ -622,38 +546,39 @@ function route() {
 
   views.forEach(v => {
     setDisplay(`view-${v}`, v === name);
-
     const t = el(`tab-${v}`);
     if (t) t.classList.toggle("active", v === name);
   });
 
-  // If we navigated to show detail, load it
   if (name === "show") {
     const params = new URLSearchParams(raw.split("?")[1] || "");
     const id = params.get("id");
     if (id) loadShowDetail(Number(id));
   }
-   if (name === "browse") rerenderFiltered();
+  if (name === "browse") rerenderFiltered();
   if (name === "collection") renderCollection();
-}
 
+  snap("after route()");
+}
 
 function wireTabs() {
   const nav = document.querySelector(".tabsRow");
+  d("wireTabs()", { foundNav: !!nav });
   if (!nav) return;
 
-  nav.addEventListener("click", (e) => {
-    const a = e.target.closest('a.tab[href^="#"]');
+  nav.addEventListener("click", (e2) => {
+    const a = e2.target.closest('a.tab[href^="#"]');
+    d("tabsRow click", { foundAnchor: !!a, href: a?.getAttribute("href") });
     if (!a) return;
 
-    e.preventDefault();
-    const hash = a.getAttribute("href"); // "#home" "#browse" "#collection"
+    e2.preventDefault();
+    const hash = a.getAttribute("href");
     window.location.hash = hash;
-
-    // 🔥 Immediately update view (don’t wait for hashchange)
     route();
+    snap("after tab click");
   });
 }
+
 function wireBrowseFilterDrawer() {
   const toggleBtn = el("filtersToggle");
   const closeBtn = el("filtersClose");
@@ -685,526 +610,14 @@ function wireBrowseFilterDrawer() {
   closeBtn?.addEventListener("click", close);
   overlay.addEventListener("click", close);
 
-  // Escape to close
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && panel.classList.contains("open")) close();
+  document.addEventListener("keydown", (e2) => {
+    if (e2.key === "Escape" && panel.classList.contains("open")) close();
   });
 }
-
-//---------------------
-// inline render helpers
-//--------------------
-function v(val) {
-  return (val === null || val === undefined || val === "") ? "—" : String(val);
-}
-
-function inputRow(label, id, type, value) {
-  return `
-    <label class="field">
-      <span>${escapeHtml(label)}</span>
-      <input id="${id}" type="${type}" value="${escapeHtml(value ?? "")}" />
-    </label>
-  `;
-}
-
-function numberRow(label, id, value, min = 0) {
-  return `
-    <label class="field">
-      <span>${escapeHtml(label)}</span>
-      <input id="${id}" type="number" min="${min}" step="1" value="${value ?? ""}" />
-    </label>
-  `;
-}
-
-function dateRow(label, id, value) {
-  return `
-    <label class="field">
-      <span>${escapeHtml(label)}</span>
-      <input id="${id}" type="date" value="${value ?? ""}" />
-    </label>
-  `;
-}
-
-function selectRow(label, id, options, value) {
-  const opts = options.map(o => {
-    const sel = String(o.value) === String(value) ? "selected" : "";
-    return `<option value="${escapeHtml(o.value)}" ${sel}>${escapeHtml(o.label)}</option>`;
-  }).join("");
-  return `
-    <label class="field">
-      <span>${escapeHtml(label)}</span>
-      <select id="${id}">${opts}</select>
-    </label>
-  `;
-}
-
-// the actual function
-function renderShowDetailBlocks(show, mode) {
-  const facts = el("showFactsBlock");
-  const desc = el("showDescriptionBlock");
-  const notes = el("showNotesBlock");
-
-  if (!facts || !desc || !notes) return;
-
-  if (mode === "view") {
-    const poster = el("showPoster");
-  if (poster) {
-    if (show.image_url) {
-      poster.src = show.image_url;
-      poster.classList.remove("hidden");
-    } else {
-      poster.classList.add("hidden");
-    }
-  }
-    desc.innerHTML = `<p class="muted">${escapeHtml(show.description?.trim() || "(No description yet.)")}</p>`;
-    notes.innerHTML = `<p class="muted">${escapeHtml(show.notes?.trim() || "(No notes.)")}</p>`;
-
-    facts.innerHTML = `
-      <div class="factRow"><div class="factLabel muted">Status</div><div class="factValue">${escapeHtml(v(show.status))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Ongoing</div><div class="factValue">${escapeHtml(v(show.ongoing))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Type</div><div class="factValue">${escapeHtml(v(show.show_type))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Release date</div><div class="factValue">${escapeHtml(v(show.release_date))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Last watched</div><div class="factValue">${escapeHtml(v(show.last_watched))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Rating</div><div class="factValue">${escapeHtml(show.rating_stars ? starsDisplay(show.rating_stars) : "—")}</div></div>
-
-      <hr style="border:none;border-top:1px solid #eef0f6; margin:10px 0;" />
-
-      <div class="factRow"><div class="factLabel muted">Current season</div><div class="factValue">${escapeHtml(v(show.current_season))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Current episode</div><div class="factValue">${escapeHtml(v(show.current_episode))}</div></div>
-
-      <hr style="border:none;border-top:1px solid #eef0f6; margin:10px 0;" />
-
-      <div class="factRow"><div class="factLabel muted"># Seasons</div><div class="factValue">${escapeHtml(v(show.seasons))}</div></div>
-      <div class="factRow"><div class="factLabel muted"># Episodes</div><div class="factValue">${escapeHtml(v(show.episodes))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Episode length</div><div class="factValue">${escapeHtml(v(show.episode_length_min))}</div></div>
-
-      <div class="factRow"><div class="factLabel muted"># Movies</div><div class="factValue">${escapeHtml(v(show.movies))}</div></div>
-      <div class="factRow"><div class="factLabel muted">Movie length</div><div class="factValue">${escapeHtml(v(show.movie_length_min))}</div></div>
-
-      <div class="factRow"><div class="factLabel muted"># OVAs</div><div class="factValue">${escapeHtml(v(show.ovas))}</div></div>
-      <div class="factRow"><div class="factLabel muted">OVA length</div><div class="factValue">${escapeHtml(v(show.ova_length_min))}</div></div>
-    `;
-    return;
-  }
-
-  // EDIT MODE
-  desc.innerHTML = `
-    <label class="field">
-      <span>Description</span>
-      <textarea id="edit_description" rows="4">${escapeHtml(show.description ?? "")}</textarea>
-    </label>
-  `;
-
-  notes.innerHTML = `
-    <label class="field">
-      <span>Notes</span>
-      <textarea id="edit_notes" rows="4">${escapeHtml(show.notes ?? "")}</textarea>
-    </label>
-  `;
-
-  facts.innerHTML = `
-    <div class="grid">
-
-      ${selectRow("Status", "edit_status", [
-        { value: "To Be Watched", label: "To Be Watched" },
-        { value: "Watching", label: "Watching" },
-        { value: "Watched", label: "Watched" },
-        { value: "Dropped", label: "Dropped" },
-        { value: "Waiting for Next Season", label: "Waiting for Next Season" }
-      ], show.status)}
-
-      ${selectRow("Ongoing", "edit_ongoing", [
-        { value: "", label: "—" },
-        { value: "Yes", label: "Yes" },
-        { value: "No", label: "No" },
-        { value: "On Hiatus", label: "On Hiatus" },
-        { value: "To Be Released", label: "To Be Released" }
-      ], show.ongoing ?? "")}
-
-      ${selectRow("Type", "edit_show_type", [
-        { value: "", label: "—" },
-        { value: "TV", label: "TV" },
-        { value: "Movie", label: "Movie" },
-        { value: "TV & Movie", label: "TV & Movie" }
-      ], show.show_type ?? "")}
-
-      ${dateRow("Release date", "edit_release_date", show.release_date ?? "")}
-      ${dateRow("Last watched", "edit_last_watched", show.last_watched ?? "")}
-      <div class="starField" style="grid-column: 1 / -1;">
-  <label>My rating</label>
-  <div class="stars" id="editRatingStars">
-    <span class="star" data-value="1">☆</span>
-    <span class="star" data-value="2">☆</span>
-    <span class="star" data-value="3">☆</span>
-    <span class="star" data-value="4">☆</span>
-    <span class="star" data-value="5">☆</span>
-    <span class="starClear secondary" id="editClearRating">Clear</span>
-  </div>
-  <input type="hidden" id="edit_rating_stars" value="${escapeHtml(show.rating_stars ?? "")}" />
-</div>
-
-      <div id="editProgressBlock" style="grid-column:1/-1; display:none;">
-        ${numberRow("Current season", "edit_current_season", show.current_season ?? "", 1)}
-        ${numberRow("Current episode", "edit_current_episode", show.current_episode ?? "", 1)}
-      </div>
-
-      <div id="editTvBlock" style="grid-column:1/-1; display:none;" class="progressBlock">
-        ${numberRow("# Seasons", "edit_seasons", show.seasons ?? "", 0)}
-        ${numberRow("# Episodes", "edit_episodes", show.episodes ?? "", 0)}
-        ${numberRow("Episode length (min)", "edit_episode_length_min", show.episode_length_min ?? "", 0)}
-      </div>
-
-      <div id="editMovieBlock" style="grid-column:1/-1; display:none;" class="progressBlock">
-        ${numberRow("# Movies", "edit_movies", show.movies ?? "", 0)}
-        ${numberRow("Movie length (min)", "edit_movie_length_min", show.movie_length_min ?? "", 0)}
-      </div>
-
-      <div id="editOvaBlock" style="grid-column:1/-1; display:none;" class="progressBlock">
-        ${numberRow("# OVAs", "edit_ovas", show.ovas ?? "", 0)}
-        ${numberRow("OVA length (min)", "edit_ova_length_min", show.ova_length_min ?? "", 0)}
-      </div>
-  <!-- ✅ TAG EDITING -->
-    <div class="card innerCard" style="grid-column:1/-1; margin-top:10px;">
-      <h4 style="margin:0 0 10px 0;">Edit Tags</h4>
-
-      <div class="multiselect">
-        <label>Studios</label>
-        <button type="button" id="editStudioBtn" class="secondary">Select studios</button>
-        <div id="editStudioMenu" class="menu hidden"></div>
-        <div id="editStudioChips" class="chips"></div>
-      </div>
-
-      <div class="multiselect">
-        <label>Platforms</label>
-        <button type="button" id="editPlatformBtn" class="secondary">Select platforms</button>
-        <div id="editPlatformMenu" class="menu hidden"></div>
-        <div id="editPlatformChips" class="chips"></div>
-      </div>
-
-      <div class="multiselect">
-        <label>Genres</label>
-        <button type="button" id="editGenreBtn" class="secondary">Select genres</button>
-        <div id="editGenreMenu" class="menu hidden"></div>
-        <div id="editGenreChips" class="chips"></div>
-      </div>
-
-      <div class="multiselect">
-        <label>Tropes</label>
-        <button type="button" id="editTropeBtn" class="secondary">Select tropes</button>
-        <div id="editTropeMenu" class="menu hidden"></div>
-        <div id="editTropeChips" class="chips"></div>
-      </div>
-    </div>
-    </div>
-  `;
-
-
-  // wire conditional visibility
-  const statusSel = el("edit_status");
-  const typeSel = el("edit_show_type");
-
-  function syncEditVisibility() {
-    const status = statusSel?.value || "";
-    const type = typeSel?.value || "";
-    const isWatching = status === "Watching";
-
-    const isTV = type === "TV" || type === "TV & Movie";
-    const isMovie = type === "Movie" || type === "TV & Movie";
-    const isAnime = (show.category === "Anime");
-
-    const prog = el("editProgressBlock");
-    const tv = el("editTvBlock");
-    const mv = el("editMovieBlock");
-    const ova = el("editOvaBlock");
-
-    if (prog) prog.style.display = isWatching ? "grid" : "none";
-    if (tv) tv.style.display = isTV ? "grid" : "none";
-    if (mv) mv.style.display = isMovie ? "grid" : "none";
-    if (ova) ova.style.display = isAnime ? "grid" : "none";
-  }
-
-  statusSel?.addEventListener("change", syncEditVisibility);
-  typeSel?.addEventListener("change", syncEditVisibility);
-  syncEditVisibility();
- // Wire edit-mode star rating UI
-const editStarUI = setupStarRating({
-  containerId: "editRatingStars",
-  inputId: "edit_rating_stars",
-  clearId: "editClearRating"
-});
-editStarUI.set(show.rating_stars || 0);
-// Pre-paint with existing value
-const existing = Number(show.rating_stars || 0);
-if (existing) {
-  // simulate setting by directly updating hidden input, then "paint"
-  // easiest: click-style set via helper: re-run setupStarRating already paints on mouse events,
-  // so we just set the hidden value and trigger a repaint by calling clear then re-click isn't ideal.
-  // Instead: small patch—see below.
-}
- // --- build edit multiselects
-window.EDIT_TAG_SELECTS = {
-  studios: setupDbMultiSelect({ buttonId:"editStudioBtn", menuId:"editStudioMenu", chipsId:"editStudioChips", tableName:"studios" }),
-  platforms: setupDbMultiSelect({ buttonId:"editPlatformBtn", menuId:"editPlatformMenu", chipsId:"editPlatformChips", tableName:"platforms" }),
-  genres: setupDbMultiSelect({ buttonId:"editGenreBtn", menuId:"editGenreMenu", chipsId:"editGenreChips", tableName:"genres" }),
-  tropes: setupDbMultiSelect({ buttonId:"editTropeBtn", menuId:"editTropeMenu", chipsId:"editTropeChips", tableName:"tropes" })
-};
-
-// load option lists (from cached globals)
-window.EDIT_TAG_SELECTS.studios.setRows(STUDIO_ROWS);
-window.EDIT_TAG_SELECTS.platforms.setRows(PLATFORM_ROWS);
-window.EDIT_TAG_SELECTS.genres.setRows(GENRE_ROWS);
-window.EDIT_TAG_SELECTS.tropes.setRows(TROPE_ROWS);
-
-// preselect current show tags (requires your joins include ids)
-const curStudios = (show.show_studios || []).map(x => x.studios).filter(Boolean);
-const curPlatforms = (show.show_platforms || []).map(x => x.platforms).filter(Boolean);
-const curGenres = (show.show_genres || []).map(x => x.genres).filter(Boolean);
-const curTropes = (show.show_tropes || []).map(x => x.tropes).filter(Boolean);
-
-window.EDIT_TAG_SELECTS.studios.setSelectedRows(curStudios);
-window.EDIT_TAG_SELECTS.platforms.setSelectedRows(curPlatforms);
-window.EDIT_TAG_SELECTS.genres.setSelectedRows(curGenres);
-window.EDIT_TAG_SELECTS.tropes.setSelectedRows(curTropes);
-
-}
-async function replaceJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
-  // delete existing
-  const del = await supabase
-    .from(joinTable)
-    .delete()
-    .eq("user_id", user_id)
-    .eq("show_id", show_id);
-
-  if (del.error) throw new Error(`Delete ${joinTable}: ${del.error.message}`);
-
-  // insert new
-  if (!ids || !ids.length) return;
-
-  const rows = ids.map(id => ({
-    user_id,
-    show_id,
-    [fkColumn]: id
-  }));
-
-  const ins = await supabase.from(joinTable).insert(rows);
-  if (ins.error) throw new Error(`Insert ${joinTable}: ${ins.error.message}`);
-}
-
-function setInlineEditMode(on) {
-  EDIT_MODE = on;
-
-  const editBtn = el("inlineEditBtn");
-  const saveBtn = el("inlineSaveBtn");
-  const cancelBtn = el("inlineCancelBtn");
-
-  if (editBtn) editBtn.style.display = on ? "none" : "";
-  if (saveBtn) saveBtn.style.display = on ? "" : "none";
-  if (cancelBtn) cancelBtn.style.display = on ? "" : "none";
-
-  if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, on ? "edit" : "view");
-}
-
-async function saveInlineEdits() {
-  if (!CURRENT_SHOW?.id) return;
-
-  const msgEl = el("showDetailMsg");
-  if (msgEl) msgEl.textContent = "Saving…";
-
-  const payload = {
-    status: el("edit_status")?.value || CURRENT_SHOW.status,
-    ongoing: (el("edit_ongoing")?.value || null),
-    show_type: (el("edit_show_type")?.value || null),
-
-    release_date: el("edit_release_date")?.value || null,
-    last_watched: el("edit_last_watched")?.value || null,
-
-    rating_stars: toIntOrNull(el("edit_rating_stars")?.value),
-
-    current_season: toIntOrNull(el("edit_current_season")?.value),
-    current_episode: toIntOrNull(el("edit_current_episode")?.value),
-
-    seasons: toIntOrNull(el("edit_seasons")?.value),
-    episodes: toIntOrNull(el("edit_episodes")?.value),
-    episode_length_min: toIntOrNull(el("edit_episode_length_min")?.value),
-
-    movies: toIntOrNull(el("edit_movies")?.value),
-    movie_length_min: toIntOrNull(el("edit_movie_length_min")?.value),
-
-    // only for anime; otherwise store nulls
-    ovas: (CURRENT_SHOW.category === "Anime") ? toIntOrNull(el("edit_ovas")?.value) : null,
-    ova_length_min: (CURRENT_SHOW.category === "Anime") ? toIntOrNull(el("edit_ova_length_min")?.value) : null,
-
-    description: el("edit_description")?.value?.trim() || null,
-    notes: el("edit_notes")?.value?.trim() || null
-  };
-
-  const { error } = await supabase
-    .from("shows")
-    .update(payload)
-    .eq("id", CURRENT_SHOW.id);
-const user_id = await getUserId();
-
-const sels = window.EDIT_TAG_SELECTS;
-if (sels && user_id) {
-  await replaceJoinRows({ joinTable:"show_studios", user_id, show_id: CURRENT_SHOW.id, fkColumn:"studio_id", ids: sels.studios.getIds() });
-  await replaceJoinRows({ joinTable:"show_platforms", user_id, show_id: CURRENT_SHOW.id, fkColumn:"platform_id", ids: sels.platforms.getIds() });
-  await replaceJoinRows({ joinTable:"show_genres", user_id, show_id: CURRENT_SHOW.id, fkColumn:"genre_id", ids: sels.genres.getIds() });
-  await replaceJoinRows({ joinTable:"show_tropes", user_id, show_id: CURRENT_SHOW.id, fkColumn:"trope_id", ids: sels.tropes.getIds() });
-}
-
-  if (error) {
-    if (msgEl) msgEl.textContent = `Error: ${error.message}`;
-    return;
-  }
-
-  if (msgEl) msgEl.textContent = "Saved!";
-  setInlineEditMode(false);
-
-  await loadShowDetail(CURRENT_SHOW.id);
- console.log("SHOW DETAIL DATA:", data);
-
-  await loadShows(); // keep Collection/Browse updated
-}
-
-// -------------------
-// Poster Cards (fixed for your schema)
-// -------------------
-const FALLBACK_POSTER = "./assets/poster-placeholder.png";
-
-function getPosterUrl(item) {
-  // You store this as image_url in DB
-  const s = String(item?.image_url ?? "").trim();
-  return s ? s : FALLBACK_POSTER;
-}
-
-// Clickable poster card template
-function collectionCardHTML(r) {
-  const poster = getPosterUrl(r);
-
-  const title = r.title || "Untitled";
-  const cat = r.category || "";
-  const type = r.show_type || "";
-  const status = r.status || "";
-  const ongoing = r.ongoing || "";
-  const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
-
-  // Optional progress for Watching
-  const progress =
-    (status === "Watching" && (r.current_season || r.current_episode))
-      ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
-      : "";
-
-  return `
-    <article class="media-card" data-id="${r.id}" role="button" tabindex="0">
-      <img
-        class="media-card__poster"
-        src="${escapeHtml(poster)}"
-        alt="${escapeHtml(title)} poster"
-        loading="lazy"
-        onerror="this.onerror=null;this.src='${FALLBACK_POSTER}';"
-      />
-      <div class="media-card__body">
-        <div class="media-title">${escapeHtml(title)}</div>
-
-        <div class="media-meta">
-          ${[cat, type].filter(Boolean).length ? `<div>${escapeHtml([cat, type].filter(Boolean).join(" • "))}</div>` : ""}
-          ${status ? `<div>Status: ${escapeHtml(status)}</div>` : ""}
-          ${ongoing ? `<div>Ongoing: ${escapeHtml(ongoing)}</div>` : ""}
-          ${progress ? `<div>${escapeHtml(progress)}</div>` : ""}
-          ${rating ? `<div>${escapeHtml(rating)}</div>` : ""}
-        </div>
-
-      </div>
-    </article>
-  `;
-}
-
-/**
- * IMPORTANT: make renderCollection take NO args,
- * because your app calls renderCollection() in loadShows().
- * It pulls rows from your existing getCollectionRows().
- */
-function renderCollection() {
-  const wrap = el("collectionList");     // keep your existing container
-  const note = el("collectionMsg");
-  if (!wrap) return;
-const mode = getCollectionViewMode();
-wrap.classList.remove("mode-compact", "mode-comfy");
-wrap.classList.add(mode);
- applyCollectionViewMode();
-  const rows = getCollectionRows();
-
-  if (!rows.length) {
-    wrap.innerHTML = "";
-    if (note) note.textContent = "No items yet (try switching filters or add a show).";
-    return;
-  }
-  if (note) note.textContent = "";
-
-  wrap.innerHTML = rows.map(collectionCardHTML).join("");
-}
-
-// ✅ Attach ONE click handler (event delegation) ONCE
-function wireCollectionClicks() {
-  const wrap = el("collectionList");
-  if (!wrap) return;
-
-  wrap.addEventListener("click", (e) => {
-    const openBtn = e.target.closest("button[data-action='open']");
-    const card = e.target.closest(".media-card");
-    const target = openBtn || card;
-    if (!target) return;
-
-    const id = card?.dataset?.id;
-    if (!id) return;
-
-    window.location.hash = `#show?id=${id}`;
-    route();
-  });
-
-  // Optional: keyboard open
-  wrap.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const card = e.target.closest(".media-card");
-    if (!card) return;
-    e.preventDefault();
-    const id = card.dataset.id;
-    window.location.hash = `#show?id=${id}`;
-    route();
-  });
-}
-
 
 // --------------------
-// Browse filter helpers
+// Browse render
 // --------------------
-function fillSelect(selectId, rows, label) {
-  const sel = el(selectId);
-  if (!sel) return;
-
-  // preserve existing selected values (works for multiple + single)
-  const prev = new Set(Array.from(sel.selectedOptions || []).map(o => o.value));
-
-  // For multiple selects, you usually DON'T want the "All ..." option.
-  const isMulti = sel.hasAttribute("multiple");
-
-  sel.innerHTML =
-    (isMulti ? "" : `<option value="">All ${label}</option>`) +
-    (rows || [])
-      .map(r => `<option value="${escapeHtml(r.name)}">${escapeHtml(r.name)}</option>`)
-      .join("");
-
-  // restore selections
-  Array.from(sel.options).forEach(opt => {
-    if (prev.has(opt.value)) opt.selected = true;
-  });
-}
-
-function rowHasName(list, key, wanted) {
-  if (!wanted) return true;
-  return (list || []).some(x => x?.[key]?.name === wanted);
-}
-
 function applyClientFilters(rows) {
   const q = (el("q")?.value || "").trim().toLowerCase();
 
@@ -1221,34 +634,28 @@ function applyClientFilters(rows) {
   return (rows || []).filter(r => {
     if (q && !String(r.title || "").toLowerCase().includes(q)) return false;
 
-    // Status: match ANY selected
     if (statuses.length && !statuses.includes(r.status)) return false;
 
-    // Min rating
     if (minRating != null) {
       const rs = r.rating_stars == null ? 0 : Number(r.rating_stars);
       if (rs < minRating) return false;
     }
 
-    // Platforms: match ANY selected
     if (platformsWanted.length) {
       const rowPlatforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
       if (!platformsWanted.some(p => rowPlatforms.includes(p))) return false;
     }
 
-    // Genres: match ANY selected
     if (genresWanted.length) {
       const rowGenres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
       if (!genresWanted.some(g => rowGenres.includes(g))) return false;
     }
 
-    // Tropes: match ANY selected
     if (tropesWanted.length) {
       const rowTropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
       if (!tropesWanted.some(t => rowTropes.includes(t))) return false;
     }
 
-    // Studios: match ANY selected
     if (studiosWanted.length) {
       const rowStudios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
       if (!studiosWanted.some(s => rowStudios.includes(s))) return false;
@@ -1258,11 +665,9 @@ function applyClientFilters(rows) {
   });
 }
 
-
-
 function rerenderFiltered() {
   renderTable(applyClientFilters(ALL_SHOWS_CACHE));
-  msg.textContent = applyClientFilters(ALL_SHOWS_CACHE).length ? "" : "No results.";
+  if (msg) msg.textContent = applyClientFilters(ALL_SHOWS_CACHE).length ? "" : "No results.";
 }
 
 // --------------------
@@ -1273,36 +678,18 @@ async function getUserId() {
   return data.user?.id || null;
 }
 
-// async function sendMagicLink(email, password) {
-// const form = document.getElementById("loginForm");
-// const errorEl = document.getElementById("loginError");
-
-// form.addEventListener("submit", async (e) => {
-//   e.preventDefault();
-
-//   const email = document.getElementById("email").value;
-//   const password = document.getElementById("password").value;
-
-//   const { data, error } = await supabase.auth.signInWithPassword({
-//     email,
-//     password
-//   });
-
-//   if (error) {
-//     errorEl.textContent = error.message;
-//     errorEl.style.display = "block";
-//     return;
-//   }
-
-//   // Redirect after login
-//   window.location.href = "./collection.html";
-// });
-
 async function logout() {
-  await supabase.auth.signOut();
+  d("logout() clicked");
+  snap("before logout");
+
+  const r = await supabase.auth.signOut();
+  d("signOut result:", r);
+
   showAuthedUI(false);
   window.location.hash = "#home";
   route();
+
+  snap("after logout");
 }
 
 // --------------------
@@ -1313,10 +700,9 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
   const menu = el(menuId);
   const chips = el(chipsId);
 
-  // Safety: if the HTML isn't on this page/view yet, don't crash
   if (!btn || !menu || !chips) {
     console.warn(`Missing multiselect elements for ${tableName}`, { buttonId, menuId, chipsId });
-    return { setRows: () => {}, getIds: () => [], clear: () => {} };
+    return { setRows: () => {}, getIds: () => [], clear: () => {}, setSelectedRows: () => {} };
   }
 
   const selected = new Map();
@@ -1354,20 +740,14 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
       <div id="${menuId}_options">${optionsHtml}</div>
     `;
 
- const searchEl = menu.querySelector(`#${menuId}_search`);
+    const searchEl = menu.querySelector(`#${menuId}_search`);
+    searchEl.value = filterText;
+    searchEl.focus({ preventScroll: true });
+    searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
 
-// IMPORTANT: keep the typed value after re-render
-searchEl.value = filterText;
-
-// IMPORTANT: keep focus so typing doesn't "die"
-searchEl.focus({ preventScroll: true });
-searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
-
-searchEl.addEventListener("input", (e) => {
-  // Re-render using the current typed value
-  renderMenu(e.target.value);
-});
-
+    searchEl.addEventListener("input", (e2) => {
+      renderMenu(e2.target.value);
+    });
 
     const addBtn = menu.querySelector(`#${menuId}_addBtn`);
     if (addBtn) {
@@ -1383,10 +763,10 @@ searchEl.addEventListener("input", (e) => {
           selected.set(row.id, row.name);
           renderChips();
           renderMenu("");
-         // If this was a new lookup value, update browse filters immediately
-if (tableName === "tropes" || tableName === "genres" || tableName === "platforms" || tableName === "studios") {
-  refreshBrowseFilterOptions();
-}
+
+          if (tableName === "tropes" || tableName === "genres" || tableName === "platforms" || tableName === "studios") {
+            refreshBrowseFilterOptions();
+          }
         }
       });
     }
@@ -1410,8 +790,8 @@ if (tableName === "tropes" || tableName === "genres" || tableName === "platforms
     if (!menu.classList.contains("hidden")) renderMenu("");
   });
 
-  document.addEventListener("click", (e) => {
-    if (!menu.contains(e.target) && e.target !== btn) {
+  document.addEventListener("click", (e2) => {
+    if (!menu.contains(e2.target) && e2.target !== btn) {
       menu.classList.add("hidden");
     }
   });
@@ -1427,18 +807,20 @@ if (tableName === "tropes" || tableName === "genres" || tableName === "platforms
       renderChips();
     },
     setSelectedRows: (rows) => {
-    selected.clear();
-    (rows || []).forEach(r => selected.set(r.id, r.name));
-    renderChips();
-  }
+      selected.clear();
+      (rows || []).forEach(r => selected.set(r.id, r.name));
+      renderChips();
+    }
   };
 }
 
+// --------------------
+// Home KPIs + Collection
+// --------------------
 function updateHomeCounts() {
   const rows = (ALL_SHOWS_CACHE || []);
 
-  // Status KPIs
-  const statusCounts = { 
+  const statusCounts = {
     "To Be Watched": 0,
     "Watching": 0,
     "Waiting for Next Season": 0,
@@ -1449,7 +831,6 @@ function updateHomeCounts() {
     if (statusCounts[r.status] != null) statusCounts[r.status] += 1;
   }
 
-  // ✅ match your HTML ids
   const map = [
     ["kpiToWatch", statusCounts["To Be Watched"]],
     ["kpiWatching", statusCounts["Watching"]],
@@ -1462,7 +843,6 @@ function updateHomeCounts() {
     if (node) node.textContent = String(val);
   });
 
-  // Total + Category breakdown (dynamic / room to grow)
   const totalEl = el("kpiTotal");
   if (totalEl) totalEl.textContent = String(rows.length);
 
@@ -1472,7 +852,6 @@ function updateHomeCounts() {
     byCategory[cat] = (byCategory[cat] || 0) + 1;
   }
 
-  // Make "Anime" and "Non-anime" appear first if present, then alpha for the rest
   const preferred = ["Anime", "Non-anime"];
   const cats = Object.keys(byCategory);
 
@@ -1489,27 +868,68 @@ function updateHomeCounts() {
   }
 }
 
+const FALLBACK_POSTER = "./assets/poster-placeholder.png";
+
+function getPosterUrl(item) {
+  const s = String(item?.image_url ?? "").trim();
+  return s ? s : FALLBACK_POSTER;
+}
+
+function collectionCardHTML(r) {
+  const poster = getPosterUrl(r);
+  const title = r.title || "Untitled";
+  const cat = r.category || "";
+  const type = r.show_type || "";
+  const status = r.status || "";
+  const ongoing = r.ongoing || "";
+  const rating = r.rating_stars ? starsDisplay(r.rating_stars) : "";
+
+  const progress =
+    (status === "Watching" && (r.current_season || r.current_episode))
+      ? `S${r.current_season || "?"} · E${r.current_episode || "?"}`
+      : "";
+
+  return `
+    <article class="media-card" data-id="${r.id}" role="button" tabindex="0">
+      <img
+        class="media-card__poster"
+        src="${escapeHtml(poster)}"
+        alt="${escapeHtml(title)} poster"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='${FALLBACK_POSTER}';"
+      />
+      <div class="media-card__body">
+        <div class="media-title">${escapeHtml(title)}</div>
+        <div class="media-meta">
+          ${[cat, type].filter(Boolean).length ? `<div>${escapeHtml([cat, type].filter(Boolean).join(" • "))}</div>` : ""}
+          ${status ? `<div>Status: ${escapeHtml(status)}</div>` : ""}
+          ${ongoing ? `<div>Ongoing: ${escapeHtml(ongoing)}</div>` : ""}
+          ${progress ? `<div>${escapeHtml(progress)}</div>` : ""}
+          ${rating ? `<div>${escapeHtml(rating)}</div>` : ""}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
 function getCollectionRows() {
   const group = el("collectionGroup")?.value || "";
   const sort = el("collectionSort")?.value || "recent";
 
-  // Filter
   let rows = (ALL_SHOWS_CACHE || []).slice();
   if (group) rows = rows.filter(r => r.category === group);
 
-  // Sort
   if (sort === "alpha") {
     rows.sort((a, b) => String(a.title || "").localeCompare(String(b.title || "")));
   } else if (sort === "rating") {
     rows.sort((a, b) => (Number(b.rating_stars || 0) - Number(a.rating_stars || 0)));
-    } else if (sort === "release_newest" || sort === "release_oldest") {
-  rows.sort((a, b) => {
-    const ad = a.release_date ? Date.parse(a.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
-    const bd = b.release_date ? Date.parse(b.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
-    return (sort === "release_oldest") ? (ad - bd) : (bd - ad);
-  });
+  } else if (sort === "release_newest" || sort === "release_oldest") {
+    rows.sort((a, b) => {
+      const ad = a.release_date ? Date.parse(a.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
+      const bd = b.release_date ? Date.parse(b.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
+      return (sort === "release_oldest") ? (ad - bd) : (bd - ad);
+    });
   } else {
-    // recent = most recently watched, else newest created
     rows.sort((a, b) => {
       const aw = a.last_watched ? Date.parse(a.last_watched) : -Infinity;
       const bw = b.last_watched ? Date.parse(b.last_watched) : -Infinity;
@@ -1524,7 +944,52 @@ function getCollectionRows() {
   return rows;
 }
 
+function renderCollection() {
+  const wrap = el("collectionList");
+  const note = el("collectionMsg");
+  if (!wrap) return;
 
+  const mode = getCollectionViewMode();
+  wrap.classList.remove("mode-compact", "mode-comfy");
+  wrap.classList.add(mode);
+  applyCollectionViewMode();
+
+  const rows = getCollectionRows();
+
+  if (!rows.length) {
+    wrap.innerHTML = "";
+    if (note) note.textContent = "No items yet (try switching filters or add a show).";
+    return;
+  }
+  if (note) note.textContent = "";
+
+  wrap.innerHTML = rows.map(collectionCardHTML).join("");
+}
+
+function wireCollectionClicks() {
+  const wrap = el("collectionList");
+  if (!wrap) return;
+
+  wrap.addEventListener("click", (e2) => {
+    const card = e2.target.closest(".media-card");
+    if (!card) return;
+    const id = card?.dataset?.id;
+    if (!id) return;
+
+    window.location.hash = `#show?id=${id}`;
+    route();
+  });
+
+  wrap.addEventListener("keydown", (e2) => {
+    if (e2.key !== "Enter" && e2.key !== " ") return;
+    const card = e2.target.closest(".media-card");
+    if (!card) return;
+    e2.preventDefault();
+    const id = card.dataset.id;
+    window.location.hash = `#show?id=${id}`;
+    route();
+  });
+}
 
 // --------------------
 // Clickable Stars for Ratings
@@ -1536,7 +1001,7 @@ function setupStarRating({ containerId, inputId, clearId }) {
 
   if (!wrap || !hidden || !clearBtn) {
     console.warn("Missing star rating elements", { containerId, inputId, clearId });
-    return { clear: () => {} };
+    return { clear: () => {}, set: () => {} };
   }
 
   const stars = Array.from(wrap.querySelectorAll(".star"));
@@ -1560,41 +1025,17 @@ function setupStarRating({ containerId, inputId, clearId }) {
     btn.addEventListener("click", () => set(Number(btn.dataset.value)));
   });
 
-    clearBtn.addEventListener("click", () => set(0));
+  clearBtn.addEventListener("click", () => set(0));
+
   return {
     clear: () => set(0),
     set: (n) => set(Number(n) || 0)
   };
 }
 
-
-
 // --------------------
 // DB helpers
 // --------------------
-// async function getOrCreateOptionRow(tableName, name) {
-//   const cleaned = String(name).trim();
-//   if (!cleaned) return null;
-
-//   const ins = await supabase
-//     .from(tableName)
-//     .insert([{ name: cleaned }], { onConflict: "name", ignoreDuplicates: true });
-
-//   if (ins.error) console.error(`Insert into ${tableName} failed:`, ins.error);
-
-//   const sel = await supabase
-//     .from(tableName)
-//     .select("id,name")
-//     .eq("name", cleaned)
-//     .maybeSingle();
-
-//   if (sel.error) {
-//     console.error(`Select from ${tableName} failed:`, sel.error);
-//     return null;
-//   }
-//   return sel.data || null;
-// }
-
 async function loadOptionRows(tableName) {
   const r = await supabase.from(tableName).select("id,name").order("name");
   if (r.error) {
@@ -1604,8 +1045,28 @@ async function loadOptionRows(tableName) {
   return r.data || [];
 }
 
+async function getOrCreateOptionRow(tableName, name) {
+  const clean = String(name || "").trim();
+  if (!clean) return null;
 
+  const { data: found, error: findErr } = await supabase
+    .from(tableName)
+    .select("id,name")
+    .ilike("name", clean)
+    .limit(1);
 
+  if (findErr) throw findErr;
+  if (found && found[0]) return found[0];
+
+  const { data: inserted, error: insErr } = await supabase
+    .from(tableName)
+    .insert({ name: clean })
+    .select("id,name")
+    .single();
+
+  if (insErr) throw insErr;
+  return inserted;
+}
 
 // --------------------
 // CRUD
@@ -1613,15 +1074,15 @@ async function loadOptionRows(tableName) {
 async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
   const user_id = await getUserId();
   if (!user_id) {
-    msg.textContent = "You must be logged in.";
+    if (msg) msg.textContent = "You must be logged in.";
     return;
   }
- 
+
   const title = formData.get("title").trim();
   const status = formData.get("status");
   const rating_stars = parseRatingStars(formData.get("my_rating"));
   const description = formData.get("description")?.trim() || null;
-const image_url = null;
+  const image_url = null;
   const category = formData.get("category") || "Non-anime";
   const show_type = formData.get("show_type") || null;
   const ongoing = formData.get("ongoing") || null;
@@ -1630,22 +1091,20 @@ const image_url = null;
   const seasons = toIntOrNull(formData.get("seasons"));
   const episodes = toIntOrNull(formData.get("episodes"));
   const episode_length_min = toIntOrNull(formData.get("episode_length_min"));
- const current_season = toIntOrNull(formData.get("current_season"));
-const current_episode = toIntOrNull(formData.get("current_episode"));
+  const current_season = toIntOrNull(formData.get("current_season"));
+  const current_episode = toIntOrNull(formData.get("current_episode"));
 
   const movies = toIntOrNull(formData.get("movies"));
   const movie_length_min = toIntOrNull(formData.get("movie_length_min"));
 
-  // Anime-only (store null if not Anime)
   const ovas = (category === "Anime") ? toIntOrNull(formData.get("ovas")) : null;
   const ova_length_min = (category === "Anime") ? toIntOrNull(formData.get("ova_length_min")) : null;
 
-  // status -> last_watched rules
   let last_watched = null;
   if (status === "Watched") {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    last_watched = d.toISOString().slice(0, 10);
+    const d2 = new Date();
+    d2.setHours(0, 0, 0, 0);
+    last_watched = d2.toISOString().slice(0, 10);
   }
   if (status === "To Be Watched") last_watched = null;
 
@@ -1656,31 +1115,28 @@ const current_episode = toIntOrNull(formData.get("current_episode"));
       title,
       status,
       last_watched,
-rating_stars, 
+      rating_stars,
       category,
       show_type,
       ongoing,
       release_date,
-
       seasons,
       episodes,
       episode_length_min,
-
       movies,
       movie_length_min,
-
       ovas,
       ova_length_min,
-     current_season,
-current_episode,
-         description,
-    image_url
+      current_season,
+      current_episode,
+      description,
+      image_url
     }])
     .select("id")
     .single();
 
   if (ins.error) {
-    msg.textContent = `Error: ${ins.error.message}`;
+    if (msg) msg.textContent = `Error: ${ins.error.message}`;
     return;
   }
 
@@ -1689,19 +1145,15 @@ current_episode,
   await insertJoinRows({ joinTable: "show_platforms", user_id, show_id, fkColumn: "platform_id", ids: platformIds });
   await insertJoinRows({ joinTable: "show_genres", user_id, show_id, fkColumn: "genre_id", ids: genreIds });
   await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
- await insertJoinRows({ joinTable: "show_studios", user_id, show_id, fkColumn: "studio_id", ids: studioIds });
+  await insertJoinRows({ joinTable: "show_studios", user_id, show_id, fkColumn: "studio_id", ids: studioIds });
 
-  msg.textContent = "Added!";
+  if (msg) msg.textContent = "Added!";
 }
-
- 
 
 async function deleteShow(id) {
   const user_id = await getUserId();
   if (!user_id) throw new Error("Not logged in.");
 
-  // If your DB has ON DELETE CASCADE on join tables, these deletes are optional.
-  // But doing them manually makes deletion more reliable if cascade isn't set.
   const joinTables = [
     "show_platforms",
     "show_genres",
@@ -1718,11 +1170,9 @@ async function deleteShow(id) {
 
     if (delJoin.error) {
       console.warn(`Join delete failed for ${jt}:`, delJoin.error);
-      // We don't hard fail here because the show delete might still succeed with cascade.
     }
   }
 
-  // Delete the show row (locked to current user)
   const { error } = await supabase
     .from("shows")
     .delete()
@@ -1730,55 +1180,51 @@ async function deleteShow(id) {
     .eq("user_id", user_id);
 
   if (error) {
-    // surface in main msg too, but ALSO throw so modal can show error
     if (msg) msg.textContent = `Error: ${error.message}`;
     throw error;
   }
 }
 
-
 async function loadShows() {
   if (DEV_MODE) return;
 
-  msg.textContent = "Loading…";
+  if (msg) msg.textContent = "Loading…";
 
   const { data, error } = await supabase
     .from("shows")
     .select(`
-       id, user_id, title, status, rating_stars, last_watched, created_at,
-    category, show_type, ongoing, release_date, rewatch_count,
-is_rewatching,
-last_rewatch_date,     description,
-    image_url,
-    seasons, episodes, episode_length_min,
-    movies, movie_length_min,
-    ovas, ova_length_min,
-    current_season, current_episode,
-show_platforms(platform_id, platforms(id, name)),
-show_genres(genre_id, genres(id, name)),
-show_tropes(trope_id, tropes(id, name)),
-show_studios(studio_id, studios(id, name))
-
+      id, user_id, title, status, rating_stars, last_watched, created_at,
+      category, show_type, ongoing, release_date, rewatch_count,
+      is_rewatching, last_rewatch_date,
+      description, image_url,
+      seasons, episodes, episode_length_min,
+      movies, movie_length_min,
+      ovas, ova_length_min,
+      current_season, current_episode,
+      show_platforms(platform_id, platforms(id, name)),
+      show_genres(genre_id, genres(id, name)),
+      show_tropes(trope_id, tropes(id, name)),
+      show_studios(studio_id, studios(id, name))
     `)
     .order("created_at", { ascending: false });
 
   if (error) {
-    msg.textContent = `Error: ${error.message}`;
+    if (msg) msg.textContent = `Error: ${error.message}`;
     return;
   }
-
 
   ALL_SHOWS_CACHE = data || [];
   rerenderFiltered();
   updateHomeCounts();
- renderCollection();
+  renderCollection();
+  if (msg) msg.textContent = "";
 }
 
 // --------------------
-// Render
+// Render table (Browse)
 // --------------------
 function renderTable(rows) {
-   const table = el("table");
+  const table = el("table");
   if (!table) return;
   const tbody = table.querySelector("tbody");
   if (!tbody) return;
@@ -1788,45 +1234,36 @@ function renderTable(rows) {
     const platforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
     const genres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
     const tropes = (r.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
-   const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
-
+    const studios = (r.show_studios || []).map(x => x.studios?.name).filter(Boolean);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-<td>
-  <span class="row-link" data-open-id="${r.id}">
-    ${escapeHtml(r.title)}
-  </span>
-</td>
-
-
+      <td><span class="row-link" data-open-id="${r.id}">${escapeHtml(r.title)}</span></td>
       <td>${escapeHtml(r.status)}</td>
       <td>${escapeHtml(starsDisplay(r.rating_stars))}</td>
       <td>${escapeHtml(platforms.join(", "))}</td>
       <td>${escapeHtml(genres.join(", "))}</td>
       <td>${escapeHtml(tropes.join(", "))}</td>
       <td>${escapeHtml(studios.join(", "))}</td>
-
     `;
     tbody.appendChild(tr);
   }
 
- tbody.querySelectorAll("[data-open-id]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const id = btn.dataset.openId;
-    window.location.hash = `#show?id=${id}`;
-    route(); // ensures view updates immediately
+  tbody.querySelectorAll("[data-open-id]").forEach(span => {
+    span.addEventListener("click", () => {
+      const id = span.dataset.openId;
+      window.location.hash = `#show?id=${id}`;
+      route();
+    });
   });
-});
-
 }
+
+// --------------------
+// Show detail (kept as-is from your file; only minimal glue here)
+// --------------------
 function labelVal(label, val) {
-  const v = (val === null || val === undefined || val === "") ? "—" : String(val);
-  return `<div class="factRow"><div class="factLabel muted">${escapeHtml(label)}</div><div class="factValue">${escapeHtml(v)}</div></div>`;
-}
-
-function namesFromJoin(list, key) {
-  return (list || []).map(x => x?.[key]?.name).filter(Boolean);
+  const v2 = (val === null || val === undefined || val === "") ? "—" : String(val);
+  return `<div class="factRow"><div class="factLabel muted">${escapeHtml(label)}</div><div class="factValue">${escapeHtml(v2)}</div></div>`;
 }
 
 async function loadShowDetail(showId) {
@@ -1838,7 +1275,6 @@ async function loadShowDetail(showId) {
 
   if (msgEl) msgEl.textContent = "Loading…";
 
-  // (Optional but recommended) lock to current user too
   const user_id = await getUserId();
 
   const { data, error } = await supabase
@@ -1847,22 +1283,18 @@ async function loadShowDetail(showId) {
       id, user_id, title, status, rating_stars, last_watched, created_at,
       category, show_type, ongoing, release_date,
       seasons, episodes, episode_length_min, rewatch_count,
-is_rewatching,
-last_rewatch_date,
-    notes,
-    description,
-    image_url,
-    mal_id,
+      is_rewatching, last_rewatch_date,
+      notes, description, image_url, mal_id,
       movies, movie_length_min,
       ovas, ova_length_min,
       current_season, current_episode,
-   show_platforms(platform_id, platforms(id, name)),
-show_genres(genre_id, genres(id, name)),
-show_tropes(trope_id, tropes(id, name)),
-show_studios(studio_id, studios(id, name))
+      show_platforms(platform_id, platforms(id, name)),
+      show_genres(genre_id, genres(id, name)),
+      show_tropes(trope_id, tropes(id, name)),
+      show_studios(studio_id, studios(id, name))
     `)
     .eq("id", showId)
-    .eq("user_id", user_id)   // prevents seeing other users’ rows + helps RLS consistency
+    .eq("user_id", user_id)
     .single();
 
   if (error) {
@@ -1872,7 +1304,6 @@ show_studios(studio_id, studios(id, name))
   }
 
   if (msgEl) msgEl.textContent = "";
-
   if (titleEl) titleEl.textContent = data.title || "Show";
 
   const metaBits = [
@@ -1895,20 +1326,16 @@ show_studios(studio_id, studios(id, name))
       labelVal("Last watched", data.last_watched),
       labelVal("Current season", data.current_season),
       labelVal("Current episode", data.current_episode),
-
       labelVal("# Seasons", data.seasons),
       labelVal("# Episodes", data.episodes),
       labelVal("Episode length (min)", data.episode_length_min),
-
       labelVal("# Movies", data.movies),
       labelVal("Movie length (min)", data.movie_length_min),
-
       labelVal("# OVAs", data.ovas),
       labelVal("OVA length (min)", data.ova_length_min),
-     labelVal("Rewatch count", data.rewatch_count),
-labelVal("Currently rewatching", data.is_rewatching ? "Yes" : "No"),
-labelVal("Last rewatch date", data.last_rewatch_date),
-
+      labelVal("Rewatch count", data.rewatch_count),
+      labelVal("Currently rewatching", data.is_rewatching ? "Yes" : "No"),
+      labelVal("Last rewatch date", data.last_rewatch_date),
     ].join("");
   }
 
@@ -1921,736 +1348,22 @@ labelVal("Last rewatch date", data.last_rewatch_date),
       ${(!studios.length && !platforms.length && !genres.length && !tropes.length) ? `<div class="muted">No tags yet.</div>` : ""}
     `;
   }
- CURRENT_SHOW = data;
-renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
- renderShowDangerZone(CURRENT_SHOW);
-}
-/**
- * Renders the delete button at the bottom of the show detail page.
- * This is where "real deletion" should live (rare action).
- */
-function renderShowDangerZone(show) {
-  const dz = el("showDangerZone");
-  if (!dz) return;
 
-  dz.innerHTML = `
-    <section class="danger-zone">
-      <h3>Danger Zone</h3>
-      <p>Deleting a show is permanent and should only be used in rare cases.</p>
-      <button id="dangerDeleteShowBtn" type="button" class="danger">
-        Delete show
-      </button>
-    </section>
-  `;
+  CURRENT_SHOW = data;
 
-  // Wire the button to open the modal
-  const btn = el("dangerDeleteShowBtn");
-  btn?.addEventListener("click", () => {
-    openDeleteModal({
-      showId: show.id,
-      showTitle: show.title,
-      redirectHash: "#collection" // after deleting from detail, go back to collection
-    });
-  });
-}
-
-function setEditMode(on) {
-  const form = el("editForm");
-  const editBtn = el("editShowBtn");
-  const saveBtn = el("saveShowBtn");
-  const cancelBtn = el("cancelShowBtn");
-
-  if (form) form.style.display = on ? "" : "none";
-  if (editBtn) editBtn.style.display = on ? "none" : "";
-  if (saveBtn) saveBtn.style.display = on ? "" : "none";
-  if (cancelBtn) cancelBtn.style.display = on ? "" : "none";
-}
-
-function fillEditForm(show) {
-  if (!show) return;
-
-  const setVal = (id, v) => { const n = el(id); if (n) n.value = (v ?? ""); };
-
-  setVal("edit_status", show.status);
-  setVal("edit_rating", show.rating_stars ?? "");
-  setVal("edit_last_watched", show.last_watched ?? "");
-  setVal("edit_current_season", show.current_season ?? "");
-  setVal("edit_current_episode", show.current_episode ?? "");
-  setVal("edit_description", show.description ?? "");
-  setVal("edit_notes", show.notes ?? "");
-
-  setVal("edit_rewatch_count", show.rewatch_count ?? 0);
-  const rw = el("edit_is_rewatching");
-  if (rw) rw.value = String(!!show.is_rewatching);
-
-  setVal("edit_last_rewatch_date", show.last_rewatch_date ?? "");
-}
-
-function toIntOrNull2(v) {
-  const s = String(v ?? "").trim();
-  if (!s) return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? Math.trunc(n) : null;
-}
-
-async function saveShowEdits() {
-  if (!CURRENT_SHOW?.id) return;
-
-  const editMsg = el("editMsg");
-  if (editMsg) editMsg.textContent = "Saving…";
-
-  const payload = {
-    status: el("edit_status")?.value || CURRENT_SHOW.status,
-    rating_stars: toIntOrNull2(el("edit_rating")?.value),
-    last_watched: el("edit_last_watched")?.value || null,
-    current_season: toIntOrNull2(el("edit_current_season")?.value),
-    current_episode: toIntOrNull2(el("edit_current_episode")?.value),
-    description: el("edit_description")?.value?.trim() || null,
-    notes: el("edit_notes")?.value?.trim() || null,
-
-    rewatch_count: toIntOrNull2(el("edit_rewatch_count")?.value) ?? 0,
-    is_rewatching: (el("edit_is_rewatching")?.value === "true"),
-    last_rewatch_date: el("edit_last_rewatch_date")?.value || null
-  };
-
-  const { error } = await supabase
-    .from("shows")
-    .update(payload)
-    .eq("id", CURRENT_SHOW.id);
-
-  if (error) {
-    if (editMsg) editMsg.textContent = `Error: ${error.message}`;
-    return;
+  // NOTE: your original file calls these; keep them if they exist in your file.
+  if (typeof renderShowDetailBlocks === "function") {
+    renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
   }
-
-  if (editMsg) editMsg.textContent = "Saved!";
-  setEditMode(false);
-
-  // Reload detail + cache list so Collection/Browse stay consistent
-  await loadShowDetail(CURRENT_SHOW.id);
-  await loadShows();
-}
-
-async function getOrCreateOptionRow(tableName, name) {
-  const clean = String(name || "").trim();
-  if (!clean) return null;
-
-  // Try existing (case-insensitive)
-  const { data: found, error: findErr } = await supabase
-    .from(tableName)
-    .select("id,name")
-    .ilike("name", clean)
-    .limit(1);
-
-  if (findErr) throw findErr;
-  if (found && found[0]) return found[0];
-
-  // Insert new
-  const { data: inserted, error: insErr } = await supabase
-    .from(tableName)
-    .insert({ name: clean })
-    .select("id,name")
-    .single();
-
-  if (insErr) throw insErr;
-  return inserted;
-}
-const JOIN = {
-  studios: { table: "show_studios", showCol: "show_id", optCol: "studio_id" },
-  genres:  { table: "show_genres",  showCol: "show_id", optCol: "genre_id"  },
-  tropes:  { table: "show_tropes",  showCol: "show_id", optCol: "trope_id"  }, // use for themes too
-};
-async function addOptionNamesToShow({ user_id, showId, optionTable, joinTable, showCol, optCol, names }) {
-  const cleanNames = (names || [])
-    .map(n => String(n || "").trim())
-    .filter(Boolean);
-
-  const uniqueNames = Array.from(new Set(cleanNames));
-  if (!uniqueNames.length) return;
-
-  if (!user_id) throw new Error(`addOptionNamesToShow: missing user_id for ${joinTable}`);
-
-  // 1) ensure each option exists, collect ids
-  const ids = [];
-  for (const name of uniqueNames) {
-    const row = await getOrCreateOptionRow(optionTable, name);
-    if (row?.id) ids.push(row.id);
+  if (typeof renderShowDangerZone === "function") {
+    renderShowDangerZone(CURRENT_SHOW);
   }
-  const uniqueIds = Array.from(new Set(ids));
-  if (!uniqueIds.length) return;
-
-  // 2) find which ones are already linked (scope by user_id too)
-  const { data: existingLinks, error: linkErr } = await supabase
-    .from(joinTable)
-    .select(optCol)
-    .eq(showCol, showId)
-    .eq("user_id", user_id);
-
-  if (linkErr) throw linkErr;
-
-  const existingSet = new Set((existingLinks || []).map(r => r[optCol]));
-  const toInsert = uniqueIds
-    .filter(id => !existingSet.has(id))
-    .map(id => ({ [showCol]: showId, [optCol]: id, user_id }));
-
-  if (!toInsert.length) return;
-
-  // 3) insert missing links
-  const { error: insErr } = await supabase
-    .from(joinTable)
-    .insert(toInsert);
-
-  if (insErr) throw insErr;
 }
+
 // --------------------
-// Init
+// Filters UI builder
 // --------------------
-async function init() {
-  const platformSelect = setupDbMultiSelect({
-    buttonId: "platformBtn",
-    menuId: "platformMenu",
-    chipsId: "platformChips",
-    tableName: "platforms"
-  });
-
-  const genreSelect = setupDbMultiSelect({
-    buttonId: "genreBtn",
-    menuId: "genreMenu",
-    chipsId: "genreChips",
-    tableName: "genres"
-  });
-
-  const tropeSelect = setupDbMultiSelect({
-    buttonId: "tropeBtn",
-    menuId: "tropeMenu",
-    chipsId: "tropeChips",
-    tableName: "tropes"
-  });
- const studioSelect = setupDbMultiSelect({
-  buttonId: "studioBtn",
-  menuId: "studioMenu",
-  chipsId: "studioChips",
-  tableName: "studios"
-});
-
-console.log("studio elements:", !!el("studioBtn"), !!el("studioMenu"), !!el("studioChips"));
-
-  const starUI = setupStarRating({
-    containerId: "ratingStars",
-    inputId: "my_rating",
-    clearId: "clearRating"
-  });
-
-setupAddShowModal();
-  logoutBtn?.addEventListener("click", logout);
-el("collectionViewCompact")?.addEventListener("click", () => {
-  setCollectionViewMode("mode-compact");
-  applyCollectionViewMode();
-  renderCollection();
-});
-
-el("collectionViewComfy")?.addEventListener("click", () => {
-  setCollectionViewMode("mode-comfy");
-  applyCollectionViewMode();
-  renderCollection();
-});
-
- // Apply saved mode on startup
-applyCollectionViewMode();
-  // Add form
-  el("addForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (DEV_MODE) {
-      msg.textContent = "DEV_MODE: not saving to DB.";
-      return;
-    }
-const form = e.target;
-const titleInput = form.title;
-const title = titleInput.value.trim();
-
-if (!title) return;
-
-
-const errorEl = document.getElementById("addShowError");
-if (errorEl) errorEl.textContent = "";
-
-const normalizedTitle = title.toLowerCase().trim();
-
-// IMPORTANT: only fetch titles (and only for this user)
-const { data: existing, error: dupErr } = await supabase
-  .from("shows")
-  .select("title")
-  .eq("user_id", (await supabase.auth.getUser()).data.user.id); // safest if you don't already store user id
-
-if (dupErr) {
-  console.error("Duplicate check failed:", dupErr);
-  if (errorEl) errorEl.textContent = "Couldn’t validate title uniqueness. Try again.";
-  return;
-}
-
-const duplicate = (existing || []).some(s =>
-  (s.title || "").toLowerCase().trim() === normalizedTitle
-);
-
-if (duplicate) {
-  if (errorEl) errorEl.textContent = "You already added this show.";
-  titleInput.focus();
-  return;
-}
-    await addShow(
-      new FormData(e.target),
-      platformSelect.getIds(),
-      genreSelect.getIds(),
-      tropeSelect.getIds(),
-      studioSelect.getIds()
-    );
-
-  e.target.reset();
-starUI.clear();
-platformSelect.clear();
-genreSelect.clear();
-tropeSelect.clear();
-   studioSelect.clear();
-syncOvaVisibility();
-await loadShows();
-   await refreshBrowseFilterOptions();
-
-  });
-
-  // Browse controls (new)
-  const rerender = debounce(rerenderFiltered, 150);
-el("q")?.addEventListener("input", rerender);
- el("fixedCardToggle")?.addEventListener("change", renderCollection);
- // .forEach(id => {
- //      const node = el(id);
- //      if (!node) return;
- //      const evt = (id === "q" || id === "studioFilter") ? "input" : "change";
- //      node.addEventListener(evt, rerender);
- //    });
-
-el("clearFilters")?.addEventListener("click", () => {
-  if (el("q")) el("q").value = "";
-
-  clearCheckboxGroup("statusFilter");
-  clearCheckboxGroup("platformFilter");
-  clearCheckboxGroup("genreFilter");
-  clearCheckboxGroup("tropeFilter");
-  clearCheckboxGroup("studioFilter");
-
-  // reset min rating radio to Any
-  const any = document.querySelector('input[type="radio"][name="minRatingFilter"][value=""]');
-  if (any) any.checked = true;
-
-  rerenderFiltered();
-});
-
-
-
-  // Refresh button
-  el("refresh")?.addEventListener("click", () => {
-    if (DEV_MODE) rerenderFiltered();
-    else loadShows();
-  });
-  // --------------------
-  // Router wiring (MUST run in DEV_MODE too)
-  // --------------------
-  wireTabs();
- wireBrowseFilterDrawer();
-  window.addEventListener("hashchange", route);
-  wireCollectionClicks();
- wireDeleteModal();
-  if (!window.location.hash) window.location.hash = "#home";
-
-  console.log("Router ready. Current hash =", window.location.hash);
-  route();
-// Anime toggle -> show/hide OVA fields
-el("category")?.addEventListener("change", syncOvaVisibility);
-syncOvaVisibility();
-// Status toggle -> show/hide progress fields
-document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
-syncProgressVisibility();
-
-el("show_type")?.addEventListener("change", syncTypeVisibility);
-syncTypeVisibility();
-
- el("collectionGroup")?.addEventListener("change", renderCollection);
-el("collectionSort")?.addEventListener("change", renderCollection);
-// el("collectionGroup")?.addEventListener("change", renderCollectionCards);
- el("editShowBtn")?.addEventListener("click", () => {
-  fillEditForm(CURRENT_SHOW);
-  setEditMode(true);
-});
-el("inlineEditBtn")?.addEventListener("click", () => setInlineEditMode(true));
- el("inlineCancelBtn")?.addEventListener("click", () => setInlineEditMode(false));
-el("inlineSaveBtn")?.addEventListener("click", saveInlineEdits);
-el("cancelShowBtn")?.addEventListener("click", () => {
-  setEditMode(false);
-  const editMsg = el("editMsg");
-  if (editMsg) editMsg.textContent = "";
-});
-el("fetchAnimeBtn")?.addEventListener("click", async () => {
-  if (!CURRENT_SHOW?.id) return;
-
-  const msgEl = el("showDetailMsg");
-  if (msgEl) msgEl.textContent = "Fetching anime info…";
-
-  try {
-    const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
-    if (!info) {
-      if (msgEl) msgEl.textContent = "No match found.";
-      return;
-    }
-const user_id = await getUserId();
-if (!user_id) {
-  if (msgEl) msgEl.textContent = "Not logged in.";
-  return;
-}
-    // 1) Build show update payload (ONLY fill release_date if empty)
-    const payload = {
-      mal_id: info.mal_id ?? null,
-      image_url: info.image_url ?? null
-    };
-    // 0) If Jikan gives us a nicer English title, optionally standardize it
-    const incomingTitle = (info.canonical_title || "").trim();
-    const currentTitle = (CURRENT_SHOW.title || "").trim();
-
-    if (incomingTitle && incomingTitle !== currentTitle) {
-      // prevent title collisions for this user
-      const user_id = await getUserId();
-      if (user_id) {
-        const { data: existingTitles, error: tErr } = await supabase
-          .from("shows")
-          .select("id,title")
-          .eq("user_id", user_id);
-
-        if (!tErr) {
-          const normalizedIncoming = incomingTitle.toLowerCase().trim();
-
-          const collides = (existingTitles || []).some(r =>
-            r.id !== CURRENT_SHOW.id &&
-            (r.title || "").toLowerCase().trim() === normalizedIncoming
-          );
-
-          if (!collides) {
-            payload.title = incomingTitle;
-          } else {
-            console.warn("Skipped title standardization due to duplicate:", incomingTitle);
-          }
-        } else {
-          console.warn("Could not check title collision:", tErr);
-        }
-      }
-    }
-    if (!CURRENT_SHOW.description?.trim() && info.description?.trim()) {
-      payload.description = info.description.trim();
-    }
-
-    // only set release_date if user hasn't already set it
-    if (!CURRENT_SHOW.release_date && info.release_date) {
-      payload.release_date = info.release_date; // must be YYYY-MM-DD
-    }
-
-    const { error: updErr } = await supabase
-      .from("shows")
-      .update(payload)
-      .eq("id", CURRENT_SHOW.id);
-
-    if (updErr) {
-      if (msgEl) msgEl.textContent = `Error: ${updErr.message}`;
-      return;
-    }
-
-    // 2) Merge Studios (add only)
-    await addOptionNamesToShow({
-     user_id,
-      showId: CURRENT_SHOW.id,
-      optionTable: "studios",
-      joinTable: JOIN.studios.table,
-      showCol: JOIN.studios.showCol,
-      optCol: JOIN.studios.optCol,
-      names: info.studios
-    });
-
-    // 3) Merge Genres (add only)
-    await addOptionNamesToShow({
-     user_id,
-      showId: CURRENT_SHOW.id,
-      optionTable: "genres",
-      joinTable: JOIN.genres.table,
-      showCol: JOIN.genres.showCol,
-      optCol: JOIN.genres.optCol,
-      names: info.genres
-    });
-
-    // 4) Merge Themes as Tropes (add only)
-    await addOptionNamesToShow({
-     user_id,
-      showId: CURRENT_SHOW.id,
-      optionTable: "tropes",
-      joinTable: JOIN.tropes.table,
-      showCol: JOIN.tropes.showCol,
-      optCol: JOIN.tropes.optCol,
-      names: info.themes
-    });
-
-    if (msgEl) msgEl.textContent = "Fetched! (release date + tags merged)";
-    await loadShowDetail(CURRENT_SHOW.id);
-    await loadShows();
-  } catch (e) {
-    if (msgEl) msgEl.textContent = `Error: ${e.message || e}`;
-  }
-});
-
-el("saveShowBtn")?.addEventListener("click", saveShowEdits);
-
-el("collectionSort")?.addEventListener("change", renderCollection);
-el("backToCollection")?.addEventListener("click", () => {
-  window.location.hash = "#collection";
-  route();
-});
-
-
-  // DEV_MODE boot
-  if (DEV_MODE) {
-    showAuthedUI(true);
-    authMsg.textContent = "DEV_MODE: auth disabled (Supabase outage)";
-    el("sendLink").disabled = true;
-
-    const devPlatforms = [
-      { id: 1, name: "Crunchyroll" },
-      { id: 2, name: "Netflix" },
-      { id: 3, name: "Hulu" }
-    ];
-    const devGenres = [
-      { id: 1, name: "Romance" },
-      { id: 2, name: "Action" },
-      { id: 3, name: "Slice of Life" }
-    ];
-    const devTropes = [
-      { id: 1, name: "Enemies to Lovers" },
-      { id: 2, name: "Found Family" },
-      { id: 3, name: "Time Loop" },
-      { id: 4, name: "Slow Burn" }
-    ];
-
-    platformSelect.setRows(devPlatforms);
-    genreSelect.setRows(devGenres);
-    tropeSelect.setRows(devTropes);
-
-    fillSelect("platformFilter", devPlatforms, "platforms");
-    fillSelect("genreFilter", devGenres, "genres");
-    fillSelect("tropeFilter", devTropes, "tropes");
-
-    ALL_SHOWS_CACHE = [
-      {
-        id: 1,
-        title: "7th Time Loop",
-        status: "Watching",
-        rating_stars: 4,
-        studio: "Studio A",
-        last_watched: "2026-02-11",
-        show_platforms: [{ platforms: { name: "Crunchyroll" } }],
-        show_genres: [{ genres: { name: "Romance" } }],
-        show_tropes: [{ tropes: { name: "Time Loop" } }]
-      },
-      {
-        id: 2,
-        title: "365 Days Before the Wedding",
-        status: "To Be Watched",
-        rating_stars: null,
-        studio: "",
-        last_watched: null,
-        show_platforms: [{ platforms: { name: "Crunchyroll" } }],
-        show_genres: [{ genres: { name: "Romance" } }],
-        show_tropes: [{ tropes: { name: "Slow Burn" } }]
-      }
-    ];
-
-    rerenderFiltered();
-    return;
-  }
-  // -----------------------------
-  // Normal mode boot (Supabase)
-  // -----------------------------
-  const { data: { session } } = await supabase.auth.getSession();
-  showAuthedUI(!!session);
-
-  if (session) {
-    // Load lookup rows + build filters + load shows
-    await ensureOptionRowsLoaded();
-
-    // Populate multi-select widgets
-    platformSelect.setRows(PLATFORM_ROWS);
-    genreSelect.setRows(GENRE_ROWS);
-    tropeSelect.setRows(TROPE_ROWS);
-    studioSelect.setRows(STUDIO_ROWS);
-
-    // Build browse filter UI (checkbox lists + min rating radios)
-    buildBrowseFiltersUI();
-
-    // Load show data + render
-    await loadShows();       // fills ALL_SHOWS_CACHE + calls rerenders
-    updateHomeCounts();
-    renderCollection();
-    route();
-  }
-
-  // Keep UI in sync when auth changes (login/logout)
-  // supabase.auth.onAuthStateChange(async (_event, session2) => {
-  //   showAuthedUI(!!session2);
-  //   if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
-  //   if (!session2) return;
-
-  //   try {
-  //     await ensureOptionRowsLoaded();
-
-  //     platformSelect.setRows(PLATFORM_ROWS);
-  //     genreSelect.setRows(GENRE_ROWS);
-  //     tropeSelect.setRows(TROPE_ROWS);
-  //     studioSelect.setRows(STUDIO_ROWS);
-
-  //     buildBrowseFiltersUI();
-  //     await loadShows();
-  //     updateHomeCounts();
-  //     renderCollection();
-  //     route();
-  //   } catch (err) {
-  //     console.error("Post-login bootstrap failed:", err);
-  //   }
-  // });
-
-
-// // Normal mode: Supabase online
-// const { data: { session } } = await supabase.auth.getSession();
-// showAuthedUI(!!session);
-
-// if (session) {
-// const [p, g, t, s] = await Promise.all([
-//   loadOptionRows("platforms"),
-//   loadOptionRows("genres"),
-//   loadOptionRows("tropes"),
-//   loadOptionRows("studios")
-// ]);
-//  PLATFORM_ROWS = p;
-//  GENRE_ROWS = g;
-//  TROPE_ROWS = t;
-//  STUDIO_ROWS = s;
- 
-//    platformSelect.setRows(p);
-//    genreSelect.setRows(g);
-//    tropeSelect.setRows(t);
-//  studioSelect.setRows(s);
-//    fillSelect("platformFilter", p, "platforms");
-//    fillSelect("genreFilter", g, "genres");
-//    fillSelect("tropeFilter", t, "tropes");
-
-//   buildCheckboxList({
-//     boxId: "statusFilterBox",
-//     items: STATUS_ITEMS,
-//     name: "statusFilter",
-//     onChange: rerenderFiltered
-//   });
-
-//   buildCheckboxList({
-//     boxId: "platformFilterBox",
-//     items: (PLATFORM_ROWS || []).map(r => r.name),
-//     name: "platformFilter",
-//     searchInputId: "platformFilterSearch",
-//     onChange: rerenderFiltered
-//   });
-
-//   buildCheckboxList({
-//     boxId: "genreFilterBox",
-//     items: (GENRE_ROWS || []).map(r => r.name),
-//     name: "genreFilter",
-//     searchInputId: "genreFilterSearch",
-//     onChange: rerenderFiltered
-//   });
-
-//   buildCheckboxList({
-//     boxId: "tropeFilterBox",
-//     items: (TROPE_ROWS || []).map(r => r.name),
-//     name: "tropeFilter",
-//     searchInputId: "tropeFilterSearch",
-//     onChange: rerenderFiltered
-//   });
-
-//   buildCheckboxList({
-//     boxId: "studioFilterBox",
-//     items: (STUDIO_ROWS || []).map(r => r.name),
-//     name: "studioFilter",
-//     searchInputId: "studioFilterSearch",
-//     onChange: rerenderFiltered
-//   });
-
-//   // Min rating: I'd recommend RADIO (single choice) instead of checkboxes
-//   buildMinRatingRadios();
-// }
-
-// function buildMinRatingRadios() {
-//   const box = el("minRatingBox");
-//   if (!box) return;
-
-//   const opts = ["", "1", "2", "3", "4", "5"]; // "" = Any
-//   box.innerHTML = opts.map(v => `
-//     <label class="checkboxRow">
-//       <input type="radio" name="minRatingFilter" value="${v}" ${v === "" ? "checked" : ""}/>
-//       <span>${v === "" ? "Any" : `${v}+`}</span>
-//     </label>
-//   `).join("");
-
-//   box.querySelectorAll('input[type="radio"][name="minRatingFilter"]').forEach(r => {
-//     r.addEventListener("change", rerenderFiltered);
-//   });
-// }
-
-//   await loadShows();       // fills ALL_SHOWS_CACHE
-//   updateHomeCounts();      // (you’ll add this below)
-//  buildBrowseFiltersUI();  
-// renderCollection();
-}
-let optionsLoadPromise = null;
-
-async function ensureOptionRowsLoaded() {
-  if (PLATFORM_ROWS && GENRE_ROWS && TROPE_ROWS && STUDIO_ROWS) return;
-  if (optionsLoadPromise) return optionsLoadPromise;
-
-  optionsLoadPromise = (async () => {
-     PLATFORM_ROWS = await loadOptionRows("platforms");
-    GENRE_ROWS    = await loadOptionRows("genres");
-    TROPE_ROWS    = await loadOptionRows("tropes");
-    STUDIO_ROWS   = await loadOptionRows("studios");
-  })();
-
-  try {
-    await optionsLoadPromise;
-  } finally {
-    optionsLoadPromise = null;
-  }
-}
-
-supabase.auth.onAuthStateChange(async (_event, session2) => {
-  showAuthedUI(!!session2);
-  if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
-  if (!session2) return;
-
-  try {
-    await ensureOptionRowsLoaded();
-    buildBrowseFiltersUI();   // builds the checkbox filter UI using PLATFORM_ROWS/etc.
-    await loadShows();        // fills ALL_SHOWS_CACHE
-    updateHomeCounts();       // populates KPIs
-    renderCollection();       // draws collection list/grid
-    route();                  // ensures correct view based on hash
-  } catch (err) {
-    console.error("Post-login bootstrap failed:", err);
-  }
-});
-
-
 function buildBrowseFiltersUI() {
-  // Status is not from a lookup table, so hardcode your known statuses
-
   buildCheckboxList({
     boxId: "statusFilterBox",
     items: STATUS_ITEMS,
@@ -2690,7 +1403,6 @@ function buildBrowseFiltersUI() {
     onChange: rerenderFiltered
   });
 
-  // Min rating: I'd recommend RADIO (single choice) instead of checkboxes
   buildMinRatingRadios();
 }
 
@@ -2699,10 +1411,10 @@ function buildMinRatingRadios() {
   if (!box) return;
 
   const opts = ["", "1", "2", "3", "4", "5"]; // "" = Any
-  box.innerHTML = opts.map(v => `
+  box.innerHTML = opts.map(v3 => `
     <label class="checkboxRow">
-      <input type="radio" name="minRatingFilter" value="${v}" ${v === "" ? "checked" : ""}/>
-      <span>${v === "" ? "Any" : `${v}+`}</span>
+      <input type="radio" name="minRatingFilter" value="${v3}" ${v3 === "" ? "checked" : ""}/>
+      <span>${v3 === "" ? "Any" : `${v3}+`}</span>
     </label>
   `).join("");
 
@@ -2711,45 +1423,300 @@ function buildMinRatingRadios() {
   });
 }
 
-  // fillSelect("platformFilter", p, "platforms");
-  // fillSelect("genreFilter", g, "genres");
-  // fillSelect("tropeFilter", t, "tropes");
-buildBrowseFiltersUI();  
-  await loadShows();
-  updateHomeCounts();
+// --------------------
+// Option rows loader (shared promise)
+// --------------------
+let optionsLoadPromise = null;
 
+async function ensureOptionRowsLoaded() {
+  if (PLATFORM_ROWS && GENRE_ROWS && TROPE_ROWS && STUDIO_ROWS) return;
+  if (optionsLoadPromise) return optionsLoadPromise;
 
-//init();
-//document.addEventListener("DOMContentLoaded", init);
+  optionsLoadPromise = (async () => {
+    PLATFORM_ROWS = await loadOptionRows("platforms");
+    GENRE_ROWS    = await loadOptionRows("genres");
+    TROPE_ROWS    = await loadOptionRows("tropes");
+    STUDIO_ROWS   = await loadOptionRows("studios");
+  })();
 
-// document.addEventListener("DOMContentLoaded", () => {
-//   const form = document.getElementById("loginForm");
+  try {
+    await optionsLoadPromise;
+  } finally {
+    optionsLoadPromise = null;
+  }
+}
 
-//   // If this page doesn't have a login form, do nothing
-//   if (!form) return;
+// --------------------
+// Init
+// --------------------
+async function init() {
+  // single-init guard
+  if (window.__WATCHLIST_INIT_RAN) {
+    w("init() called AGAIN — duplicate bootstrap detected");
+    snap("duplicate init");
+    return;
+  }
+  window.__WATCHLIST_INIT_RAN = true;
 
-//   const errorEl = document.getElementById("loginError");
+  d("init() starting");
+  snap("init start");
 
-//   form.addEventListener("submit", async (e) => {
-//     e.preventDefault();
+  // DOM sanity checks (this catches the classic “half logged in” issue fast)
+  d("DOM sanity checks", {
+    appCount: document.querySelectorAll("#app").length,
+    authCard: !!document.getElementById("authCard"),
+    logout: !!document.getElementById("logout"),
+    tabsRow: !!document.querySelector(".tabsRow")
+  });
 
-//     const email = document.getElementById("email").value;
-//     const password = document.getElementById("password").value;
+  const platformSelect = setupDbMultiSelect({
+    buttonId: "platformBtn",
+    menuId: "platformMenu",
+    chipsId: "platformChips",
+    tableName: "platforms"
+  });
 
-//     const { data, error } = await supabase.auth.signInWithPassword({
-//       email,
-//       password
-//     });
+  const genreSelect = setupDbMultiSelect({
+    buttonId: "genreBtn",
+    menuId: "genreMenu",
+    chipsId: "genreChips",
+    tableName: "genres"
+  });
 
-//     if (error) {
-//       errorEl.textContent = error.message;
-//       errorEl.style.display = "block";
-//       return;
-//     }
+  const tropeSelect = setupDbMultiSelect({
+    buttonId: "tropeBtn",
+    menuId: "tropeMenu",
+    chipsId: "tropeChips",
+    tableName: "tropes"
+  });
 
-//      showAuthedUI(true);
-//   window.location.hash = "#collection";
-//   route()
-//   });
-// });
+  const studioSelect = setupDbMultiSelect({
+    buttonId: "studioBtn",
+    menuId: "studioMenu",
+    chipsId: "studioChips",
+    tableName: "studios"
+  });
+
+  const starUI = setupStarRating({
+    containerId: "ratingStars",
+    inputId: "my_rating",
+    clearId: "clearRating"
+  });
+
+  setupAddShowModal();
+
+  logoutBtn?.addEventListener("click", logout);
+  d("wired logout click:", { exists: !!logoutBtn });
+
+  el("collectionViewCompact")?.addEventListener("click", () => {
+    setCollectionViewMode("mode-compact");
+    applyCollectionViewMode();
+    renderCollection();
+  });
+
+  el("collectionViewComfy")?.addEventListener("click", () => {
+    setCollectionViewMode("mode-comfy");
+    applyCollectionViewMode();
+    renderCollection();
+  });
+
+  applyCollectionViewMode();
+
+  // Add form (this is NOT login — debug label fixed)
+  el("addForm")?.addEventListener("submit", async (e2) => {
+    d("ADD SHOW submit clicked");
+    snap("before add show submit");
+
+    e2.preventDefault();
+
+    if (DEV_MODE) {
+      if (msg) msg.textContent = "DEV_MODE: not saving to DB.";
+      return;
+    }
+
+    const form = e2.target;
+    const titleInput = form.title;
+    const title = titleInput.value.trim();
+    if (!title) return;
+
+    const errorEl = document.getElementById("addShowError");
+    if (errorEl) errorEl.textContent = "";
+
+    const normalizedTitle = title.toLowerCase().trim();
+
+    const user = await supabase.auth.getUser();
+    const userId = user?.data?.user?.id;
+    d("duplicate check user", { userId });
+
+    const { data: existing, error: dupErr } = await supabase
+      .from("shows")
+      .select("title")
+      .eq("user_id", userId);
+
+    if (dupErr) {
+      console.error("Duplicate check failed:", dupErr);
+      if (errorEl) errorEl.textContent = "Couldn’t validate title uniqueness. Try again.";
+      return;
+    }
+
+    const duplicate = (existing || []).some(s =>
+      (s.title || "").toLowerCase().trim() === normalizedTitle
+    );
+
+    if (duplicate) {
+      if (errorEl) errorEl.textContent = "You already added this show.";
+      titleInput.focus();
+      return;
+    }
+
+    await addShow(
+      new FormData(form),
+      platformSelect.getIds(),
+      genreSelect.getIds(),
+      tropeSelect.getIds(),
+      studioSelect.getIds()
+    );
+
+    form.reset();
+    starUI.clear();
+    platformSelect.clear();
+    genreSelect.clear();
+    tropeSelect.clear();
+    studioSelect.clear();
+    syncOvaVisibility();
+
+    await loadShows();
+    await refreshBrowseFilterOptions();
+
+    snap("after add show submit");
+  });
+
+  const rerender = debounce(rerenderFiltered, 150);
+  el("q")?.addEventListener("input", rerender);
+
+  el("clearFilters")?.addEventListener("click", () => {
+    if (el("q")) el("q").value = "";
+
+    clearCheckboxGroup("statusFilter");
+    clearCheckboxGroup("platformFilter");
+    clearCheckboxGroup("genreFilter");
+    clearCheckboxGroup("tropeFilter");
+    clearCheckboxGroup("studioFilter");
+
+    const any = document.querySelector('input[type="radio"][name="minRatingFilter"][value=""]');
+    if (any) any.checked = true;
+
+    rerenderFiltered();
+  });
+
+  el("refresh")?.addEventListener("click", () => {
+    if (DEV_MODE) rerenderFiltered();
+    else loadShows();
+  });
+
+  // Router wiring
+  wireTabs();
+  wireBrowseFilterDrawer();
+
+  window.addEventListener("hashchange", () => {
+    d("hashchange event", { hash: window.location.hash });
+    route();
+    snap("after hashchange route");
+  });
+
+  wireCollectionClicks();
+  wireDeleteModal();
+
+  if (!window.location.hash) window.location.hash = "#home";
+  d("Router ready. Current hash =", window.location.hash);
+  route();
+
+  el("category")?.addEventListener("change", syncOvaVisibility);
+  syncOvaVisibility();
+
+  document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
+  syncProgressVisibility();
+
+  el("show_type")?.addEventListener("change", syncTypeVisibility);
+  syncTypeVisibility();
+
+  el("collectionGroup")?.addEventListener("change", renderCollection);
+  el("collectionSort")?.addEventListener("change", renderCollection);
+
+  // DEV_MODE boot
+  if (DEV_MODE) {
+    showAuthedUI(true);
+    if (authMsg) authMsg.textContent = "DEV_MODE: auth disabled (Supabase outage)";
+    const send = el("sendLink");
+    if (send) send.disabled = true;
+
+    // (kept from your file; you can add dev rows here if you want)
+    rerenderFiltered();
+    return;
+  }
+
+  // Normal mode boot (Supabase)
+  const { data: { session } } = await supabase.auth.getSession();
+  d("initial getSession (init)", { hasSession: !!session, userId: session?.user?.id });
+  showAuthedUI(!!session);
+
+  // If already logged in on refresh, do the full bootstrap
+  if (session) {
+    await ensureOptionRowsLoaded();
+
+    platformSelect.setRows(PLATFORM_ROWS);
+    genreSelect.setRows(GENRE_ROWS);
+    tropeSelect.setRows(TROPE_ROWS);
+    studioSelect.setRows(STUDIO_ROWS);
+
+    buildBrowseFiltersUI();
+    await loadShows();
+    updateHomeCounts();
+    renderCollection();
+    route();
+  }
+
+  snap("init end");
+}
+
+// Keep UI in sync when auth changes (login/logout)
+supabase.auth.onAuthStateChange(async (event, session2) => {
+  d("onAuthStateChange fired:", {
+    event,
+    hasSession: !!session2,
+    userId: session2?.user?.id,
+    accessTokenStart: session2?.access_token?.slice(0, 12)
+  });
+
+  showAuthedUI(!!session2);
+  if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
+
+  // If logged out, do NOT try to load anything else
+  if (!session2) {
+    snap("after auth state change (logged out)");
+    return;
+  }
+
+  try {
+    await ensureOptionRowsLoaded();
+    buildBrowseFiltersUI();
+    await loadShows();
+    updateHomeCounts();
+    renderCollection();
+    route();
+    snap("after auth state change (logged in)");
+  } catch (err) {
+    console.error("Post-login bootstrap failed:", err);
+  }
+});
+
+// IMPORTANT NOTE:
+// In your original pasted file, you had these lines at top-level:
+//   buildBrowseFiltersUI();  
+//   await loadShows();
+//   updateHomeCounts();
+// That would HARD BREAK the script (top-level await not allowed here),
+// causing the “half logged in” / stuck UI behavior.
+// They are intentionally removed — bootstrap now only happens inside init() or auth change.
+
 init().catch(err => console.error("INIT FAILED:", err));
