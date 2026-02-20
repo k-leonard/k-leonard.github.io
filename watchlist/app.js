@@ -38,6 +38,14 @@ let ALL_SHOWS_CACHE = [];
 // --------------------
 // UI helpers
 // --------------------
+
+function getCollectionViewMode() {
+  return localStorage.getItem("collectionViewMode") || "mode-comfy"; // default
+}
+
+function setCollectionViewMode(mode) {
+  localStorage.setItem("collectionViewMode", mode);
+}
 function setDisplay(id, show) {
   const node = el(id);
   if (!node) return;
@@ -992,8 +1000,9 @@ function renderCollection() {
   const wrap = el("collectionList");     // keep your existing container
   const note = el("collectionMsg");
   if (!wrap) return;
-const fixed = el("fixedCardToggle")?.checked;
-wrap.classList.toggle("fixed-cards", !!fixed);
+const mode = getCollectionViewMode();
+wrap.classList.remove("mode-compact", "mode-comfy");
+wrap.classList.add(mode);
   const rows = getCollectionRows();
 
   if (!rows.length) {
@@ -1971,7 +1980,15 @@ setupAddShowModal();
 const form = e.target;
 const titleInput = form.title;
 const title = titleInput.value.trim();
+el("collectionViewCompact")?.addEventListener("click", () => {
+  setCollectionViewMode("mode-compact");
+  renderCollection();
+});
 
+el("collectionViewComfy")?.addEventListener("click", () => {
+  setCollectionViewMode("mode-comfy");
+  renderCollection();
+});
 if (!title) return;
 
 
