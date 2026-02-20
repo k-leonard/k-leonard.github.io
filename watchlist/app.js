@@ -1981,18 +1981,6 @@ console.log("studio elements:", !!el("studioBtn"), !!el("studioMenu"), !!el("stu
   });
 setupAddShowModal();
   logoutBtn.addEventListener("click", logout);
-
-  // Add form
-  el("addForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (DEV_MODE) {
-      msg.textContent = "DEV_MODE: not saving to DB.";
-      return;
-    }
-const form = e.target;
-const titleInput = form.title;
-const title = titleInput.value.trim();
 el("collectionViewCompact")?.addEventListener("click", () => {
   setCollectionViewMode("mode-compact");
   applyCollectionViewMode();
@@ -2004,6 +1992,21 @@ el("collectionViewComfy")?.addEventListener("click", () => {
   applyCollectionViewMode();
   renderCollection();
 });
+
+ // Apply saved mode on startup
+applyCollectionViewMode();
+  // Add form
+  el("addForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (DEV_MODE) {
+      msg.textContent = "DEV_MODE: not saving to DB.";
+      return;
+    }
+const form = e.target;
+const titleInput = form.title;
+const title = titleInput.value.trim();
+
 if (!title) return;
 
 
