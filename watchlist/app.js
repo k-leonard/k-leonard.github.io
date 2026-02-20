@@ -327,8 +327,8 @@ function setupAddShowModal() {
   const openBtn = document.getElementById("openAddShowBtn");
   const closeBtn = document.getElementById("closeAddShowBtn");
 
-  const addShowSection = document.getElementById("app"); // your existing add-show card section
-
+  const addShowSection = document.getElementById("addShowCard");
+ 
   if (!modal || !modalBody || !openBtn || !closeBtn || !addShowSection) {
     console.warn("Add Show modal setup: missing elements");
     return;
@@ -592,20 +592,19 @@ function route() {
 
 
 function wireTabs() {
-  const views = ["home", "browse", "collection"];
+  const nav = document.querySelector(".tabsRow");
+  if (!nav) return;
 
-  views.forEach(name => {
-    const tab = el(`tab-${name}`);
-    if (!tab) {
-      console.warn("Missing tab element:", `tab-${name}`);
-      return;
-    }
+  nav.addEventListener("click", (e) => {
+    const a = e.target.closest('a.tab[href^="#"]');
+    if (!a) return;
 
-    tab.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.location.hash = `#${name}`;
-      route();
-    });
+    e.preventDefault();
+    const hash = a.getAttribute("href"); // "#home" "#browse" "#collection"
+    window.location.hash = hash;
+
+    // 🔥 Immediately update view (don’t wait for hashchange)
+    route();
   });
 }
 function wireBrowseFilterDrawer() {
