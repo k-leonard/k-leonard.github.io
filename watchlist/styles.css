@@ -881,6 +881,12 @@ input[type="checkbox"]{
   line-height: 1.1;
   margin-top: 6px;
 }
+.totalCard{
+  grid-column: 1 / -1; /* spans all columns */
+}
+#kpiBreakdown{
+  margin-top: 8px;
+}
 /* =========================================================
    LEGACY / OPTIONAL: collectionCard (older card style)
    - Keep if you still render .collectionCard somewhere
