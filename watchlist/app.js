@@ -27,7 +27,13 @@ let PLATFORM_ROWS = null;
 let GENRE_ROWS = null;
 let TROPE_ROWS = null;
 let STUDIO_ROWS = null;
-
+const STATUS_ITEMS = [
+  "To Be Watched",
+  "Watching",
+  "Waiting for Next Season",
+  "Watched",
+  "Dropped"
+];
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
   if (browseMsg) browseMsg.textContent = text;
@@ -2418,97 +2424,145 @@ el("backToCollection")?.addEventListener("click", () => {
     rerenderFiltered();
     return;
   }
+  // -----------------------------
+  // Normal mode boot (Supabase)
+  // -----------------------------
+  const { data: { session } } = await supabase.auth.getSession();
+  showAuthedUI(!!session);
+
+  if (session) {
+    // Load lookup rows + build filters + load shows
+    await ensureOptionRowsLoaded();
+
+    // Populate multi-select widgets
+    platformSelect.setRows(PLATFORM_ROWS);
+    genreSelect.setRows(GENRE_ROWS);
+    tropeSelect.setRows(TROPE_ROWS);
+    studioSelect.setRows(STUDIO_ROWS);
+
+    // Build browse filter UI (checkbox lists + min rating radios)
+    buildBrowseFiltersUI();
+
+    // Load show data + render
+    await loadShows();       // fills ALL_SHOWS_CACHE + calls rerenders
+    updateHomeCounts();
+    renderCollection();
+    route();
+  }
+
+  // Keep UI in sync when auth changes (login/logout)
+  supabase.auth.onAuthStateChange(async (_event, session2) => {
+    showAuthedUI(!!session2);
+    if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
+    if (!session2) return;
+
+    try {
+      await ensureOptionRowsLoaded();
+
+      platformSelect.setRows(PLATFORM_ROWS);
+      genreSelect.setRows(GENRE_ROWS);
+      tropeSelect.setRows(TROPE_ROWS);
+      studioSelect.setRows(STUDIO_ROWS);
+
+      buildBrowseFiltersUI();
+      await loadShows();
+      updateHomeCounts();
+      renderCollection();
+      route();
+    } catch (err) {
+      console.error("Post-login bootstrap failed:", err);
+    }
+  });
 
 
+// // Normal mode: Supabase online
+// const { data: { session } } = await supabase.auth.getSession();
+// showAuthedUI(!!session);
 
-// Normal mode: Supabase online
-const { data: { session } } = await supabase.auth.getSession();
-showAuthedUI(!!session);
-
-if (session) {
-const [p, g, t, s] = await Promise.all([
-  loadOptionRows("platforms"),
-  loadOptionRows("genres"),
-  loadOptionRows("tropes"),
-  loadOptionRows("studios")
-]);
- PLATFORM_ROWS = p;
- GENRE_ROWS = g;
- TROPE_ROWS = t;
- STUDIO_ROWS = s;
+// if (session) {
+// const [p, g, t, s] = await Promise.all([
+//   loadOptionRows("platforms"),
+//   loadOptionRows("genres"),
+//   loadOptionRows("tropes"),
+//   loadOptionRows("studios")
+// ]);
+//  PLATFORM_ROWS = p;
+//  GENRE_ROWS = g;
+//  TROPE_ROWS = t;
+//  STUDIO_ROWS = s;
  
-   platformSelect.setRows(p);
-   genreSelect.setRows(g);
-   tropeSelect.setRows(t);
- studioSelect.setRows(s);
-   fillSelect("platformFilter", p, "platforms");
-   fillSelect("genreFilter", g, "genres");
-   fillSelect("tropeFilter", t, "tropes");
+//    platformSelect.setRows(p);
+//    genreSelect.setRows(g);
+//    tropeSelect.setRows(t);
+//  studioSelect.setRows(s);
+//    fillSelect("platformFilter", p, "platforms");
+//    fillSelect("genreFilter", g, "genres");
+//    fillSelect("tropeFilter", t, "tropes");
 
-  buildCheckboxList({
-    boxId: "statusFilterBox",
-    items: STATUS_ITEMS,
-    name: "statusFilter",
-    onChange: rerenderFiltered
-  });
+//   buildCheckboxList({
+//     boxId: "statusFilterBox",
+//     items: STATUS_ITEMS,
+//     name: "statusFilter",
+//     onChange: rerenderFiltered
+//   });
 
-  buildCheckboxList({
-    boxId: "platformFilterBox",
-    items: (PLATFORM_ROWS || []).map(r => r.name),
-    name: "platformFilter",
-    searchInputId: "platformFilterSearch",
-    onChange: rerenderFiltered
-  });
+//   buildCheckboxList({
+//     boxId: "platformFilterBox",
+//     items: (PLATFORM_ROWS || []).map(r => r.name),
+//     name: "platformFilter",
+//     searchInputId: "platformFilterSearch",
+//     onChange: rerenderFiltered
+//   });
 
-  buildCheckboxList({
-    boxId: "genreFilterBox",
-    items: (GENRE_ROWS || []).map(r => r.name),
-    name: "genreFilter",
-    searchInputId: "genreFilterSearch",
-    onChange: rerenderFiltered
-  });
+//   buildCheckboxList({
+//     boxId: "genreFilterBox",
+//     items: (GENRE_ROWS || []).map(r => r.name),
+//     name: "genreFilter",
+//     searchInputId: "genreFilterSearch",
+//     onChange: rerenderFiltered
+//   });
 
-  buildCheckboxList({
-    boxId: "tropeFilterBox",
-    items: (TROPE_ROWS || []).map(r => r.name),
-    name: "tropeFilter",
-    searchInputId: "tropeFilterSearch",
-    onChange: rerenderFiltered
-  });
+//   buildCheckboxList({
+//     boxId: "tropeFilterBox",
+//     items: (TROPE_ROWS || []).map(r => r.name),
+//     name: "tropeFilter",
+//     searchInputId: "tropeFilterSearch",
+//     onChange: rerenderFiltered
+//   });
 
-  buildCheckboxList({
-    boxId: "studioFilterBox",
-    items: (STUDIO_ROWS || []).map(r => r.name),
-    name: "studioFilter",
-    searchInputId: "studioFilterSearch",
-    onChange: rerenderFiltered
-  });
+//   buildCheckboxList({
+//     boxId: "studioFilterBox",
+//     items: (STUDIO_ROWS || []).map(r => r.name),
+//     name: "studioFilter",
+//     searchInputId: "studioFilterSearch",
+//     onChange: rerenderFiltered
+//   });
 
-  // Min rating: I'd recommend RADIO (single choice) instead of checkboxes
-  buildMinRatingRadios();
-}
+//   // Min rating: I'd recommend RADIO (single choice) instead of checkboxes
+//   buildMinRatingRadios();
+// }
 
-function buildMinRatingRadios() {
-  const box = el("minRatingBox");
-  if (!box) return;
+// function buildMinRatingRadios() {
+//   const box = el("minRatingBox");
+//   if (!box) return;
 
-  const opts = ["", "1", "2", "3", "4", "5"]; // "" = Any
-  box.innerHTML = opts.map(v => `
-    <label class="checkboxRow">
-      <input type="radio" name="minRatingFilter" value="${v}" ${v === "" ? "checked" : ""}/>
-      <span>${v === "" ? "Any" : `${v}+`}</span>
-    </label>
-  `).join("");
+//   const opts = ["", "1", "2", "3", "4", "5"]; // "" = Any
+//   box.innerHTML = opts.map(v => `
+//     <label class="checkboxRow">
+//       <input type="radio" name="minRatingFilter" value="${v}" ${v === "" ? "checked" : ""}/>
+//       <span>${v === "" ? "Any" : `${v}+`}</span>
+//     </label>
+//   `).join("");
 
-  box.querySelectorAll('input[type="radio"][name="minRatingFilter"]').forEach(r => {
-    r.addEventListener("change", rerenderFiltered);
-  });
-}
+//   box.querySelectorAll('input[type="radio"][name="minRatingFilter"]').forEach(r => {
+//     r.addEventListener("change", rerenderFiltered);
+//   });
+// }
 
-  await loadShows();       // fills ALL_SHOWS_CACHE
-  updateHomeCounts();      // (you’ll add this below)
- buildBrowseFiltersUI();  
-renderCollection();
+//   await loadShows();       // fills ALL_SHOWS_CACHE
+//   updateHomeCounts();      // (you’ll add this below)
+//  buildBrowseFiltersUI();  
+// renderCollection();
 }
 let optionsLoadPromise = null;
 
@@ -2550,13 +2604,6 @@ supabase.auth.onAuthStateChange(async (_event, session2) => {
 
 function buildBrowseFiltersUI() {
   // Status is not from a lookup table, so hardcode your known statuses
-  const STATUS_ITEMS = [
-    "To Be Watched",
-    "Watching",
-    "Waiting for Next Season",
-    "Watched",
-    "Dropped"
-  ];
 
   buildCheckboxList({
     boxId: "statusFilterBox",
