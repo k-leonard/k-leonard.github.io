@@ -1617,13 +1617,20 @@ async function init() {
 
   setupAddShowModal();
   
-await supabase.auth.resetPasswordForEmail(email, {
-  const RESET_URL = `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, "/")}reset.html`;
-// If your app is at /watchlist.html, this resolves to /reset.html in the same folder.
+// Build reset URL first
+const RESET_URL = new URL("reset.html", window.location.href).href;
 
-const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+// Then call Supabase once
+const { error } = await supabase.auth.resetPasswordForEmail(email, {
   redirectTo: RESET_URL
 });
+
+if (error) {
+  console.error("Reset error:", error.message);
+} else {
+  console.log("Reset email sent");
+}
+
 
 d("resetPasswordForEmail()", { email, redirectTo: RESET_URL, error: error?.message, data });
 });
