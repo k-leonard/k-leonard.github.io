@@ -120,6 +120,25 @@ function syncProgressVisibility() {
     if (e) e.value = "";
   }
 }
+// async function fetchAnimeFromJikan(title) {
+//   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
+//   const res = await fetch(url);
+//   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
+//   const json = await res.json();
+
+//   const results = json?.data || [];
+//   if (!results.length) return null;
+
+//   // Pick best match (simple: first result). Later you can improve ranking.
+//   const a = results[0];
+
+//   return {
+//     mal_id: a.mal_id ?? null,
+//     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
+//     description: a.synopsis ?? null
+//   };
+// }
+
 async function fetchAnimeFromJikan(title) {
   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
   const res = await fetch(url);
@@ -129,16 +148,58 @@ async function fetchAnimeFromJikan(title) {
   const results = json?.data || [];
   if (!results.length) return null;
 
-  // Pick best match (simple: first result). Later you can improve ranking.
-  const a = results[0];
+  const a = results[0]; // you can improve matching later
+
+  const release_date = a.aired?.from ? a.aired.from.split("T")[0] : null;
+
+  const studios = (a.studios || [])
+    .map(s => s?.name)
+    .filter(Boolean);
+
+  const genres = (a.genres || [])
+    .map(g => g?.name)
+    .filter(Boolean);
+
+  const themes = (a.themes || [])
+    .map(t => t?.name)
+    .filter(Boolean);
 
   return {
     mal_id: a.mal_id ?? null,
     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
-    description: a.synopsis ?? null
+    description: a.synopsis ?? null,
+
+    release_date,
+    studios,
+    genres,
+    themes
   };
 }
 
+async function addNamesToMultiSelect(selectWidget, names, tableName) {
+  if (!names || !names.length) return;
+
+  // normalize + dedupe incoming names
+  const want = Array.from(new Set(names.map(n => n.trim()).filter(Boolean)));
+
+  // current selected ids (do NOT clear them)
+  const existingIds = new Set(selectWidget.getIds());
+
+  // For each name, ensure it exists in the DB, then select it
+  for (const name of want) {
+    const row = await getOrCreateOptionRow(tableName, name); // you already have this function
+    if (row?.id) existingIds.add(row.id);
+  }
+
+  // Apply back to widget (assumes you have setSelectedIds; if not, see note below)
+  if (typeof selectWidget.setSelectedIds === "function") {
+    selectWidget.setSelectedIds([...existingIds]);
+  } else {
+    // fallback: if your widget stores selections internally, you can just "select" each row
+    // If you paste your multiselect code, I'll wire this to your exact API.
+    console.warn("MultiSelect missing setSelectedIds; paste widget code and I'll adapt.");
+  }
+}
 function syncTypeVisibility() {
   const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
 
@@ -1782,7 +1843,74 @@ async function saveShowEdits() {
   await loadShows();
 }
 
+async function getOrCreateOptionRow(tableName, name) {
+  const clean = String(name || "").trim();
+  if (!clean) return null;
 
+  // Try existing (case-insensitive)
+  const { data: found, error: findErr } = await supabase
+    .from(tableName)
+    .select("id,name")
+    .ilike("name", clean)
+    .limit(1);
+
+  if (findErr) throw findErr;
+  if (found && found[0]) return found[0];
+
+  // Insert new
+  const { data: inserted, error: insErr } = await supabase
+    .from(tableName)
+    .insert({ name: clean })
+    .select("id,name")
+    .single();
+
+  if (insErr) throw insErr;
+  return inserted;
+}
+const JOIN = {
+  studios: { table: "show_studios", showCol: "show_id", optCol: "studio_id" },
+  genres:  { table: "show_genres",  showCol: "show_id", optCol: "genre_id"  },
+  tropes:  { table: "show_tropes",  showCol: "show_id", optCol: "trope_id"  }, // use for themes too
+};
+async function addOptionNamesToShow({ showId, optionTable, joinTable, showCol, optCol, names }) {
+  const cleanNames = (names || [])
+    .map(n => String(n || "").trim())
+    .filter(Boolean);
+
+  const uniqueNames = Array.from(new Set(cleanNames));
+  if (!uniqueNames.length) return;
+
+  // 1) ensure each option exists, collect ids
+  const ids = [];
+  for (const name of uniqueNames) {
+    const row = await getOrCreateOptionRow(optionTable, name);
+    if (row?.id) ids.push(row.id);
+  }
+  const uniqueIds = Array.from(new Set(ids));
+  if (!uniqueIds.length) return;
+
+  // 2) find which ones are already linked
+  const { data: existingLinks, error: linkErr } = await supabase
+    .from(joinTable)
+    .select(optCol)
+    .eq(showCol, showId);
+
+  if (linkErr) throw linkErr;
+
+  const existingSet = new Set((existingLinks || []).map(r => r[optCol]));
+  const toInsert = uniqueIds
+    .filter(id => !existingSet.has(id))
+    .map(id => ({ [showCol]: showId, [optCol]: id }));
+
+  if (!toInsert.length) return;
+
+  // 3) insert missing links
+  const { error: insErr } = await supabase
+    .from(joinTable)
+    .insert(toInsert);
+
+  if (insErr) throw insErr;
+}
 // --------------------
 // Init
 // --------------------
@@ -1974,30 +2102,66 @@ el("fetchAnimeBtn")?.addEventListener("click", async () => {
       return;
     }
 
-    // Decide whether to overwrite description or only fill if empty:
+    // 1) Build show update payload (ONLY fill release_date if empty)
     const payload = {
-      mal_id: info.mal_id,
-      image_url: info.image_url
+      mal_id: info.mal_id ?? null,
+      image_url: info.image_url ?? null
     };
 
-    // only fill description if you don’t already have one
-    if (!CURRENT_SHOW.description?.trim()) payload.description = info.description;
+    if (!CURRENT_SHOW.description?.trim() && info.description?.trim()) {
+      payload.description = info.description.trim();
+    }
 
-    const { error } = await supabase
+    // only set release_date if user hasn't already set it
+    if (!CURRENT_SHOW.release_date && info.release_date) {
+      payload.release_date = info.release_date; // must be YYYY-MM-DD
+    }
+
+    const { error: updErr } = await supabase
       .from("shows")
       .update(payload)
       .eq("id", CURRENT_SHOW.id);
 
-    if (error) {
-      if (msgEl) msgEl.textContent = `Error: ${error.message}`;
+    if (updErr) {
+      if (msgEl) msgEl.textContent = `Error: ${updErr.message}`;
       return;
     }
 
-    if (msgEl) msgEl.textContent = "Fetched!";
+    // 2) Merge Studios (add only)
+    await addOptionNamesToShow({
+      showId: CURRENT_SHOW.id,
+      optionTable: "studios",
+      joinTable: JOIN.studios.table,
+      showCol: JOIN.studios.showCol,
+      optCol: JOIN.studios.optCol,
+      names: info.studios
+    });
+
+    // 3) Merge Genres (add only)
+    await addOptionNamesToShow({
+      showId: CURRENT_SHOW.id,
+      optionTable: "genres",
+      joinTable: JOIN.genres.table,
+      showCol: JOIN.genres.showCol,
+      optCol: JOIN.genres.optCol,
+      names: info.genres
+    });
+
+    // 4) Merge Themes as Tropes (add only)
+    await addOptionNamesToShow({
+      showId: CURRENT_SHOW.id,
+      optionTable: "tropes",
+      joinTable: JOIN.tropes.table,
+      showCol: JOIN.tropes.showCol,
+      optCol: JOIN.tropes.optCol,
+      names: info.themes
+    });
+
+    if (msgEl) msgEl.textContent = "Fetched! (release date + tags merged)";
     await loadShowDetail(CURRENT_SHOW.id);
     await loadShows();
   } catch (e) {
-    if (msgEl) msgEl.textContent = `Error: ${e.message}`;
+    if (msgEl) msgEl.textContent = `Error: ${e.message || e}`;
   }
 });
 
