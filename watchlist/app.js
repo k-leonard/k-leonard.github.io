@@ -992,7 +992,8 @@ function renderCollection() {
   const wrap = el("collectionList");     // keep your existing container
   const note = el("collectionMsg");
   if (!wrap) return;
-
+const fixed = el("fixedCardToggle")?.checked;
+wrap.classList.toggle("fixed-cards", !!fixed);
   const rows = getCollectionRows();
 
   if (!rows.length) {
@@ -2022,6 +2023,7 @@ await loadShows();
   // Browse controls (new)
   const rerender = debounce(rerenderFiltered, 150);
 el("q")?.addEventListener("input", rerender);
+ el("fixedCardToggle")?.addEventListener("change", renderCollection);
  // .forEach(id => {
  //      const node = el(id);
  //      if (!node) return;
