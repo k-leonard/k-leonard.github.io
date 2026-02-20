@@ -1594,7 +1594,56 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
   inTabsRow: !!el("logout")?.closest(".tabsRow")
 });
   d("wired logout click:", { exists: !!logoutBtn });
+  // --------------------
+  // LOGIN wiring
+  // --------------------
+  const loginForm = el("loginForm");
+  const loginBtn = el("sendLink");        // if your button has this id
+  const loginErr = el("loginError");      // optional
+  d("login wiring:", {
+    loginForm: !!loginForm,
+    loginBtn: !!loginBtn,
+    emailField: !!el("email"),
+    passwordField: !!el("password"),
+  });
 
+  // If your login is a FORM submit:
+  loginForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    d("loginForm submit fired");
+
+    const email = el("email")?.value?.trim();
+    const password = el("password")?.value;
+
+    if (!email || !password) {
+      if (loginErr) loginErr.textContent = "Email + password required.";
+      w("login blocked: missing email/password", { email: !!email, password: !!password });
+      return;
+    }
+
+    if (loginErr) loginErr.textContent = "";
+
+    d("calling supabase.auth.signInWithPassword", { email });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    d("signInWithPassword result", {
+      hasSession: !!data?.session,
+      userId: data?.session?.user?.id,
+      error: error?.message || null
+    });
+
+    if (error) {
+      if (loginErr) loginErr.textContent = error.message;
+      return;
+    }
+
+    // UI will update via onAuthStateChange
+  });
+
+  // If your login button is NOT type="submit" and you rely on click instead:
+  loginBtn?.addEventListener("click", () => {
+    d("login button clicked");
+  });
   el("collectionViewCompact")?.addEventListener("click", () => {
     setCollectionViewMode("mode-compact");
     applyCollectionViewMode();
@@ -1767,22 +1816,17 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
 }
 
 // Keep UI in sync when auth changes (login/logout)
-supabase.auth.onAuthStateChange(async (event, session2) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
   d("onAuthStateChange fired:", {
     event,
-    hasSession: !!session2,
-    userId: session2?.user?.id,
-    accessTokenStart: session2?.access_token?.slice(0, 12)
+    hasSession: !!session,
+    userId: session?.user?.id,
+    accessTokenStart: session?.access_token?.slice(0, 12)
   });
 
-  showAuthedUI(!!session2);
-  if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
-
-  // If logged out, do NOT try to load anything else
-  if (!session2) {
-    snap("after auth state change (logged out)");
-    return;
-  }
+  showAuthedUI(!!session);
+  if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
+  if (!session) return;
 
   try {
     await ensureOptionRowsLoaded();
@@ -1791,11 +1835,11 @@ supabase.auth.onAuthStateChange(async (event, session2) => {
     updateHomeCounts();
     renderCollection();
     route();
-    snap("after auth state change (logged in)");
   } catch (err) {
-    console.error("Post-login bootstrap failed:", err);
+    e("Post-login bootstrap failed:", err);
   }
 });
+
 
 // IMPORTANT NOTE:
 // In your original pasted file, you had these lines at top-level:
