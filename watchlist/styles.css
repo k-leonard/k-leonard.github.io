@@ -1,243 +1,166 @@
-body {
-  font-family: system-ui, Arial, sans-serif;
-  margin: 0;
-  background: #f6f7fb;
+/* =========================================================
+   GLOBAL / BASE
+   - Page background + default font
+   ========================================================= */
+:root{
+  --bg: #f6f7fb;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #d7dbe7;
+  --border-soft: #eef0f6;
+  --card: #ffffff;
+
+  --primary: #2f6fed;
+  --danger: #d83a3a;
+
+  --radius: 12px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 6px rgba(0,0,0,.08);
 }
 
-.container {
+body{
+  font-family: system-ui, Arial, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container{
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px;
 }
 
-.card {
-  background: white;
+.muted{ color: var(--muted); }
+
+/* Utility */
+.hidden{ display: none !important; }
+
+
+/* =========================================================
+   GENERIC CARDS / ROWS
+   - Reusable white card container
+   - Horizontal row helper
+   ========================================================= */
+.card{
+  background: var(--card);
   padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.08);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   margin: 16px 0;
 }
 
-.row {
+.row{
   display: flex;
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-input, select, textarea, button {
+
+/* =========================================================
+   FORM CONTROLS + BUTTONS
+   - Default input/select/textarea/button styling
+   - Variants: secondary + danger
+   ========================================================= */
+input, select, textarea, button{
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid #d7dbe7;
+  border: 1px solid var(--border);
+  box-sizing: border-box;
 }
 
-button {
+input, select, textarea{
+  width: 100%;
+}
+
+button{
   cursor: pointer;
   border: 0;
-  background: #2f6fed;
+  background: var(--primary);
   color: white;
 }
 
-button.secondary {
+button.secondary{
   background: #e7eaf3;
   color: #111;
 }
 
-button.danger {
-  background: #d83a3a;
+button.danger{
+  background: var(--danger);
 }
 
-table {
+
+/* =========================================================
+   TABLES
+   - Base table styling (used on Browse table)
+   ========================================================= */
+table{
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
 }
 
-th, td {
-  border-bottom: 1px solid #eef0f6;
+th, td{
+  border-bottom: 1px solid var(--border-soft);
   padding: 10px;
   text-align: left;
 }
 
-.muted { color: #666; }
 
-/* ---------- Multiselect ---------- */
-.multiselect {
+/* =========================================================
+   MULTISELECT (your custom dropdown)
+   - The "Select platforms/genres..." controls in Add/Edit
+   ========================================================= */
+.multiselect{
   grid-column: 1 / -1;
 }
 
-.multiselect label {
+.multiselect label{
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
 }
 
-.menu {
+.menu{
   margin-top: 8px;
   padding: 10px;
-  border: 1px solid #d7dbe7;
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: #fff;
   max-height: 200px;
   overflow: auto;
 }
 
-.hidden { display: none; }
-
-.menu .search {
+.menu .search{
   width: 100%;
   margin-bottom: 8px;
 }
 
-.menu label.option {
+.menu label.option{
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 4px 0;
 }
 
-.chips {
+/* Chips (selected tag pills) */
+.chips{
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
   margin-top: 8px;
 }
 
-.chip {
+.chip{
   padding: 4px 8px;
   border-radius: 999px;
-  border: 1px solid #d7dbe7;
-  background: #f6f7fb;
+  border: 1px solid var(--border);
+  background: var(--bg);
   font-size: 12px;
 }
 
-/* ---------- Tabs ---------- */
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.tab {
-  padding: 6px 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  border: 1px solid #d7dbe7;
-  background: #f6f7fb;
-  font-weight: 500;
-}
-
-.tab.active {
-  background: #1f2937;
-  color: white;
-  border-color: #1f2937;
-}
-
-/* ---------- Browse filters grid ---------- */
-.filters {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr 1.2fr 0.9fr;
-  gap: 8px;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.filterBtns {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-@media (max-width: 980px) {
-  .filters { grid-template-columns: 1fr 1fr; }
-  .filterBtns { grid-column: 1 / -1; justify-content: flex-start; }
-}
-
-/* ---------- Form layout polish (Add Show) ---------- */
-
-/* One grid definition for the form */
-.grid{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap:12px;
-}
-
-/* Make native controls fill their grid cell */
-input, select, textarea{
-  width:100%;
-  box-sizing:border-box;
-}
-
-/* Labels behave nicely */
-.field{
-  display:block;
-}
-.field span{
-  display:block;
-  margin-bottom:6px;
-  font-size:12px;
-  color:#555;
-}
-
-/* Make "blocks" span full width and keep 2 cols inside */
-.progressBlock,
-.ovaBlock,
-.typeBlock{
-  grid-column: 1 / -1;
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap:12px;
-}
-
-/* Notes + submit full width */
-.grid textarea{
-  grid-column: 1 / -1;
-  min-height: 90px;
-}
-
-.grid button[type="submit"]{
-  grid-column: 1 / -1;
-}
-
-/* Stars look less cramped */
-.starField{
-  grid-column: 1 / -1;
-}
-
-.stars{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.star{
-  font-size:24px;
-  line-height:1;
-  padding:2px 4px;
-  border-radius:6px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.star:hover { background:#f6f7fb; }
-
-.starClear { margin-left: 8px; }
-
-/* Mobile: collapse to 1 column */
-@media (max-width: 720px){
-  .grid{
-    grid-template-columns: 1fr;
-  }
-  .progressBlock,
-  .ovaBlock,
-  .typeBlock{
-    grid-template-columns: 1fr;
-  }
-}
-/* ---------- Fix multiselect menu checkbox layout ---------- */
-
-/* Don't apply big input styling to checkboxes */
+/* Prevent “big input styling” from messing up checkboxes */
 input[type="checkbox"]{
   padding: 0;
   border-radius: 0;
@@ -246,7 +169,7 @@ input[type="checkbox"]{
   height: 16px;
 }
 
-/* Make menu options compact + left-aligned */
+/* Make option rows compact + readable */
 .multiselect .menu label.option{
   display: flex;
   align-items: center;
@@ -254,352 +177,212 @@ input[type="checkbox"]{
   gap: 10px;
   padding: 6px 8px;
   margin: 0;
-  font-weight: 400;   /* overrides .multiselect label { font-weight:600 } */
+  font-weight: 400; /* overrides .multiselect label { font-weight:600 } */
 }
 
-/* Ensure option text doesn’t get pushed around */
 .multiselect .menu label.option span{
   display: inline-block;
   text-align: left;
   margin: 0;
 }
 
-/* Optional: nice hover for options */
 .multiselect .menu label.option:hover{
-  background: #f6f7fb;
+  background: var(--bg);
   border-radius: 8px;
 }
-.collectionCard{
-  width: 100%;
-  text-align: left;
-  border: 1px solid #d7dbe7;
-  background: #fff;
-  color: #111;
-  border-radius: 12px;
-  padding: 12px;
-  cursor: pointer;
-  display: grid;
-  gap: 4px;
-}
-.collectionCard:hover{
-  background: #f6f7fb;
-}
-.collectionTitle{
-  font-weight: 700;
-}
-.collectionMeta{
-  font-size: 13px;
-}
 
-.factRow{
-  display: grid;
-  grid-template-columns: 160px 1fr;
+
+/* =========================================================
+   TABS
+   - Home / Browse / Collection nav
+   ========================================================= */
+.tabs{
+  display: flex;
   gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid #eef0f6;
-}
-.factRow:last-child{ border-bottom: 0; }
-.factLabel{ font-size: 12px; }
-.factValue{ font-size: 14px; }
-.poster{
-  width: 160px;
-  max-width: 100%;
-  border-radius: 12px;
-  display: block;
-  margin-bottom: 10px;
-}
-.hidden{ display:none; }
-.poster{
-  width: 160px;
-  max-width: 100%;
-  border-radius: 12px;
-  display: block;
-  margin-bottom: 10px;
-}
-.hidden{ display:none; }
-/* Base collection grid */
-.collection-grid {
-  display: grid;
-  gap: 14px;
+  margin-top: 10px;
 }
 
-/* --- View modes --- */
-.collection-grid.mode-compact {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+.tab{
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-weight: 500;
+  color: inherit;
 }
 
-.collection-grid.mode-comfy {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.tab.active{
+  background: #1f2937;
+  color: white;
+  border-color: #1f2937;
 }
 
-/* --- Fixed card sizing (applies to both modes) --- */
-.collection-grid .media-card {
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  height: 100%;
-}
-
-/* Card structure */
-.collection-grid .media-card {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Posters */
-.collection-grid.mode-compact .media-card__poster {
-  height: 170px;
-  width: 100%;
-  object-fit: cover;
-  flex: 0 0 auto;
-}
-
-.collection-grid.mode-comfy .media-card__poster {
-  height: 240px;
-  width: 100%;
-  object-fit: cover;
-  flex: 0 0 auto;
-}
-
-/* Body sizing */
-.collection-grid .media-card__body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  padding: 10px 12px;
-}
-
-/* Clamp title so card height stays consistent */
-.collection-grid .media-title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 6px;
-}
-
-.collection-grid.mode-compact .media-title { -webkit-line-clamp: 2; }
-.collection-grid.mode-comfy  .media-title { -webkit-line-clamp: 3; }
-
-/* Clamp meta too */
-.collection-grid .media-meta {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  color: #444;
-  font-size: 0.92rem;
-}
-
-.collection-grid.mode-compact .media-meta { -webkit-line-clamp: 4; }
-.collection-grid.mode-comfy  .media-meta { -webkit-line-clamp: 6; }
-
-.media-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(0,0,0,0.25);
-}
-
-/* poster image: show the whole poster, no cropping */
-.media-card__poster {
-  width: 100%;
-  height: 180px;          /* compact default (adjust to taste) */
-  object-fit: contain;    /* <-- key: no cropping */
-  object-position: center;
-  background: #e9e9e9;    /* shows behind letterboxed posters */
-  display: block;
-}
-
-.media-card__body {
-  padding: 10px 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.media-title {
-  font-weight: 650;
-  font-size: 0.95rem;
-  line-height: 1.2;
-}
-
-.media-meta {
-  font-size: 0.8rem;
-  opacity: 0.85;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.media-tags {
-  margin-top: 4px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tag {
-  font-size: 0.72rem;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-}
-
-.media-actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
-
-/* Top bar layout */
-.browse-topbar{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:10px 0;
-}
-
-.browse-searchWrap{
-  flex:1;
-  display:flex;
-  justify-content:center;
-}
-
-#q{
-  width:min(720px, 100%);
-}
-
-/* Drawer overlay */
-.filters-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(17, 24, 39, 0.35);
-  backdrop-filter: blur(2px);
-  z-index: 9998;
-}
-
-
-.filters-overlay.hidden{
-  display: none !important;
-}
-
-/* Drawer panel */
-.filters-drawer{
-  position: fixed;
-  top: 0;
-  right: 0;                 /* ✅ right side */
-  left: auto;
-  height: 100vh;
-  width: min(420px, 92vw);
-  z-index: 9999;
-
-  background: #f7f8fc;      /* ✅ light, readable */
-  color: #111827;
-
-  border-left: 1px solid #e5e7eb;
-  box-shadow: -18px 0 40px rgba(0,0,0,0.18);
-
-  transform: translateX(102%);     /* hidden offscreen to the right */
-  transition: transform 180ms ease;
-
-  padding: 14px;
-  overflow: auto;
-}
-
-.filters-drawer.open{
-  transform: translateX(0);
-}
-
-
-.filters-drawer__header{
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: #f7f8fc;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #e5e7eb;
-
+.tabsRow{
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.filters-drawer__body{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.filters-drawer select[multiple]{
-  height: 140px;       /* tweak */
-  padding: 6px;
-}
-
-.filterBlock{ margin:10px 0; }
-/* Filter blocks */
-.filterTitle{
-  font-weight: 800;
-  color: #111827;
-  margin: 12px 0 6px;
-}
-
-.filterSearch{
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #111827;
-  outline: none;
-}
-.filterSearch::placeholder{
-  color: #6b7280;
-}
-
-/* ✅ Force vertical list (one option per line) */
-.checkboxList{
-  display: block;                 /* not flex */
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 8px;
-  max-height: 220px;
-  overflow: auto;
-}
-
-/* each row is its own line */
-.checkboxRow{
+.tabsLeft,
+.tabsRight{
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 6px;
-  border-radius: 8px;
+}
+
+
+/* =========================================================
+   BROWSE FILTERS (older grid version)
+   - If you still use the inline grid layout
+   ========================================================= */
+.filters{
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr 1.2fr 0.9fr;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.filterBtns{
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 980px){
+  .filters{ grid-template-columns: 1fr 1fr; }
+  .filterBtns{ grid-column: 1 / -1; justify-content: flex-start; }
+}
+
+
+/* =========================================================
+   ADD SHOW / EDIT FORMS (grid layout)
+   - Your main form grid system + conditional blocks
+   ========================================================= */
+.grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field{
+  display: block;
+}
+
+.field span{
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+/* Blocks that span full width but keep 2 cols inside */
+.progressBlock,
+.ovaBlock,
+.typeBlock{
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Notes full width */
+.grid textarea{
+  grid-column: 1 / -1;
+  min-height: 90px;
+}
+
+/* Submit button full width */
+.grid button[type="submit"]{
+  grid-column: 1 / -1;
+}
+
+/* Star rating UI */
+.starField{
+  grid-column: 1 / -1;
+}
+
+.stars{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.star{
+  font-size: 24px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
   cursor: pointer;
   user-select: none;
 }
 
-.checkboxRow:hover{
-  background: #f3f4f6;
+.star:hover{ background: var(--bg); }
+
+.starClear{ margin-left: 8px; }
+
+/* Mobile: collapse to 1 column */
+@media (max-width: 720px){
+  .grid{ grid-template-columns: 1fr; }
+
+  .progressBlock,
+  .ovaBlock,
+  .typeBlock{
+    grid-template-columns: 1fr;
+  }
 }
 
-.checkboxRow input{
-  width: 16px;
-  height: 16px;
-  accent-color: #4f46e5; /* purple-blue */
+
+/* =========================================================
+   SHOW DETAIL FACTS + POSTER
+   - The detail page "facts" rows and poster styling
+   ========================================================= */
+.factRow{
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-soft);
 }
 
-.checkboxRow span{
-  color: #111827;
+.factRow:last-child{ border-bottom: 0; }
+.factLabel{ font-size: 12px; }
+.factValue{ font-size: 14px; }
+
+.poster{
+  width: 160px;
+  max-width: 100%;
+  border-radius: var(--radius);
+  display: block;
+  margin-bottom: 10px;
 }
 
-/* Make the tiny grey labels readable */
-.muted{
-  color: #6b7280 !important;
+
+/* =========================================================
+   BROWSE TOPBAR + TABLE (newer browse UI)
+   - Search centered
+   - Sticky header
+   ========================================================= */
+.browse-topbar{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
 }
+
+.browse-searchWrap{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+#q{
+  width: min(720px, 100%);
+}
+
 .browseTable{
   width: 100%;
   border-collapse: collapse;
@@ -625,59 +408,304 @@ input[type="checkbox"]{
 .browseTable tr:hover td{
   background: #f9fafb;
 }
+
 .browseTable thead th{
   position: sticky;
   top: 0;
   background: #ffffff;
   z-index: 1;
 }
-/* Danger zone section */
-.danger-zone {
-  margin-top: 32px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-}
 
-.danger-zone__text {
-  opacity: 0.85;
-  margin: 8px 0 12px;
-}
-
-/* Buttons (adapt to your existing button system) */
-.btn {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid transparent;
+/* Clickable row title (browse list) */
+.row-link{
   cursor: pointer;
-  font-weight: 600;
+  color: inherit;
+  font-weight: 500;
 }
 
-.btn-secondary {
+.row-link:hover{
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+
+/* =========================================================
+   FILTER DRAWER (right-side slide-out)
+   - Overlay + drawer panel + filter blocks
+   ========================================================= */
+.filters-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+}
+
+.filters-drawer{
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+  height: 100vh;
+  width: min(420px, 92vw);
+  z-index: 9999;
+
+  background: #f7f8fc;
+  color: var(--text);
+
+  border-left: 1px solid #e5e7eb;
+  box-shadow: -18px 0 40px rgba(0,0,0,0.18);
+
+  transform: translateX(102%);
+  transition: transform 180ms ease;
+
+  padding: 14px;
+  overflow: auto;
+}
+
+.filters-drawer.open{
+  transform: translateX(0);
+}
+
+.filters-drawer__header{
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f7f8fc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filters-drawer__body{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters-drawer select[multiple]{
+  height: 140px;
+  padding: 6px;
+}
+
+/* Filter blocks inside drawer */
+.filterBlock{ margin: 10px 0; }
+
+.filterTitle{
+  font-weight: 800;
+  color: var(--text);
+  margin: 12px 0 6px;
+}
+
+.filterSearch{
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: var(--text);
+  outline: none;
+}
+
+.filterSearch::placeholder{
+  color: #6b7280;
+}
+
+/* Vertical checkbox list (one per line) */
+.checkboxList{
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 8px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.checkboxRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxRow:hover{
+  background: #f3f4f6;
+}
+
+.checkboxRow input{
+  width: 16px;
+  height: 16px;
+  accent-color: #4f46e5;
+}
+
+.checkboxRow span{
+  color: var(--text);
+}
+
+
+/* =========================================================
+   COLLECTION GRID + CARDS
+   - Two modes: compact (5) and comfy (3)
+   - Fix poster cropping: use object-fit: contain (no cut-off)
+   - Optional fixed-cards toggle: consistent height
+   ========================================================= */
+.collection-grid{
+  display: grid;
+  gap: 14px;
+}
+
+/* View modes */
+.collection-grid.mode-compact{
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.collection-grid.mode-comfy{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Card base */
+.collection-grid .media-card{
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Poster sizing per mode
+   NOTE: object-fit: contain prevents cropping (letterboxes instead) */
+.collection-grid.mode-compact .media-card__poster{
+  height: 170px;
+  width: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #e9e9e9;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.collection-grid.mode-comfy .media-card__poster{
+  height: 240px;
+  width: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #e9e9e9;
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* Body */
+.collection-grid .media-card__body{
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+}
+
+/* Title */
+.collection-grid .media-title{
+  font-weight: 650;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.collection-grid.mode-compact .media-title{ -webkit-line-clamp: 2; }
+.collection-grid.mode-comfy  .media-title{ -webkit-line-clamp: 3; }
+
+/* Meta lines */
+.collection-grid .media-meta{
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.collection-grid.mode-compact .media-meta{ -webkit-line-clamp: 4; }
+.collection-grid.mode-comfy  .media-meta{ -webkit-line-clamp: 6; }
+
+/* Optional tags */
+.media-tags{
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag{
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 999px;
   background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.12);
 }
 
-.btn-danger-outline {
-  background: transparent;
-  border-color: rgba(255, 80, 80, 0.6);
-  color: rgba(255, 120, 120, 1);
+/* Optional actions row (if you ever add buttons back) */
+.media-actions{
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
 }
 
-.btn-danger {
-  background: rgba(255, 80, 80, 0.9);
-  border-color: rgba(255, 80, 80, 1);
-  color: #fff;
+/* Fixed card sizing toggle (apply .fixed-cards on .collection-grid)
+   - Keeps every card the same overall height */
+.collection-grid.fixed-cards .media-card{
+  height: 380px; /* adjust if you want */
 }
 
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.collection-grid.fixed-cards.mode-compact .media-card__poster{
+  height: 170px; /* stays consistent with compact */
 }
 
-/* ===== Modal basics ===== */
-.hidden { display: none !important; }
+.collection-grid.fixed-cards.mode-comfy .media-card__poster{
+  height: 240px; /* stays consistent with comfy */
+}
 
-.modal-backdrop {
+/* Clamp a bit harder when fixed to avoid overflow */
+.collection-grid.fixed-cards .media-title{
+  -webkit-line-clamp: 2;
+}
+
+.collection-grid.fixed-cards.mode-compact .media-meta{
+  -webkit-line-clamp: 4;
+}
+
+.collection-grid.fixed-cards.mode-comfy .media-meta{
+  -webkit-line-clamp: 5;
+}
+
+
+/* =========================================================
+   DANGER ZONE + DELETE MODAL
+   - Bottom of show detail + confirmation modal styling
+   ========================================================= */
+.danger-zone{
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+.danger-zone p{
+  margin: 6px 0 12px;
+  opacity: 0.85;
+}
+
+/* Modal backdrop for delete confirm */
+.modal-backdrop{
   position: fixed;
   inset: 0;
   display: flex;
@@ -688,17 +716,22 @@ input[type="checkbox"]{
   z-index: 9999;
 }
 
-.modal {
+.modal{
   width: min(540px, 100%);
   background: #141418;
   color: #fff;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 18px;
   border: 1px solid rgba(255,255,255,0.14);
 }
 
-.modal-label { display:block; margin-top: 12px; margin-bottom: 6px; }
-.modal-input {
+.modal-label{
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.modal-input{
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
@@ -707,48 +740,19 @@ input[type="checkbox"]{
   color: #fff;
 }
 
-.modal-actions {
-  display:flex;
-  justify-content:flex-end;
+.modal-actions{
+  display: flex;
+  justify-content: flex-end;
   gap: 10px;
   margin-top: 14px;
 }
 
-/* ===== “Danger Zone” section ===== */
-.danger-zone {
-  margin-top: 26px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-}
-.danger-zone p { margin: 6px 0 12px; opacity: 0.85; }
 
-/* Clean clickable row title */
-.row-link {
-  cursor: pointer;
-  color: inherit;
-  font-weight: 500;
-}
-
-.row-link:hover {
-  text-decoration: underline;
-  opacity: 0.85;
-}
-
-.tabsRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.tabsLeft, .tabsRight {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Modal overlay */
-.modalOverlay {
+/* =========================================================
+   ADD SHOW MODAL (your big modal overlay)
+   - The modal that contains the add-show form
+   ========================================================= */
+.modalOverlay{
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
@@ -759,22 +763,22 @@ input[type="checkbox"]{
   z-index: 9999;
 }
 
-.modalOverlay.is-open {
+.modalOverlay.is-open{
   display: flex;
 }
 
-.modalCard {
+.modalCard{
   width: min(900px, 100%);
   max-height: min(85vh, 900px);
   background: #fff;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-.modalHeader {
+.modalHeader{
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -782,18 +786,18 @@ input[type="checkbox"]{
   border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 
-.modalHeader h2 {
+.modalHeader h2{
   font-size: 18px;
   margin: 0;
 }
 
-.modalBody {
+.modalBody{
   padding: 16px;
   overflow: auto;
 }
 
-/* Close button */
-.iconBtn {
+/* Close icon button */
+.iconBtn{
   border: 0;
   background: transparent;
   font-size: 18px;
@@ -803,59 +807,69 @@ input[type="checkbox"]{
   border-radius: 8px;
 }
 
-.iconBtn:hover {
+.iconBtn:hover{
   background: rgba(0,0,0,0.06);
 }
 
-/* If you already have button styles, you can ignore these */
-.btn {
+/* If you use "btn" classes anywhere */
+.btn{
   border: 1px solid rgba(0,0,0,0.12);
   background: #fff;
   border-radius: 10px;
   padding: 8px 12px;
   cursor: pointer;
+  font-weight: 600;
 }
 
-.btn-primary {
+.btn-primary{
   background: #111;
   color: #fff;
   border-color: #111;
 }
-/* Collection grid cards */
-.collection-grid .media-card {
-  height: auto; /* default */
+
+.btn-secondary{
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
 }
 
-/* Toggle ON: fixed consistent height */
-.collection-grid.fixed-cards .media-card {
-  height: 380px;          /* adjust */
-  display: flex;
-  flex-direction: column;
+.btn-danger-outline{
+  background: transparent;
+  border-color: rgba(255, 80, 80, 0.6);
+  color: rgba(255, 120, 120, 1);
 }
 
-.collection-grid.fixed-cards .media-card__poster {
-  height: 220px;          /* adjust */
-  object-fit: cover;
+.btn-danger{
+  background: rgba(255, 80, 80, 0.9);
+  border-color: rgba(255, 80, 80, 1);
+  color: #fff;
+}
+
+.btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LEGACY / OPTIONAL: collectionCard (older card style)
+   - Keep if you still render .collectionCard somewhere
+   ========================================================= */
+.collectionCard{
   width: 100%;
-  flex: 0 0 auto;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #111;
+  border-radius: var(--radius);
+  padding: 12px;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
 }
 
-.collection-grid.fixed-cards .media-card__body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+.collectionCard:hover{
+  background: var(--bg);
 }
 
-.collection-grid.fixed-cards .media-title {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;  /* cap title to 2 lines */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.collection-grid.fixed-cards .media-meta {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;  /* cap meta */
-  -webkit-box-orient: vertical;
-}
+.collectionTitle{ font-weight: 700; }
+.collectionMeta{ font-size: 13px; }
