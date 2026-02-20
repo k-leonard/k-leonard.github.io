@@ -216,12 +216,27 @@ async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
 function showAuthedUI(isAuthed) {
   d("showAuthedUI called:", { isAuthed });
 
-  setDisplay("authCard", !isAuthed);
+   setDisplay("authCard", !isAuthed);
+  setDisplay("app", isAuthed);
 
   const logout = el("logout");
   if (logout) logout.style.display = isAuthed ? "" : "none";
 
-  setDisplay("app", isAuthed);
+
+  // ✅ LOCK "Add Show" behind auth
+  const openAdd = el("openAddShowBtn");
+  if (openAdd) {
+    openAdd.style.display = isAuthed ? "" : "none"; // hide it completely
+    openAdd.disabled = !isAuthed;                   // extra safety
+    openAdd.setAttribute("aria-disabled", String(!isAuthed));
+  }
+
+  // ✅ If logged out, force-close modal if it was open
+  const modal = el("addShowModal");
+  if (!isAuthed && modal) {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+  }
 
   if (!isAuthed) {
     ["home", "browse", "collection", "show"].forEach(name => setDisplay(`view-${name}`, false));
@@ -383,6 +398,11 @@ function setupAddShowModal() {
   }
 
   async function openModal() {
+      if (!data?.session) {
+    w("Blocked Add Show: not logged in");
+    showAuthedUI(false);
+    return;
+  }
     try {
       if (typeof ensureOptionRowsLoaded === "function") {
         await ensureOptionRowsLoaded();
