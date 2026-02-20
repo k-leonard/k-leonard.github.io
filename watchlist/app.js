@@ -1618,7 +1618,14 @@ async function init() {
   setupAddShowModal();
   
 await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: new URL("./reset.html", window.location.href).toString()
+  const RESET_URL = `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, "/")}reset.html`;
+// If your app is at /watchlist.html, this resolves to /reset.html in the same folder.
+
+const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: RESET_URL
+});
+
+d("resetPasswordForEmail()", { email, redirectTo: RESET_URL, error: error?.message, data });
 });
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
   d("logout button sanity", {
