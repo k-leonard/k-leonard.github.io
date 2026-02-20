@@ -1364,29 +1364,58 @@ if (tableName === "tropes" || tableName === "genres" || tableName === "platforms
 }
 
 function updateHomeCounts() {
-  const counts = { 
+  const rows = (ALL_SHOWS_CACHE || []);
+
+  // Status KPIs
+  const statusCounts = { 
     "To Be Watched": 0,
     "Watching": 0,
     "Waiting for Next Season": 0,
     "Watched": 0
   };
 
-  for (const r of (ALL_SHOWS_CACHE || [])) {
-    if (counts[r.status] != null) counts[r.status] += 1;
+  for (const r of rows) {
+    if (statusCounts[r.status] != null) statusCounts[r.status] += 1;
   }
 
   // ✅ match your HTML ids
   const map = [
-    ["kpiToWatch", counts["To Be Watched"]],
-    ["kpiWatching", counts["Watching"]],
-    ["kpiWaiting", counts["Waiting for Next Season"]],
-    ["kpiWatched", counts["Watched"]],
+    ["kpiToWatch", statusCounts["To Be Watched"]],
+    ["kpiWatching", statusCounts["Watching"]],
+    ["kpiWaiting", statusCounts["Waiting for Next Season"]],
+    ["kpiWatched", statusCounts["Watched"]],
   ];
 
   map.forEach(([id, val]) => {
     const node = el(id);
     if (node) node.textContent = String(val);
   });
+
+  // Total + Category breakdown (dynamic / room to grow)
+  const totalEl = el("kpiTotal");
+  if (totalEl) totalEl.textContent = String(rows.length);
+
+  const byCategory = {};
+  for (const r of rows) {
+    const cat = (r.category || "Uncategorized").trim();
+    byCategory[cat] = (byCategory[cat] || 0) + 1;
+  }
+
+  // Make "Anime" and "Non-anime" appear first if present, then alpha for the rest
+  const preferred = ["Anime", "Non-anime"];
+  const cats = Object.keys(byCategory);
+
+  cats.sort((a, b) => {
+    const ai = preferred.indexOf(a);
+    const bi = preferred.indexOf(b);
+    if (ai !== -1 || bi !== -1) return (ai === -1) - (bi === -1) || ai - bi;
+    return a.localeCompare(b);
+  });
+
+  const breakdownEl = el("kpiBreakdown");
+  if (breakdownEl) {
+    breakdownEl.textContent = cats.map(c => `${byCategory[c]} ${c}`).join("  |  ");
+  }
 }
 
 function getCollectionRows() {
