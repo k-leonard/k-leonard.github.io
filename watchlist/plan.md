@@ -23,7 +23,7 @@
     *  shift main content slightly right when drawer opens (like Notion)
 - [ ] maybe do implement a recommender system on the home page but like WAY later down the line
 
-- [ ] add in all of my current shows
+- [ ] add in all of my current shows BUT BEFORE DOING THAT WIPE EVERYTHING CLEAN SO WE START WITH ID OF 1 
 
 
 
