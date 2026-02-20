@@ -42,7 +42,19 @@ let ALL_SHOWS_CACHE = [];
 function getCollectionViewMode() {
   return localStorage.getItem("collectionViewMode") || "mode-comfy"; // default
 }
+function applyCollectionViewMode() {
+  const mode = getCollectionViewMode(); // "mode-compact" or "mode-comfy"
 
+  const targets = [el("collectionList"), el("collectionGrid")].filter(Boolean);
+  targets.forEach(wrap => {
+    wrap.classList.remove("mode-compact", "mode-comfy");
+    wrap.classList.add(mode);
+  });
+
+  // optional: visually mark active button
+  el("collectionViewCompact")?.classList.toggle("active", mode === "mode-compact");
+  el("collectionViewComfy")?.classList.toggle("active", mode === "mode-comfy");
+}
 function setCollectionViewMode(mode) {
   localStorage.setItem("collectionViewMode", mode);
 }
@@ -1003,6 +1015,7 @@ function renderCollection() {
 const mode = getCollectionViewMode();
 wrap.classList.remove("mode-compact", "mode-comfy");
 wrap.classList.add(mode);
+ applyCollectionViewMode();
   const rows = getCollectionRows();
 
   if (!rows.length) {
@@ -1982,11 +1995,13 @@ const titleInput = form.title;
 const title = titleInput.value.trim();
 el("collectionViewCompact")?.addEventListener("click", () => {
   setCollectionViewMode("mode-compact");
+  applyCollectionViewMode();
   renderCollection();
 });
 
 el("collectionViewComfy")?.addEventListener("click", () => {
   setCollectionViewMode("mode-comfy");
+  applyCollectionViewMode();
   renderCollection();
 });
 if (!title) return;
