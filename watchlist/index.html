@@ -227,10 +227,7 @@
           <option value="Anime">Anime</option>
           <option value="Non-anime">Non-anime</option>
         </select>
-<label class="checkboxRow" style="margin-left:auto;">
-  <input type="checkbox" id="fixedCardToggle" />
-  <span>Fixed card size</span>
-</label>
+
         <select id="collectionSort">
           <option value="recent">Recently watched</option>
           <option value="rating">Highest rated</option>
@@ -238,6 +235,10 @@
           <option value="release_newest">Release Date (Newest)</option>
           <option value="release_oldest">Release Date (Oldest)</option>
         </select>
+        <div class="row" style="gap:10px;">
+  <button id="collectionViewCompact" type="button" class="secondary">Compact (5)</button>
+  <button id="collectionViewComfy" type="button" class="secondary">Comfortable (3)</button>
+</div>
       </div>
 <div id="collectionList" class="collection-grid" style="margin-top:10px;"></div>
 
