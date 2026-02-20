@@ -1375,12 +1375,12 @@ function updateHomeCounts() {
     if (counts[r.status] != null) counts[r.status] += 1;
   }
 
-  // These IDs must exist in your home view HTML
+  // ✅ match your HTML ids
   const map = [
-    ["count-toWatch", counts["To Be Watched"]],
-    ["count-watching", counts["Watching"]],
-    ["count-waiting", counts["Waiting for Next Season"]],
-    ["count-watched", counts["Watched"]],
+    ["kpiToWatch", counts["To Be Watched"]],
+    ["kpiWatching", counts["Watching"]],
+    ["kpiWaiting", counts["Waiting for Next Season"]],
+    ["kpiWatched", counts["Watched"]],
   ];
 
   map.forEach(([id, val]) => {
