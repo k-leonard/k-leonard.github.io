@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reset Password</title>
+</head>
+<body>
+  <h1>Set a new password</h1>
+
+  <label>
+    New password
+    <input id="pw" type="password" />
+  </label>
+  <button id="setPw">Update password</button>
+
+  <p id="msg"></p>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const msg = document.getElementById("msg");
+
+    // Some flows use "code" (PKCE). This will set the session if so.
+    try {
+      await supabase.auth.exchangeCodeForSession(window.location.href);
+    } catch (e) {
+      // ignore
+    }
+
+    document.getElementById("setPw").addEventListener("click", async () => {
+      const pw = document.getElementById("pw").value;
+      if (!pw) return;
+
+      const { data, error } = await supabase.auth.updateUser({ password: pw });
+
+      if (error) {
+        msg.textContent = "Error: " + error.message;
+        return;
+      }
+
+      msg.textContent = "Password updated. You can go back and log in.";
+    });
+  </script>
+</body>
+</html>
