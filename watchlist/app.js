@@ -15,7 +15,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (session) {
-  window.location.href = "./collection.html";
+  window.location.href = "./watchlist.html";
 }
 let CURRENT_SHOW = null;
 let EDIT_MODE = false; 
