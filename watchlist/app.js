@@ -14,9 +14,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // If already logged in, skip login page
 const { data: { session } } = await supabase.auth.getSession();
 
-if (session) {
-  window.location.href = "./watchlist.html";
-}
+// if (session) {
+//   window.location.href = "./watchlist.html";
+// }
 let CURRENT_SHOW = null;
 let EDIT_MODE = false; 
 const el = (id) => document.getElementById(id);
