@@ -1248,8 +1248,9 @@ async function getUserId() {
 
 async function logout() {
   await supabase.auth.signOut();
-  authMsg.textContent = "Logged out.";
   showAuthedUI(false);
+  window.location.hash = "#home";
+  route();
 }
 
 // --------------------
