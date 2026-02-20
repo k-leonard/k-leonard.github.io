@@ -2666,6 +2666,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    window.location.href = "./collection.html";
+    window.location.href = "./watchlist.html";
   });
 });
