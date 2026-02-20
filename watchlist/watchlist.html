@@ -20,7 +20,7 @@
     <a class="tab" href="#home" id="tab-home">Home</a>
     <a class="tab" href="#browse" id="tab-browse">Browse</a>
     <a class="tab" href="#collection" id="tab-collection">My Collection</a>
-    <button id="logout" class="ghost hidden">Log Out</button>
+    <button id="logout" class="ghost" type="button" style="display:none;">Log Out</button>
   </div>
 
   <div class="tabsRight">
@@ -57,7 +57,7 @@
       </div>
       <p id="authMsg" class="muted"></p>
     </section>
-
+<section id="app" style="display:none;">
     <!-- HOME -->
     <section class="card" id="view-home" style="display:none;">
       <h2>Home</h2>
@@ -489,7 +489,7 @@
   <!-- ✅ Danger Zone belongs INSIDE view-show, AFTER your content/forms -->
   <div id="showDangerZone"></div>
 </section>
-
+</section>
 
   </main>
 
@@ -529,7 +529,7 @@
     </div>
 
     <div id="addShowModalBody" class="modalBody">
-      <section class="card innerCard" id="app"; margin-top:14px;">
+      <section class="card innerCard" id="addShowCard" style="margin-top:14px;">
         <h3>Add show</h3>
 
         <form id="addForm" class="grid">
