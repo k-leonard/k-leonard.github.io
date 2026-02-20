@@ -2497,28 +2497,28 @@ el("backToCollection")?.addEventListener("click", () => {
   }
 
   // Keep UI in sync when auth changes (login/logout)
-  supabase.auth.onAuthStateChange(async (_event, session2) => {
-    showAuthedUI(!!session2);
-    if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
-    if (!session2) return;
+  // supabase.auth.onAuthStateChange(async (_event, session2) => {
+  //   showAuthedUI(!!session2);
+  //   if (authMsg) authMsg.textContent = session2 ? "Logged in." : "Logged out.";
+  //   if (!session2) return;
 
-    try {
-      await ensureOptionRowsLoaded();
+  //   try {
+  //     await ensureOptionRowsLoaded();
 
-      platformSelect.setRows(PLATFORM_ROWS);
-      genreSelect.setRows(GENRE_ROWS);
-      tropeSelect.setRows(TROPE_ROWS);
-      studioSelect.setRows(STUDIO_ROWS);
+  //     platformSelect.setRows(PLATFORM_ROWS);
+  //     genreSelect.setRows(GENRE_ROWS);
+  //     tropeSelect.setRows(TROPE_ROWS);
+  //     studioSelect.setRows(STUDIO_ROWS);
 
-      buildBrowseFiltersUI();
-      await loadShows();
-      updateHomeCounts();
-      renderCollection();
-      route();
-    } catch (err) {
-      console.error("Post-login bootstrap failed:", err);
-    }
-  });
+  //     buildBrowseFiltersUI();
+  //     await loadShows();
+  //     updateHomeCounts();
+  //     renderCollection();
+  //     route();
+  //   } catch (err) {
+  //     console.error("Post-login bootstrap failed:", err);
+  //   }
+  // });
 
 
 // // Normal mode: Supabase online
@@ -2720,35 +2720,36 @@ buildBrowseFiltersUI();
 
 
 //init();
-document.addEventListener("DOMContentLoaded", init);
+//document.addEventListener("DOMContentLoaded", init);
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("loginForm");
+// document.addEventListener("DOMContentLoaded", () => {
+//   const form = document.getElementById("loginForm");
 
-  // If this page doesn't have a login form, do nothing
-  if (!form) return;
+//   // If this page doesn't have a login form, do nothing
+//   if (!form) return;
 
-  const errorEl = document.getElementById("loginError");
+//   const errorEl = document.getElementById("loginError");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+//   form.addEventListener("submit", async (e) => {
+//     e.preventDefault();
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+//     const email = document.getElementById("email").value;
+//     const password = document.getElementById("password").value;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+//     const { data, error } = await supabase.auth.signInWithPassword({
+//       email,
+//       password
+//     });
 
-    if (error) {
-      errorEl.textContent = error.message;
-      errorEl.style.display = "block";
-      return;
-    }
+//     if (error) {
+//       errorEl.textContent = error.message;
+//       errorEl.style.display = "block";
+//       return;
+//     }
 
-     showAuthedUI(true);
-  window.location.hash = "#collection";
-  route()
-  });
-});
+//      showAuthedUI(true);
+//   window.location.hash = "#collection";
+//   route()
+//   });
+// });
+init().catch(err => console.error("INIT FAILED:", err));
