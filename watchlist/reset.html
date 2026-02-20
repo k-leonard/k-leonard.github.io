@@ -1,69 +1,164 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Reset Password</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { max-width: 520px; margin: 48px auto; padding: 0 16px; }
+    h1 { margin: 0 0 12px; }
+    .muted { color: #666; margin: 0 0 24px; }
+    label { display: block; margin: 14px 0 6px; font-weight: 600; }
+    input { width: 100%; padding: 10px 12px; font-size: 16px; }
+    .row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+    button { padding: 10px 14px; font-size: 16px; cursor: pointer; }
+    button[disabled] { opacity: 0.6; cursor: not-allowed; }
+    #msg { margin-top: 16px; }
+    .error { color: #b00020; }
+    .ok { color: #0b6b0b; }
+    .hidden { display: none; }
+  </style>
 </head>
+
 <body>
   <h1>Set a new password</h1>
+  <p class="muted" id="subtitle">Verifying your reset link…</p>
 
-  <label>
-    New password
-    <input id="pw" type="password" />
-  </label>
-  <button id="setPw">Update password</button>
+  <form id="form" class="hidden">
+    <label for="pw">New password</label>
+    <input id="pw" type="password" autocomplete="new-password" minlength="8" />
 
-  <p id="msg"></p>
+    <label for="pw2">Confirm new password</label>
+    <input id="pw2" type="password" autocomplete="new-password" minlength="8" />
+
+    <div class="row">
+      <button id="setPw" type="submit">Update password</button>
+      <button id="toggle" type="button">Show</button>
+    </div>
+
+    <p id="msg" aria-live="polite"></p>
+  </form>
 
   <script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
-  const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE";
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ✅ Put your real values here
+    const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 
-  const msg = document.getElementById("msg");
-  const pw = document.getElementById("pw");
-  const btn = document.getElementById("setPw");
+    // Optional: where to send them after success
+    // Example: "./index.html" or your browse page, etc.
+    const RETURN_TO = "./index.html";
 
-  function log(...a){ console.log("[reset]", ...a); }
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // 1) Turn the recovery link into an authenticated session
-  try {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-    log("exchangeCodeForSession", { hasSession: !!data?.session, error: error?.message });
+    const subtitle = document.getElementById("subtitle");
+    const form = document.getElementById("form");
+    const pw = document.getElementById("pw");
+    const pw2 = document.getElementById("pw2");
+    const btn = document.getElementById("setPw");
+    const toggle = document.getElementById("toggle");
+    const msg = document.getElementById("msg");
 
-    if (error) {
-      msg.textContent = "This reset link is invalid or expired. Please request a new one.";
+    function setMsg(text, kind = "") {
+      msg.className = kind;
+      msg.textContent = text || "";
+    }
+
+    function log(...a) { console.log("[reset]", ...a); }
+
+    // --- 1) Verify link + establish session ---
+    async function verifyResetLink() {
+      // Supabase can deliver reset links in different shapes depending on settings:
+      // - PKCE code flow: https://site/reset.html?code=...
+      // - Hash tokens:    https://site/reset.html#access_token=...&type=recovery
+      // exchangeCodeForSession is for the PKCE (?code=...) variant.
+      const hasCodeParam = new URL(window.location.href).searchParams.has("code");
+
+      try {
+        if (hasCodeParam) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          log("exchangeCodeForSession", { hasSession: !!data?.session, error: error?.message });
+
+          if (error) return { ok: false, reason: "invalid_or_expired" };
+          return { ok: true };
+        }
+
+        // If there's no ?code=..., try reading an existing session from hash tokens.
+        // Supabase-js will parse the URL hash automatically on load in many cases,
+        // but we can still sanity-check by asking for the current user.
+        const { data: userData, error: userErr } = await supabase.auth.getUser();
+        log("getUser", { hasUser: !!userData?.user, error: userErr?.message });
+
+        if (userErr || !userData?.user) return { ok: false, reason: "invalid_or_expired" };
+        return { ok: true };
+      } catch (e) {
+        log("verifyResetLink threw", e);
+        return { ok: false, reason: "unknown" };
+      }
+    }
+
+    // --- 2) UI wiring ---
+    toggle.addEventListener("click", () => {
+      const isPw = pw.type === "password";
+      pw.type = isPw ? "text" : "password";
+      pw2.type = isPw ? "text" : "password";
+      toggle.textContent = isPw ? "Hide" : "Show";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const newPw = pw.value;
+      const confirmPw = pw2.value;
+
+      setMsg("");
+
+      if (!newPw || newPw.length < 8) {
+        setMsg("Password must be at least 8 characters.", "error");
+        return;
+      }
+      if (newPw !== confirmPw) {
+        setMsg("Passwords do not match.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      setMsg("Updating password…");
+
+      const { error } = await supabase.auth.updateUser({ password: newPw });
+      log("updateUser", { ok: !error, error: error?.message });
+
+      if (error) {
+        btn.disabled = false;
+        setMsg("Error updating password: " + error.message, "error");
+        return;
+      }
+
+      setMsg("Password updated! Redirecting…", "ok");
+
+      // Optional sign-out after reset (some apps prefer this)
+      // await supabase.auth.signOut();
+
+      setTimeout(() => {
+        window.location.href = RETURN_TO;
+      }, 900);
+    });
+
+    // --- boot ---
+    const res = await verifyResetLink();
+    if (!res.ok) {
+      subtitle.textContent = "This reset link is invalid or expired.";
+      // Keep the form hidden, but show a helpful message area
+      form.classList.remove("hidden");
+      btn.disabled = true;
+      setMsg("Please request a new password reset link from the login screen.", "error");
     } else {
-      msg.textContent = "Link verified. Enter a new password.";
+      subtitle.textContent = "Link verified. Enter a new password.";
+      form.classList.remove("hidden");
+      pw.focus();
     }
-  } catch (e) {
-    log("exchangeCodeForSession threw", e);
-    msg.textContent = "Could not verify reset link. Please request a new one.";
-  }
-
-  // 2) Update password for the user tied to that recovery session
-  btn.addEventListener("click", async () => {
-    const newPw = pw.value.trim();
-    if (!newPw) return;
-
-    btn.disabled = true;
-    msg.textContent = "Updating password…";
-
-    const { data, error } = await supabase.auth.updateUser({ password: newPw });
-
-    log("updateUser", { ok: !error, error: error?.message });
-
-    if (error) {
-      msg.textContent = "Error updating password: " + error.message;
-      btn.disabled = false;
-      return;
-    }
-
-    msg.textContent = "Password updated! You can return to the app and log in.";
-  });
-</script>
+  </script>
 </body>
 </html>
