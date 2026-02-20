@@ -173,7 +173,37 @@ async function refreshBrowseFilterOptions() {
 function getCollectionViewMode() {
   return localStorage.getItem("collectionViewMode") || "mode-comfy"; // default
 }
+async function handlePasswordRecoveryIfPresent() {
+  // This is for your reset.html page or if Supabase redirects back with a code.
+  // Safe to run on all pages: it only does work if a recovery "code" is present.
+  try {
+    const url = new URL(window.location.href);
+    const hasCode = url.searchParams.has("code");
+    const type = url.searchParams.get("type") || "";
 
+    d("handlePasswordRecoveryIfPresent()", { hasCode, type, href: window.location.href });
+
+    // If this is a recovery link, exchange it for a session
+    if (hasCode && (type === "recovery" || type === "signup" || type === "")) {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+      d("exchangeCodeForSession result", { hasSession: !!data?.session, error: error?.message });
+
+      if (error) {
+        w("Password recovery link exchange failed", error);
+        return;
+      }
+
+      // Clean URL so refreshes don't re-run the exchange
+      url.searchParams.delete("code");
+      url.searchParams.delete("type");
+      window.history.replaceState({}, document.title, url.toString());
+
+      d("Password recovery/session exchange complete; URL cleaned");
+    }
+  } catch (err) {
+    e("handlePasswordRecoveryIfPresent failed:", err);
+  }
+}
 function applyCollectionViewMode() {
   const mode = getCollectionViewMode();
   const targets = [el("collectionList"), el("collectionGrid")].filter(Boolean);
