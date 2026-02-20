@@ -11,6 +11,12 @@ console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// If already logged in, skip login page
+const { data: { session } } = await supabase.auth.getSession();
+
+if (session) {
+  window.location.href = "./collection.html";
+}
 let CURRENT_SHOW = null;
 let EDIT_MODE = false; 
 const el = (id) => document.getElementById(id);
@@ -1217,16 +1223,30 @@ async function getUserId() {
   return data.user?.id || null;
 }
 
-async function sendMagicLink(email) {
-  authMsg.textContent = "Sending magic link…";
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href }
-  });
-  authMsg.textContent = error
-    ? `Error: ${error.message}`
-    : "Check your email for the sign-in link.";
-}
+// async function sendMagicLink(email, password) {
+// const form = document.getElementById("loginForm");
+// const errorEl = document.getElementById("loginError");
+
+// form.addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   const email = document.getElementById("email").value;
+//   const password = document.getElementById("password").value;
+
+//   const { data, error } = await supabase.auth.signInWithPassword({
+//     email,
+//     password
+//   });
+
+//   if (error) {
+//     errorEl.textContent = error.message;
+//     errorEl.style.display = "block";
+//     return;
+//   }
+
+//   // Redirect after login
+//   window.location.href = "./collection.html";
+// });
 
 async function logout() {
   await supabase.auth.signOut();
@@ -2620,3 +2640,32 @@ buildBrowseFiltersUI();
 };
 
 init();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+
+  // If this page doesn't have a login form, do nothing
+  if (!form) return;
+
+  const errorEl = document.getElementById("loginError");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = "block";
+      return;
+    }
+
+    window.location.href = "./collection.html";
+  });
+});
