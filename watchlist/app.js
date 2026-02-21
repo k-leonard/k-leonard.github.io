@@ -1382,14 +1382,14 @@ function renderShowDetailBlocks(show, mode = "view") {
 
   // Poster
   const posterUrl = getPosterUrl(show);
-  const posterOk = setImg("showPosterImg", posterUrl, `${show?.title || "Show"} poster`);
-  if (!posterOk) w("Missing #showPosterImg (poster won't render)");
+  const posterOk = setImg("showPoster", posterUrl, `${show?.title || "Show"} poster`);
+  if (!posterOk) w("Missing #showPoster (poster won't render)");
 
   // Description
   const desc = (show?.description || "").trim();
   const descHtml = desc ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No description yet.</p>`;
-  const descOk = setHtml("showDescBody", descHtml);
-  if (!descOk) w("Missing #showDescBody (description won't render)");
+  const descOk = setHtml("showDescriptionBlock", descHtml);
+  if (!descOk) w("Missing #showDescriptionBlock (description won't render)");
 
   // Notes
   const notes = (show?.notes || "").trim();
@@ -1420,37 +1420,36 @@ function renderShowDetailBlocks(show, mode = "view") {
 function renderShowDangerZone(show) {
   d("renderShowDangerZone()", { id: show?.id, title: show?.title });
 
-  // If you already have a button in HTML, use it. Otherwise, try to create one in a container.
-  let btn = el("deleteShowBtn");
-  const host = el("showDangerZone");
+ const host = el("showDangerZone");
+  if (!host) return;
 
-  if (!btn && host) {
-    host.innerHTML = `
-      <button id="deleteShowBtn" class="danger" type="button">Delete</button>
-      <p class="muted small">This cannot be undone.</p>
-    `;
-    btn = el("deleteShowBtn");
-  }
+  host.innerHTML = `
+    <div class="card innerCard" style="margin-top:12px;">
+      <h3 style="margin-top:0;">Danger Zone</h3>
+      <button id="deleteShowBtn" type="button" class="secondary">Delete show</button>
+      <p class="muted small" style="margin-top:8px;">This cannot be undone.</p>
+    </div>
+  `;
 
-  if (!btn) {
-    w("No #deleteShowBtn or #showDangerZone found (delete won't show)");
-    return;
-  }
-
-  btn.onclick = () => {
+  el("deleteShowBtn")?.addEventListener("click", () => {
     openDeleteModal({
       showId: show.id,
       showTitle: show.title,
       redirectHash: "#collection"
     });
-  };
+  });
 }
 async function loadShowDetail(showId) {
-  const titleEl = el("showTitle");
-  const metaEl = el("showMeta");
-  const factsEl = el("showFacts");
-  const tagsEl = el("showTags");
-  const msgEl = el("showDetailMsg");
+const titleEl = el("showTitle");
+const metaEl  = el("showMeta");
+const msgEl   = el("showDetailMsg");
+
+const posterEl = el("showPoster");
+const descEl   = el("showDescriptionBlock");
+const factsEl  = el("showFactsBlock");
+const notesEl  = el("showNotesBlock");
+const tagsEl   = el("showTags");
+
 
   if (msgEl) msgEl.textContent = "Loading…";
 
@@ -1475,7 +1474,8 @@ async function loadShowDetail(showId) {
     .eq("id", showId)
     .eq("user_id", user_id)
     .single();
-
+if (msgEl) msgEl.textContent = "";
+  
   if (error) {
     console.error("loadShowDetail error:", error);
     if (msgEl) msgEl.textContent = `Error: ${error.message}`;
@@ -1498,25 +1498,57 @@ async function loadShowDetail(showId) {
   const tropes = (data.show_tropes || []).map(x => x.tropes?.name).filter(Boolean);
   const studios = (data.show_studios || []).map(x => x.studios?.name).filter(Boolean);
 
-  if (factsEl) {
-    factsEl.innerHTML = [
-      labelVal("Ongoing", data.ongoing),
-      labelVal("Release date", data.release_date),
-      labelVal("Last watched", data.last_watched),
-      labelVal("Current season", data.current_season),
-      labelVal("Current episode", data.current_episode),
-      labelVal("# Seasons", data.seasons),
-      labelVal("# Episodes", data.episodes),
-      labelVal("Episode length (min)", data.episode_length_min),
-      labelVal("# Movies", data.movies),
-      labelVal("Movie length (min)", data.movie_length_min),
-      labelVal("# OVAs", data.ovas),
-      labelVal("OVA length (min)", data.ova_length_min),
-      labelVal("Rewatch count", data.rewatch_count),
-      labelVal("Currently rewatching", data.is_rewatching ? "Yes" : "No"),
-      labelVal("Last rewatch date", data.last_rewatch_date),
-    ].join("");
-  }
+// Poster
+if (posterEl) {
+  const url = getPosterUrl(data);
+  posterEl.src = url;
+  // showPoster starts with class="hidden" in HTML, so remove it when we have a real image
+  posterEl.classList.toggle("hidden", !data.image_url);
+  posterEl.onerror = () => {
+    posterEl.onerror = null;
+    posterEl.src = FALLBACK_POSTER;
+    // optional: keep it visible or hide placeholder
+    // posterEl.classList.add("hidden");
+  };
+}
+
+// Description
+if (descEl) {
+  const desc = (data.description || "").trim();
+  descEl.innerHTML = desc
+    ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>`
+    : `<p class="muted">No description yet.</p>`;
+}
+
+// Notes
+if (notesEl) {
+  const notes = (data.notes || "").trim();
+  notesEl.innerHTML = notes
+    ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>`
+    : `<p class="muted">No notes yet.</p>`;
+}
+
+// Facts ("Your Info")
+// NOTE: your existing function uses factsEl = el("showFacts") — change to showFactsBlock
+if (factsEl) {
+  factsEl.innerHTML = [
+    labelVal("Ongoing", data.ongoing),
+    labelVal("Release date", data.release_date),
+    labelVal("Last watched", data.last_watched),
+    labelVal("Current season", data.current_season),
+    labelVal("Current episode", data.current_episode),
+    labelVal("# Seasons", data.seasons),
+    labelVal("# Episodes", data.episodes),
+    labelVal("Episode length (min)", data.episode_length_min),
+    labelVal("# Movies", data.movies),
+    labelVal("Movie length (min)", data.movie_length_min),
+    labelVal("# OVAs", data.ovas),
+    labelVal("OVA length (min)", data.ova_length_min),
+    labelVal("Rewatch count", data.rewatch_count),
+    labelVal("Currently rewatching", data.is_rewatching ? "Yes" : "No"),
+    labelVal("Last rewatch date", data.last_rewatch_date),
+  ].join("");
+}
 
   if (tagsEl) {
     tagsEl.innerHTML = `
@@ -1931,7 +1963,10 @@ wireForgotPassword();
 
   el("collectionGroup")?.addEventListener("change", renderCollection);
   el("collectionSort")?.addEventListener("change", renderCollection);
-
+el("backToCollection")?.addEventListener("click", () => {
+  window.location.hash = "#collection";
+  route();
+});
   // DEV_MODE boot
   if (DEV_MODE) {
     showAuthedUI(true);
