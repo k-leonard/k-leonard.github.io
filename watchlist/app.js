@@ -1377,7 +1377,74 @@ function labelVal(label, val) {
   const v2 = (val === null || val === undefined || val === "") ? "—" : String(val);
   return `<div class="factRow"><div class="factLabel muted">${escapeHtml(label)}</div><div class="factValue">${escapeHtml(v2)}</div></div>`;
 }
+function renderShowDetailBlocks(show, mode = "view") {
+  d("renderShowDetailBlocks()", { id: show?.id, mode });
 
+  // Poster
+  const posterUrl = getPosterUrl(show);
+  const posterOk = setImg("showPosterImg", posterUrl, `${show?.title || "Show"} poster`);
+  if (!posterOk) w("Missing #showPosterImg (poster won't render)");
+
+  // Description
+  const desc = (show?.description || "").trim();
+  const descHtml = desc ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No description yet.</p>`;
+  const descOk = setHtml("showDescBody", descHtml);
+  if (!descOk) w("Missing #showDescBody (description won't render)");
+
+  // Notes
+  const notes = (show?.notes || "").trim();
+  const notesHtml = notes ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No notes yet.</p>`;
+  const notesOk = setHtml("showNotesBody", notesHtml);
+  if (!notesOk) w("Missing #showNotesBody (notes won't render)");
+
+  // “Your Info” card body
+  const infoBits = [
+    labelVal("Status", show?.status),
+    labelVal("Ongoing", show?.ongoing),
+    labelVal("Release date", show?.release_date),
+    labelVal("Last watched", show?.last_watched),
+    labelVal("Rating", show?.rating_stars ? starsDisplay(show.rating_stars) : null),
+    labelVal("Seasons", show?.seasons),
+    labelVal("Episodes", show?.episodes),
+    labelVal("Ep length (min)", show?.episode_length_min),
+    labelVal("Movies", show?.movies),
+    labelVal("Movie length (min)", show?.movie_length_min),
+    labelVal("OVAs", show?.ovas),
+    labelVal("OVA length (min)", show?.ova_length_min),
+  ].join("");
+
+  const infoOk = setHtml("showInfoBody", infoBits || `<div class="muted">No info yet.</div>`);
+  if (!infoOk) w("Missing #showInfoBody (your info won't render)");
+}
+
+function renderShowDangerZone(show) {
+  d("renderShowDangerZone()", { id: show?.id, title: show?.title });
+
+  // If you already have a button in HTML, use it. Otherwise, try to create one in a container.
+  let btn = el("deleteShowBtn");
+  const host = el("showDangerZone");
+
+  if (!btn && host) {
+    host.innerHTML = `
+      <button id="deleteShowBtn" class="danger" type="button">Delete</button>
+      <p class="muted small">This cannot be undone.</p>
+    `;
+    btn = el("deleteShowBtn");
+  }
+
+  if (!btn) {
+    w("No #deleteShowBtn or #showDangerZone found (delete won't show)");
+    return;
+  }
+
+  btn.onclick = () => {
+    openDeleteModal({
+      showId: show.id,
+      showTitle: show.title,
+      redirectHash: "#collection"
+    });
+  };
+}
 async function loadShowDetail(showId) {
   const titleEl = el("showTitle");
   const metaEl = el("showMeta");
@@ -1472,6 +1539,60 @@ async function loadShowDetail(showId) {
   }
 }
 
+function setText(id, text) {
+  const n = el(id);
+  if (!n) return false;
+  n.textContent = text ?? "";
+  return true;
+}
+
+function setHtml(id, html) {
+  const n = el(id);
+  if (!n) return false;
+  n.innerHTML = html ?? "";
+  return true;
+}
+
+function setImg(id, src, alt = "") {
+  const n = el(id);
+  if (!n) return false;
+  n.src = src;
+  n.alt = alt;
+  return true;
+}
+function wireForgotPassword() {
+  const forgotBtn = el("forgotPasswordBtn"); // <-- make sure this exists in HTML
+  const loginErr = el("loginError") || el("authMsg") || el("msg");
+
+  if (!forgotBtn) {
+    d("wireForgotPassword: no #forgotPasswordBtn found (ok if you haven't added it yet)");
+    return;
+  }
+
+  forgotBtn.addEventListener("click", async (e2) => {
+    e2.preventDefault();
+
+    const emailStr = (el("email")?.value || "").trim();
+    if (!emailStr) {
+      if (loginErr) loginErr.textContent = "Enter your email first, then click Forgot Password.";
+      return;
+    }
+
+    const RESET_URL = new URL("reset.html", window.location.href).href;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailStr, {
+      redirectTo: RESET_URL
+    });
+
+    if (error) {
+      console.error("resetPasswordForEmail error:", error.message);
+      if (loginErr) loginErr.textContent = "Reset failed: " + error.message;
+      return;
+    }
+
+    if (loginErr) loginErr.textContent = "Reset email sent! Check your inbox.";
+  });
+}
 // --------------------
 // Filters UI builder
 // --------------------
@@ -1616,37 +1737,6 @@ async function init() {
   });
 
   setupAddShowModal();
-console.log("typeof email =", typeof email, email);  
-// Build reset URL first
-const RESET_URL = new URL("reset.html", window.location.href).href;
-
-// Ensure email is a STRING (not an input element / object)
-const emailStr = (typeof email === "string")
-  ? email.trim()
-  : (email?.value ?? "").trim();
-
-if (!emailStr) {
-  console.error("Reset error: missing email");
-} else {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(emailStr, {
-    redirectTo: RESET_URL
-  });
-
-  if (error) {
-    console.error("Reset error:", error.message);
-  } else {
-    console.log("Reset email sent");
-  }
-
-  // Safe debug log (data is defined now)
-  d("resetPasswordForEmail()", {
-    email: emailStr,
-    redirectTo: RESET_URL,
-    error: error?.message,
-    data
-  });
-}
-
 
 
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
@@ -1816,7 +1906,7 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
   // Router wiring
   wireTabs();
   wireBrowseFilterDrawer();
-
+wireForgotPassword();
   window.addEventListener("hashchange", () => {
     d("hashchange event", { hash: window.location.hash });
     route();
