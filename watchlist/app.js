@@ -1,7 +1,7 @@
 console.count("app.js executed");
 
 // =========================
-// DEBUG KIT (paste near top)
+// DEBUG KIT
 // =========================
 const DEBUG = true;
 
@@ -174,7 +174,7 @@ function getCollectionViewMode() {
   return localStorage.getItem("collectionViewMode") || "mode-comfy"; // default
 }
 async function handlePasswordRecoveryIfPresent() {
-  // This is for your reset.html page or if Supabase redirects back with a code.
+  // This is for reset.html page or if Supabase redirects back with a code.
   // Safe to run on all pages: it only does work if a recovery "code" is present.
   try {
     const url = new URL(window.location.href);
@@ -1299,7 +1299,10 @@ async function deleteShow(id) {
 
 async function loadShows() {
   if (DEV_MODE) return;
+d("loadShows starting");
 
+const user_id = await getUserId();
+d("user_id", user_id);
   if (msg) msg.textContent = "Loading…";
 
   const { data, error } = await supabase
@@ -1330,6 +1333,11 @@ async function loadShows() {
   updateHomeCounts();
   renderCollection();
   if (msg) msg.textContent = "";
+
+  d("loadShows result", {
+  count: data?.length,
+  error: error?.message
+});
 }
 
 // --------------------
