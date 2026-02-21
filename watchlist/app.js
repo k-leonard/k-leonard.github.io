@@ -1616,19 +1616,35 @@ async function init() {
   });
 
   setupAddShowModal();
-  
+console.log("typeof email =", typeof email, email);  
 // Build reset URL first
 const RESET_URL = new URL("reset.html", window.location.href).href;
 
-// Then call Supabase once
-const { error } = await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: RESET_URL
-});
+// Ensure email is a STRING (not an input element / object)
+const emailStr = (typeof email === "string")
+  ? email.trim()
+  : (email?.value ?? "").trim();
 
-if (error) {
-  console.error("Reset error:", error.message);
+if (!emailStr) {
+  console.error("Reset error: missing email");
 } else {
-  console.log("Reset email sent");
+  const { data, error } = await supabase.auth.resetPasswordForEmail(emailStr, {
+    redirectTo: RESET_URL
+  });
+
+  if (error) {
+    console.error("Reset error:", error.message);
+  } else {
+    console.log("Reset email sent");
+  }
+
+  // Safe debug log (data is defined now)
+  d("resetPasswordForEmail()", {
+    email: emailStr,
+    redirectTo: RESET_URL,
+    error: error?.message,
+    data
+  });
 }
 
 
