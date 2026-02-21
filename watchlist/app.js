@@ -1648,7 +1648,6 @@ if (!emailStr) {
 }
 
 
-d("resetPasswordForEmail()", { email, redirectTo: RESET_URL, error: error?.message, data });
 
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
   d("logout button sanity", {
