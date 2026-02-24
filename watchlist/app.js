@@ -61,7 +61,7 @@ console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+window.supabase = supabase;
 d("Supabase client created");
 supabase.auth.getSession().then(({ data, error }) => {
   d("getSession (early probe)", { hasSession: !!data?.session, error });
