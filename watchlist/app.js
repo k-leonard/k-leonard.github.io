@@ -267,7 +267,10 @@ async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
 
 function showAuthedUI(isAuthed) {
   d("showAuthedUI called:", { isAuthed });
-
+  if (!isAuthed) {
+    CURRENT_SESSION = null;
+    CURRENT_USER_ID = null;
+  }
    setDisplay("authCard", !isAuthed);
   setDisplay("app", isAuthed);
 
@@ -643,9 +646,10 @@ function route() {
   // --------------------
   // AUTH GATE
   // --------------------
-  if (!CURRENT_SESSION) {
+  const authed = !!CURRENT_SESSION || !!CURRENT_USER_ID;
+  if (!authed) {
     showAuthedUI(false);
-    return; // <-- IMPORTANT: do not change the hash here
+    return;
   }
   views.forEach(v => {
     setDisplay(`view-${v}`, v === name);
@@ -2023,6 +2027,7 @@ el("backToCollection")?.addEventListener("click", () => {
 
   // Normal mode boot (Supabase)
   // Restore session FIRST (authoritative)
+    d("about to restore session...");
   const session = await restoreSessionOnLoad();
   d("initial restoreSessionOnLoad (init)", { hasSession: !!session, userId: session?.user?.id });
 
@@ -2058,24 +2063,26 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     userId: session?.user?.id,
     accessTokenStart: session?.access_token?.slice(0, 12)
   });
-    CURRENT_SESSION = session ?? null;
+
+  // ✅ update globals FIRST
+  CURRENT_SESSION = session ?? null;
   CURRENT_USER_ID = session?.user?.id ?? null;
-showAuthedUI(!!session);
-route(); // <-- ALWAYS set the visible view right away
 
-if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
-if (!session) return;
+  showAuthedUI(!!session);
+  route(); // ✅ route immediately so views show even if bootstrap fails
 
-try {
-  await ensureOptionRowsLoaded();
-  buildBrowseFiltersUI();
-  await loadShows();
-  updateHomeCounts();
-  renderCollection();
-  // no need to route() here anymore, already did it
-} catch (err) {
-  e("Post-login bootstrap failed:", err);
-}
+  if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
+  if (!session) return;
+
+  try {
+    await ensureOptionRowsLoaded();
+    buildBrowseFiltersUI();
+    await loadShows();
+    updateHomeCounts();
+    renderCollection();
+  } catch (err) {
+    e("Post-login bootstrap failed:", err);
+  }
 });
 
 
