@@ -140,13 +140,20 @@ let ALL_SHOWS_CACHE = [];
 // --------------------
 // UI helpers
 // --------------------
-
-function withTimeout(promise, ms, label = "timeout") {
+function withTimeoutAbort(makePromise, ms, label = "timeout") {
+  const controller = new AbortController();
   let t;
+
   const timeout = new Promise((_, reject) => {
-    t = setTimeout(() => reject(new Error(`${label} after ${ms}ms`)), ms);
+    t = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`${label} after ${ms}ms`));
+    }, ms);
   });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(t));
+
+  // makePromise MUST use controller.signal (via .abortSignal or fetch signal)
+  return Promise.race([makePromise(controller.signal), timeout])
+    .finally(() => clearTimeout(t));
 }
 
 function clearSupabaseLocalAuthTokens() {
@@ -821,7 +828,7 @@ async function logout(ev) {
 
   try {
     d("calling supabase.auth.signOut({scope:'local'})…");
-    const res = await withTimeout(
+    const res = await withTimeoutAbort(
       supabase.auth.signOut({ scope: "local" }),
       2500,
       "signOut"
@@ -1204,9 +1211,14 @@ async function loadOptionRows(tableName) {
   d(`loadOptionRows START: ${tableName}`);
 
   try {
-    const r = await withTimeout(
-      supabase.from(tableName).select("id,name").order("name"),
-      6000,
+    const r = await withTimeoutAbort(
+      (signal) =>
+        supabase
+          .from(tableName)
+          .select("id,name")
+          .order("name")
+          .abortSignal(signal),
+      15000, // give it more room than 6s
       `loadOptionRows(${tableName})`
     );
 
@@ -1218,7 +1230,6 @@ async function loadOptionRows(tableName) {
     d(`loadOptionRows DONE: ${tableName}`, { count: r.data?.length || 0 });
     return r.data || [];
   } catch (err) {
-    // Timeout or fetch stuck -> do NOT block app
     w(`loadOptionRows TIMEOUT/FAIL: ${tableName}`, err);
     return [];
   }
@@ -1372,23 +1383,29 @@ const user_id = await getUserId();
 d("user_id", user_id);
   if (msg) msg.textContent = "Loading…";
 
-  const { data, error } = await supabase
-    .from("shows")
-    .select(`
-      id, user_id, title, status, rating_stars, last_watched, created_at,
-      category, show_type, ongoing, release_date, rewatch_count,
-      is_rewatching, last_rewatch_date,
-      description, image_url,
-      seasons, episodes, episode_length_min,
-      movies, movie_length_min,
-      ovas, ova_length_min,
-      current_season, current_episode,
-      show_platforms(platform_id, platforms(id, name)),
-      show_genres(genre_id, genres(id, name)),
-      show_tropes(trope_id, tropes(id, name)),
-      show_studios(studio_id, studios(id, name))
-    `)
-    .order("created_at", { ascending: false });
+const { data, error } = await withTimeoutAbort(
+  (signal) =>
+    supabase
+      .from("shows")
+      .select(`
+        id, user_id, title, status, rating_stars, last_watched, created_at,
+        category, show_type, ongoing, release_date, rewatch_count,
+        is_rewatching, last_rewatch_date,
+        description, image_url,
+        seasons, episodes, episode_length_min,
+        movies, movie_length_min,
+        ovas, ova_length_min,
+        current_season, current_episode,
+        show_platforms(platform_id, platforms(id, name)),
+        show_genres(genre_id, genres(id, name)),
+        show_tropes(trope_id, tropes(id, name)),
+        show_studios(studio_id, studios(id, name))
+      `)
+      .order("created_at", { ascending: false })
+      .abortSignal(signal),
+  15000,
+  "loadShows()"
+);
 
   if (error) {
     if (msg) msg.textContent = `Error: ${error.message}`;
