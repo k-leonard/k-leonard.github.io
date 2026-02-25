@@ -1064,7 +1064,15 @@ function updateHomeCounts() {
     byCategory[cat] = (byCategory[cat] || 0) + 1;
   }
 
-  const preferred = ["Anime", "Non-anime"];
+ const preferred = [
+  "Anime",
+  "Western Animation",
+  "Live-Action Series",
+  "Reality / Competition",
+  "Documentary",
+  "Movies",
+  "Animated Movies"
+];
   const cats = Object.keys(byCategory);
 
   cats.sort((a, b) => {
@@ -1314,7 +1322,7 @@ async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
   const rating_stars = parseRatingStars(formData.get("my_rating"));
   const description = formData.get("description")?.trim() || null;
   const image_url = null;
-  const category = formData.get("category") || "Non-anime";
+  const category = formData.get("category") || "Anime";
   const show_type = formData.get("show_type") || null;
   const ongoing = formData.get("ongoing") || null;
   const release_date = toDateOrNull(formData.get("release_date"));
