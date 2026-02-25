@@ -910,3 +910,53 @@ input[type="checkbox"]{
 
 .collectionTitle{ font-weight: 700; }
 .collectionMeta{ font-size: 13px; }
+
+/* ---------- Toast (bottom-right) ---------- */
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: #0b2e13;
+  background: #c8f7d0;          /* green */
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  font-weight: 650;
+  max-width: min(360px, calc(100vw - 32px));
+  transform: translateY(10px);
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hidden { display: none !important; }
+
+/* ---------- Red banner inside Add Show modal ---------- */
+.addBanner {
+  position: sticky;             /* stays at top inside scrollable modal */
+  top: 0;
+  z-index: 5;
+  background: #ffdddd;
+  color: #5b0b0b;
+  border: 1px solid rgba(0,0,0,0.10);
+  padding: 10px 12px;
+  font-weight: 700;
+  border-radius: 12px;
+  margin: 0 0 10px 0;
+
+  /* slide-down animation */
+  transform: translateY(-14px);
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.addBanner.show {
+  opacity: 1;
+  transform: translateY(0);
+}
