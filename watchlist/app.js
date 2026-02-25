@@ -1758,9 +1758,13 @@ async function ensureOptionRowsLoaded() {
 
   try {
     PLATFORM_ROWS = await loadOptionRows("platforms");
+      d("PLATFORM_ROWS: DONE");
     GENRE_ROWS    = await loadOptionRows("genres");
+      d("GENRE_ROWS: DONE");
     TROPE_ROWS    = await loadOptionRows("tropes");
+      d("TROPE_ROWS: DONE");
     STUDIO_ROWS   = await loadOptionRows("studios");
+      d("STUDIO_ROWS: DONE");
 
     d("ensureOptionRowsLoaded: DONE", {
       platforms: PLATFORM_ROWS?.length,
