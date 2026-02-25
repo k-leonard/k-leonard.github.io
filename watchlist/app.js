@@ -1770,7 +1770,39 @@ async function ensureOptionRowsLoaded() {
     optionsLoadPromise = null;
   }
 }
+// =====================
+// ONE-TIME AUTH BOOTSTRAP
+// =====================
+let DID_AUTH_BOOTSTRAP = false;
 
+async function bootstrapWhenAuthed(origin = "unknown") {
+  if (!CURRENT_SESSION) {
+    d("bootstrapWhenAuthed: skipped (no CURRENT_SESSION)", { origin });
+    return;
+  }
+  if (DID_AUTH_BOOTSTRAP) {
+    d("bootstrapWhenAuthed: skipped (already bootstrapped)", { origin });
+    return;
+  }
+
+  DID_AUTH_BOOTSTRAP = true;
+  d("bootstrapWhenAuthed: RUN", { origin, userId: CURRENT_USER_ID });
+
+  try {
+    await ensureOptionRowsLoaded();
+    buildBrowseFiltersUI();
+    await loadShows();
+    updateHomeCounts();
+    renderCollection();
+
+    // Make sure the correct view is visible after data loads
+    route();
+    d("bootstrapWhenAuthed: DONE", { origin });
+  } catch (err) {
+    DID_AUTH_BOOTSTRAP = false; // allow retry if it failed
+    e("bootstrapWhenAuthed failed:", err);
+  }
+}
 // --------------------
 // Init
 // --------------------
@@ -2041,32 +2073,37 @@ el("backToCollection")?.addEventListener("click", () => {
 
   // Normal mode boot (Supabase)
   // Restore session FIRST (authoritative)
-    d("about to restore session...");
-  const session = await restoreSessionOnLoad();
-  d("initial restoreSessionOnLoad (init)", { hasSession: !!session, userId: session?.user?.id });
+// Normal mode boot (Supabase)
+d("about to restore session...");
+const session = await restoreSessionOnLoad();
+d("initial restoreSessionOnLoad (init)", { hasSession: !!session, userId: session?.user?.id });
 
-  showAuthedUI(!!session);
+showAuthedUI(!!session);
+route();
 
-  // Now that auth UI is correct, route safely
-  route();
+if (session) {
+  await bootstrapWhenAuthed("init");
+}
 
-  // If already logged in on refresh, do the full bootstrap
-  if (session) {
-    await ensureOptionRowsLoaded();
+snap("init end");
 
-    platformSelect.setRows(PLATFORM_ROWS);
-    genreSelect.setRows(GENRE_ROWS);
-    tropeSelect.setRows(TROPE_ROWS);
-    studioSelect.setRows(STUDIO_ROWS);
+  // // If already logged in on refresh, do the full bootstrap
+  // if (session) {
+  //   await ensureOptionRowsLoaded();
 
-    buildBrowseFiltersUI();
-    await loadShows();
-    updateHomeCounts();
-    renderCollection();
-    route();
-  }
+  //   platformSelect.setRows(PLATFORM_ROWS);
+  //   genreSelect.setRows(GENRE_ROWS);
+  //   tropeSelect.setRows(TROPE_ROWS);
+  //   studioSelect.setRows(STUDIO_ROWS);
 
-  snap("init end");
+  //   buildBrowseFiltersUI();
+  //   await loadShows();
+  //   updateHomeCounts();
+  //   renderCollection();
+  //   route();
+  // }
+
+  // snap("init end");
 }
 
 // Keep UI in sync when auth changes (login/logout)
@@ -2078,25 +2115,26 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     accessTokenStart: session?.access_token?.slice(0, 12)
   });
 
-  // ✅ update globals FIRST
+  // Update globals FIRST
   CURRENT_SESSION = session ?? null;
   CURRENT_USER_ID = session?.user?.id ?? null;
 
+  // Keep UI correct immediately
   showAuthedUI(!!session);
-  route(); // ✅ route immediately so views show even if bootstrap fails
+  route();
 
   if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
-  if (!session) return;
 
-  try {
-    await ensureOptionRowsLoaded();
-    buildBrowseFiltersUI();
-    await loadShows();
-    updateHomeCounts();
-    renderCollection();
-  } catch (err) {
-    e("Post-login bootstrap failed:", err);
+  // If signed out, reset bootstrap so next login can run again
+  if (!session) {
+    DID_AUTH_BOOTSTRAP = false;
+    ALL_SHOWS_CACHE = [];
+    return;
   }
+
+  // Run bootstrap once when we have a session (refresh/login/restore)
+  // Use origin label so logs tell us what triggered it
+  await bootstrapWhenAuthed(`auth:${event}`);
 });
 
 
