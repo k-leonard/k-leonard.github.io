@@ -1737,7 +1737,9 @@ function setInlineEditMode(on) {
 
   // If you still have the old editForm in HTML, hide it always:
   el("editForm")?.style.setProperty("display", "none");
-
+// IMPORTANT: prevent duplicate ids from being "active"
+  const form = el("editForm");
+  if (form) form.style.display = "none";
   if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, on ? "edit" : "view");
 }
 
