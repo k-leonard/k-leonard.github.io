@@ -1811,16 +1811,20 @@ function wireShowDetailButtons() {
 
       const user_id = await getUserId();
 
-      const { error } = await supabase
-        .from("shows")
-        .update({
-          mal_id: info.mal_id,
-          image_url: info.image_url,
-          description: info.description,
-          release_date: info.release_date
-        })
-        .eq("id", CURRENT_SHOW.id)
-        .eq("user_id", user_id);
+    const updatePayload = {
+  mal_id: info.mal_id,
+  image_url: info.image_url,
+  description: info.description,
+  release_date: info.release_date
+};
+
+if (info.canonical_title) {
+  updatePayload.title = info.canonical_title;
+}
+
+const { error } = await supabase
+  .from("shows")
+  .update(updatePayload)
 
       if (error) throw error;
 
