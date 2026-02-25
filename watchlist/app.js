@@ -60,19 +60,33 @@ console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 // -------------------
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+const supabase = window.__SUPABASE__ || createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: "watchlist-auth",
   },
 });
+window.__SUPABASE__ = supabase;
 window.supabase = supabase;
 d("Supabase client created");
 supabase.auth.getSession().then(({ data, error }) => {
   d("getSession (early probe)", { hasSession: !!data?.session, error });
 });
-
+// DEBUG: auth storage probe
+setTimeout(() => {
+  try {
+    const k = "watchlist-auth";
+    d("auth storage probe", {
+      hasKey: localStorage.getItem(k) != null,
+      keyLen: (localStorage.getItem(k) || "").length
+    });
+  } catch (err) {
+    w("auth storage probe failed", err);
+  }
+}, 500);
 let CURRENT_SHOW = null;
 // --------------------
 // AUTH STATE (authoritative)
@@ -141,7 +155,7 @@ function clearSupabaseLocalAuthTokens() {
   const removed = [];
 
   for (const k of keys) {
-    if (k.startsWith("sb-") && (k.includes("auth-token") || k.includes("auth"))) {
+      if (k.startsWith("sb-lldpkdwbnlqfuwjbbirt-")) {
       removed.push(k);
       localStorage.removeItem(k);
     }
