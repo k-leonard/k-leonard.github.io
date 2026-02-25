@@ -323,7 +323,47 @@ function showAuthedUI(isAuthed) {
   // route() is controlled by init() / hashchange / auth change
   snap("after showAuthedUI(true)");
 }
+function showToast(message = "Show Successfully added!", ms = 2600) {
+  const toast = el("toast");
+  const toastText = el("toastText");
+  if (!toast || !toastText) return;
 
+  toastText.textContent = message;
+
+  toast.classList.remove("hidden");
+  // force reflow so transition works reliably
+  void toast.offsetHeight;
+  toast.classList.add("show");
+
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.classList.add("hidden"), 200);
+  }, ms);
+}
+
+function showAddBanner(message, ms = 3500) {
+  const banner = el("addBanner");
+  if (!banner) return;
+
+  banner.textContent = message;
+  banner.classList.remove("hidden");
+  void banner.offsetHeight;
+  banner.classList.add("show");
+
+  clearTimeout(showAddBanner._t);
+  showAddBanner._t = setTimeout(() => {
+    banner.classList.remove("show");
+    setTimeout(() => banner.classList.add("hidden"), 200);
+  }, ms);
+}
+
+function closeAddShowModal() {
+  const modal = el("addShowModal");
+  if (!modal) return;
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+}
 function getMultiSelectValues(id) {
   const sel = el(id);
   if (!sel) return [];
@@ -1338,7 +1378,8 @@ async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
   await insertJoinRows({ joinTable: "show_tropes", user_id, show_id, fkColumn: "trope_id", ids: tropeIds });
   await insertJoinRows({ joinTable: "show_studios", user_id, show_id, fkColumn: "studio_id", ids: studioIds });
 
-  if (msg) msg.textContent = "Added!";
+ if (msg) msg.textContent = "Added!";
+return true;
 }
 
 async function deleteShow(id) {
@@ -2080,11 +2121,13 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
       (s.title || "").toLowerCase().trim() === normalizedTitle
     );
 
-    if (duplicate) {
-      if (errorEl) errorEl.textContent = "You already added this show.";
-      titleInput.focus();
-      return;
-    }
+if (duplicate) {
+  // old: errorEl.textContent = "You already added this show.";
+  // NEW: loud banner inside modal
+  showAddBanner("Show already exists!");
+  titleInput.focus();
+  return;
+}
 
     await addShow(
       new FormData(form),
@@ -2093,7 +2136,11 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
       tropeSelect.getIds(),
       studioSelect.getIds()
     );
-
+const ok = await addShow(...);
+if (ok) {
+  closeAddShowModal();
+  showToast("Show Successfully added!");
+}
     form.reset();
     starUI.clear();
     platformSelect.clear();
