@@ -644,15 +644,8 @@ function route() {
   // AUTH GATE
   // --------------------
   if (!CURRENT_SESSION) {
-    // logged out: always show login card and hide app views
     showAuthedUI(false);
-
-    // optional: force hash so browser refresh doesn't land on protected view
-    if (window.location.hash !== "#home") {
-      // you can choose "#home" or "#login" — your app uses authCard, so "#home" is fine
-      window.location.hash = "#home";
-    }
-    return;
+    return; // <-- IMPORTANT: do not change the hash here
   }
   views.forEach(v => {
     setDisplay(`view-${v}`, v === name);
@@ -2067,20 +2060,22 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   });
     CURRENT_SESSION = session ?? null;
   CURRENT_USER_ID = session?.user?.id ?? null;
-  showAuthedUI(!!session);
-  if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
-  if (!session) return;
+showAuthedUI(!!session);
+route(); // <-- ALWAYS set the visible view right away
 
-  try {
-    await ensureOptionRowsLoaded();
-    buildBrowseFiltersUI();
-    await loadShows();
-    updateHomeCounts();
-    renderCollection();
-    route();
-  } catch (err) {
-    e("Post-login bootstrap failed:", err);
-  }
+if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
+if (!session) return;
+
+try {
+  await ensureOptionRowsLoaded();
+  buildBrowseFiltersUI();
+  await loadShows();
+  updateHomeCounts();
+  renderCollection();
+  // no need to route() here anymore, already did it
+} catch (err) {
+  e("Post-login bootstrap failed:", err);
+}
 });
 
 
