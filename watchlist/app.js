@@ -800,8 +800,9 @@ function applyClientFilters(rows) {
 }
 
 function rerenderFiltered() {
-  renderTable(applyClientFilters(ALL_SHOWS_CACHE));
-  if (msg) msg.textContent = applyClientFilters(ALL_SHOWS_CACHE).length ? "" : "No results.";
+  const filtered = applyClientFilters(ALL_SHOWS_CACHE);
+  renderTable(filtered);
+  if (msg) msg.textContent = filtered.length ? "" : "No results.";
 }
 
 // --------------------
@@ -829,7 +830,7 @@ async function logout(ev) {
   try {
     d("calling supabase.auth.signOut({scope:'local'})…");
     const res = await withTimeoutAbort(
-      supabase.auth.signOut({ scope: "local" }),
+       (_signal) => supabase.auth.signOut({ scope: "local" }),
       2500,
       "signOut"
     );
@@ -1786,37 +1787,44 @@ function buildMinRatingRadios() {
 
 
 // ===== PATCH: ENSURE OPTIONS FAIL-OPEN =====
-// CTRL+F: "async function ensureOptionRowsLoaded()"
+let OPTIONS_INFLIGHT = null;
 async function ensureOptionRowsLoaded() {
-  d("ensureOptionRowsLoaded: START");
+  if (OPTIONS_INFLIGHT) return OPTIONS_INFLIGHT;
 
-  try {
-    const [p, g, t, s] = await Promise.all([
-      loadOptionRows("platforms"),
-      loadOptionRows("genres"),
-      loadOptionRows("tropes"),
-      loadOptionRows("studios"),
-    ]);
+  OPTIONS_INFLIGHT = (async () => {
+    d("ensureOptionRowsLoaded: START");
 
-    PLATFORM_ROWS = p;
-    GENRE_ROWS = g;
-    TROPE_ROWS = t;
-    STUDIO_ROWS = s;
+    try {
+      const [p, g, t, s] = await Promise.all([
+        loadOptionRows("platforms"),
+        loadOptionRows("genres"),
+        loadOptionRows("tropes"),
+        loadOptionRows("studios"),
+      ]);
 
-    d("ensureOptionRowsLoaded: DONE", {
-      platforms: PLATFORM_ROWS?.length,
-      genres: GENRE_ROWS?.length,
-      tropes: TROPE_ROWS?.length,
-      studios: STUDIO_ROWS?.length
-    });
-  } catch (err) {
-    // Even if this fails, do not block show loading
-    w("ensureOptionRowsLoaded FAILED (continuing anyway):", err);
-    PLATFORM_ROWS = PLATFORM_ROWS || [];
-    GENRE_ROWS = GENRE_ROWS || [];
-    TROPE_ROWS = TROPE_ROWS || [];
-    STUDIO_ROWS = STUDIO_ROWS || [];
-  }
+      PLATFORM_ROWS = p;
+      GENRE_ROWS = g;
+      TROPE_ROWS = t;
+      STUDIO_ROWS = s;
+
+      d("ensureOptionRowsLoaded: DONE", {
+        platforms: PLATFORM_ROWS?.length,
+        genres: GENRE_ROWS?.length,
+        tropes: TROPE_ROWS?.length,
+        studios: STUDIO_ROWS?.length
+      });
+    } catch (err) {
+      w("ensureOptionRowsLoaded FAILED (continuing anyway):", err);
+      PLATFORM_ROWS ??= [];
+      GENRE_ROWS ??= [];
+      TROPE_ROWS ??= [];
+      STUDIO_ROWS ??= [];
+    } finally {
+      OPTIONS_INFLIGHT = null; // allow refresh later
+    }
+  })();
+
+  return OPTIONS_INFLIGHT;
 }
 // =====================
 // ONE-TIME AUTH BOOTSTRAP
@@ -2177,9 +2185,6 @@ d("initial restoreSessionOnLoad (init)", { hasSession: !!session, userId: sessio
 showAuthedUI(!!session);
 route();
 
-if (session) {
-  await bootstrapWhenAuthed("init");
-}
 
 snap("init end");
 
@@ -2221,19 +2226,17 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 
   if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
 
-  // If signed out, reset bootstrap so next login can run again
-  if (!session) {
-    DID_AUTH_BOOTSTRAP = false;
-    ALL_SHOWS_CACHE = [];
-    return;
-  }
-  // 🔥 ONLY bootstrap on INITIAL_SESSION
-  if (event === "INITIAL_SESSION") {
-    await requestBootstrap("auth:INITIAL_SESSION");
-  }
-  // Run bootstrap once when we have a session (refresh/login/restore)
-  // Use origin label so logs tell us what triggered it
-  await bootstrapWhenAuthed(`auth:${event}`);
+// If signed out, reset bootstrap so next login can run again
+if (!session) {
+  DID_AUTH_BOOTSTRAP = false;
+  ALL_SHOWS_CACHE = [];
+  return;
+}
+
+// ✅ only bootstrap once, on INITIAL_SESSION
+if (event === "INITIAL_SESSION") {
+  await bootstrapWhenAuthed("auth:INITIAL_SESSION");
+}
 });
 
 
