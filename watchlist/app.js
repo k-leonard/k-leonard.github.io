@@ -1201,12 +1201,27 @@ function setupStarRating({ containerId, inputId, clearId }) {
 // DB helpers
 // --------------------
 async function loadOptionRows(tableName) {
-  const r = await supabase.from(tableName).select("id,name").order("name");
-  if (r.error) {
-    console.error(`${tableName} load error:`, r.error);
+  d(`loadOptionRows START: ${tableName}`);
+
+  try {
+    const r = await withTimeout(
+      supabase.from(tableName).select("id,name").order("name"),
+      6000,
+      `loadOptionRows(${tableName})`
+    );
+
+    if (r.error) {
+      w(`loadOptionRows ERROR: ${tableName}`, r.error);
+      return [];
+    }
+
+    d(`loadOptionRows DONE: ${tableName}`, { count: r.data?.length || 0 });
+    return r.data || [];
+  } catch (err) {
+    // Timeout or fetch stuck -> do NOT block app
+    w(`loadOptionRows TIMEOUT/FAIL: ${tableName}`, err);
     return [];
   }
-  return r.data || [];
 }
 
 async function getOrCreateOptionRow(tableName, name) {
@@ -1753,18 +1768,23 @@ function buildMinRatingRadios() {
 // --------------------
 
 
+// ===== PATCH: ENSURE OPTIONS FAIL-OPEN =====
+// CTRL+F: "async function ensureOptionRowsLoaded()"
 async function ensureOptionRowsLoaded() {
   d("ensureOptionRowsLoaded: START");
 
   try {
-    PLATFORM_ROWS = await loadOptionRows("platforms");
-      d("PLATFORM_ROWS: DONE");
-    GENRE_ROWS    = await loadOptionRows("genres");
-      d("GENRE_ROWS: DONE");
-    TROPE_ROWS    = await loadOptionRows("tropes");
-      d("TROPE_ROWS: DONE");
-    STUDIO_ROWS   = await loadOptionRows("studios");
-      d("STUDIO_ROWS: DONE");
+    const [p, g, t, s] = await Promise.all([
+      loadOptionRows("platforms"),
+      loadOptionRows("genres"),
+      loadOptionRows("tropes"),
+      loadOptionRows("studios"),
+    ]);
+
+    PLATFORM_ROWS = p;
+    GENRE_ROWS = g;
+    TROPE_ROWS = t;
+    STUDIO_ROWS = s;
 
     d("ensureOptionRowsLoaded: DONE", {
       platforms: PLATFORM_ROWS?.length,
@@ -1773,8 +1793,12 @@ async function ensureOptionRowsLoaded() {
       studios: STUDIO_ROWS?.length
     });
   } catch (err) {
-    e("ensureOptionRowsLoaded FAILED:", err);
-    throw err;
+    // Even if this fails, do not block show loading
+    w("ensureOptionRowsLoaded FAILED (continuing anyway):", err);
+    PLATFORM_ROWS = PLATFORM_ROWS || [];
+    GENRE_ROWS = GENRE_ROWS || [];
+    TROPE_ROWS = TROPE_ROWS || [];
+    STUDIO_ROWS = STUDIO_ROWS || [];
   }
 }
 // =====================
@@ -1782,6 +1806,8 @@ async function ensureOptionRowsLoaded() {
 // =====================
 let DID_AUTH_BOOTSTRAP = false;
 
+// ===== PATCH: BOOTSTRAP FAIL-OPEN (OPTIONS MUST NOT BLOCK SHOWS) =====
+// CTRL+F: "async function bootstrapWhenAuthed"
 async function bootstrapWhenAuthed(origin = "unknown") {
   if (!CURRENT_SESSION) {
     d("bootstrapWhenAuthed: skipped (no CURRENT_SESSION)", { origin });
@@ -1792,22 +1818,68 @@ async function bootstrapWhenAuthed(origin = "unknown") {
     return;
   }
 
-  DID_AUTH_BOOTSTRAP = true;
   d("bootstrapWhenAuthed: RUN", { origin, userId: CURRENT_USER_ID });
 
-  try {
-    await ensureOptionRowsLoaded();
-    buildBrowseFiltersUI();
-    await loadShows();
-    updateHomeCounts();
-    renderCollection();
+  // We only mark bootstrapped AFTER shows load successfully
+  // so a transient options timeout doesn't permanently lock you out.
+  let showsLoadedOk = false;
 
-    // Make sure the correct view is visible after data loads
-    route();
-    d("bootstrapWhenAuthed: DONE", { origin });
+  // 1) Try to load option rows, but NEVER let it block the app forever
+  try {
+    d("bootstrapWhenAuthed: ensureOptionRowsLoaded START", { origin });
+    await ensureOptionRowsLoaded(); // make sure ensureOptionRowsLoaded/loadOptionRows have timeouts as discussed
+    d("bootstrapWhenAuthed: ensureOptionRowsLoaded DONE", {
+      platforms: PLATFORM_ROWS?.length,
+      genres: GENRE_ROWS?.length,
+      tropes: TROPE_ROWS?.length,
+      studios: STUDIO_ROWS?.length
+    });
   } catch (err) {
-    DID_AUTH_BOOTSTRAP = false; // allow retry if it failed
-    e("bootstrapWhenAuthed failed:", err);
+    // Fail-open: options may be empty, but we can still load shows
+    w("bootstrapWhenAuthed: ensureOptionRowsLoaded failed (continuing)", err);
+    PLATFORM_ROWS = PLATFORM_ROWS || [];
+    GENRE_ROWS = GENRE_ROWS || [];
+    TROPE_ROWS = TROPE_ROWS || [];
+    STUDIO_ROWS = STUDIO_ROWS || [];
+  }
+
+  // 2) Build filters UI if possible (don't let it block)
+  try {
+    d("bootstrapWhenAuthed: buildBrowseFiltersUI START", { origin });
+    buildBrowseFiltersUI();
+    d("bootstrapWhenAuthed: buildBrowseFiltersUI DONE", { origin });
+  } catch (err) {
+    w("bootstrapWhenAuthed: buildBrowseFiltersUI failed (continuing)", err);
+  }
+
+  // 3) ALWAYS load shows (this is the real “logged in” experience)
+  try {
+    d("bootstrapWhenAuthed: loadShows START", { origin });
+    await loadShows();
+    showsLoadedOk = true;
+    d("bootstrapWhenAuthed: loadShows DONE", { origin, count: ALL_SHOWS_CACHE?.length });
+  } catch (err) {
+    e("bootstrapWhenAuthed: loadShows FAILED", err);
+    showsLoadedOk = false;
+  }
+
+  // 4) If shows loaded, finish boot; otherwise allow retry
+  if (showsLoadedOk) {
+    try {
+      updateHomeCounts();
+      renderCollection();
+      route();
+    } catch (err) {
+      // Even if UI post-processing fails, we consider core bootstrap done
+      w("bootstrapWhenAuthed: post-load UI steps failed", err);
+    }
+
+    DID_AUTH_BOOTSTRAP = true;
+    d("bootstrapWhenAuthed: DONE", { origin });
+  } else {
+    // Allow retry on next auth event / manual refresh
+    DID_AUTH_BOOTSTRAP = false;
+    w("bootstrapWhenAuthed: NOT marked bootstrapped (shows not loaded)", { origin });
   }
 }
 // --------------------
