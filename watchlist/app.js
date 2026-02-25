@@ -1562,40 +1562,282 @@ function renderShowDetailBlocks(show, mode = "view") {
 
   // Poster
   const posterUrl = getPosterUrl(show);
-  const posterOk = setImg("showPoster", posterUrl, `${show?.title || "Show"} poster`);
-  if (!posterOk) w("Missing #showPoster (poster won't render)");
+  setImg("showPoster", posterUrl, `${show?.title || "Show"} poster`);
+  // Show poster if we have an image_url OR fallback; you can choose behavior
+  el("showPoster")?.classList.remove("hidden");
 
-  // Description
-  const desc = (show?.description || "").trim();
-  const descHtml = desc ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No description yet.</p>`;
-  const descOk = setHtml("showDescriptionBlock", descHtml);
-  if (!descOk) w("Missing #showDescriptionBlock (description won't render)");
+  // ---------- DESCRIPTION ----------
+  const descHost = el("showDescriptionBlock");
+  if (descHost) {
+    if (mode === "edit") {
+      descHost.innerHTML = `
+        <label class="field" style="margin-top:8px;">
+          <span>Description</span>
+          <textarea id="edit_description" rows="5">${escapeHtml(show?.description || "")}</textarea>
+        </label>
+      `;
+    } else {
+      const desc = (show?.description || "").trim();
+      descHost.innerHTML = desc
+        ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>`
+        : `<p class="muted">No description yet.</p>`;
+    }
+  }
 
-  // Notes
-  const notes = (show?.notes || "").trim();
-  const notesHtml = notes ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No notes yet.</p>`;
-  const notesOk = setHtml("showNotesBlock", notesHtml);
-  if (!notesOk) w("Missing #showNotesBlock(notes won't render)");
+  // ---------- NOTES ----------
+  const notesHost = el("showNotesBlock");
+  if (notesHost) {
+    if (mode === "edit") {
+      notesHost.innerHTML = `
+        <label class="field">
+          <span>Notes</span>
+          <textarea id="edit_notes" rows="5">${escapeHtml(show?.notes || "")}</textarea>
+        </label>
+      `;
+    } else {
+      const notes = (show?.notes || "").trim();
+      notesHost.innerHTML = notes
+        ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>`
+        : `<p class="muted">No notes yet.</p>`;
+    }
+  }
 
-  // “Your Info” card body
-  const infoBits = [
-    labelVal("Status", show?.status),
-    labelVal("Ongoing", show?.ongoing),
-    labelVal("Release date", show?.release_date),
-    labelVal("Last watched", show?.last_watched),
-    labelVal("Rating", show?.rating_stars ? starsDisplay(show.rating_stars) : null),
-    labelVal("Seasons", show?.seasons),
-    labelVal("Episodes", show?.episodes),
-    labelVal("Ep length (min)", show?.episode_length_min),
-    labelVal("Movies", show?.movies),
-    labelVal("Movie length (min)", show?.movie_length_min),
-    labelVal("OVAs", show?.ovas),
-    labelVal("OVA length (min)", show?.ova_length_min),
-  ].join("");
+  // ---------- YOUR INFO ----------
+  const factsHost = el("showFactsBlock");
+  if (factsHost) {
+    if (mode === "edit") {
+      factsHost.innerHTML = `
+        <div class="grid" style="gap:10px;">
 
-  const infoOk = setHtml("showInfoBlock", infoBits || `<div class="muted">No info yet.</div>`);
-  if (!infoOk) w("Missing #showInfoBlock (your info won't render)");
+          <label class="field">
+            <span>Status</span>
+            <select id="edit_status">
+              ${["To Be Watched","Watching","Waiting for Next Season","Watched","Dropped"]
+                .map(s => `<option ${s === (show?.status || "") ? "selected" : ""}>${escapeHtml(s)}</option>`).join("")}
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Ongoing</span>
+            <select id="edit_ongoing">
+              <option value="" ${!show?.ongoing ? "selected" : ""}>—</option>
+              ${["Yes","No","On Hiatus","To Be Released"]
+                .map(v => `<option ${v === (show?.ongoing || "") ? "selected" : ""}>${escapeHtml(v)}</option>`).join("")}
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Type</span>
+            <select id="edit_show_type">
+              <option value="" ${!show?.show_type ? "selected" : ""}>—</option>
+              ${["TV","Movie","TV & Movie"]
+                .map(v => `<option ${v === (show?.show_type || "") ? "selected" : ""}>${escapeHtml(v)}</option>`).join("")}
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Release date</span>
+            <input id="edit_release_date" type="date" value="${escapeHtml(show?.release_date || "")}" />
+          </label>
+
+          <label class="field">
+            <span>Last watched</span>
+            <input id="edit_last_watched" type="date" value="${escapeHtml(show?.last_watched || "")}" />
+          </label>
+
+          <label class="field">
+            <span>Rating (0–5)</span>
+            <input id="edit_rating" type="number" min="0" max="5" step="1" value="${show?.rating_stars ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span>Current season</span>
+            <input id="edit_current_season" type="number" min="1" step="1" value="${show?.current_season ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span>Current episode</span>
+            <input id="edit_current_episode" type="number" min="1" step="1" value="${show?.current_episode ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span># Seasons</span>
+            <input id="edit_seasons" type="number" min="0" step="1" value="${show?.seasons ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span># Episodes</span>
+            <input id="edit_episodes" type="number" min="0" step="1" value="${show?.episodes ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span>Ep length (min)</span>
+            <input id="edit_episode_length_min" type="number" min="0" step="1" value="${show?.episode_length_min ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span># Movies</span>
+            <input id="edit_movies" type="number" min="0" step="1" value="${show?.movies ?? ""}" />
+          </label>
+
+          <label class="field">
+            <span>Movie length (min)</span>
+            <input id="edit_movie_length_min" type="number" min="0" step="1" value="${show?.movie_length_min ?? ""}" />
+          </label>
+
+          ${
+            (show?.category === "Anime")
+              ? `
+                <label class="field">
+                  <span># OVAs</span>
+                  <input id="edit_ovas" type="number" min="0" step="1" value="${show?.ovas ?? ""}" />
+                </label>
+
+                <label class="field">
+                  <span>OVA length (min)</span>
+                  <input id="edit_ova_length_min" type="number" min="0" step="1" value="${show?.ova_length_min ?? ""}" />
+                </label>
+              `
+              : `
+                <div class="muted small" style="grid-column:1 / -1;">OVA fields are only for Anime.</div>
+              `
+          }
+
+        </div>
+      `;
+    } else {
+      const infoBits = [
+        labelVal("Status", show?.status),
+        labelVal("Ongoing", show?.ongoing),
+        labelVal("Type", show?.show_type),
+        labelVal("Release date", show?.release_date),
+        labelVal("Last watched", show?.last_watched),
+        labelVal("Rating", show?.rating_stars ? starsDisplay(show.rating_stars) : null),
+        labelVal("Current season", show?.current_season),
+        labelVal("Current episode", show?.current_episode),
+        labelVal("Seasons", show?.seasons),
+        labelVal("Episodes", show?.episodes),
+        labelVal("Ep length (min)", show?.episode_length_min),
+        labelVal("Movies", show?.movies),
+        labelVal("Movie length (min)", show?.movie_length_min),
+        labelVal("OVAs", show?.ovas),
+        labelVal("OVA length (min)", show?.ova_length_min),
+      ].join("");
+      factsHost.innerHTML = infoBits || `<div class="muted">No info yet.</div>`;
+    }
+  }
 }
+
+function setInlineEditMode(on) {
+  EDIT_MODE = on;
+
+  el("inlineEditBtn")?.style.setProperty("display", on ? "none" : "");
+  el("inlineSaveBtn")?.style.setProperty("display", on ? "" : "none");
+  el("inlineCancelBtn")?.style.setProperty("display", on ? "" : "none");
+
+  // If you still have the old editForm in HTML, hide it always:
+  el("editForm")?.style.setProperty("display", "none");
+
+  if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, on ? "edit" : "view");
+}
+
+
+async function saveInlineEdits() {
+  if (!CURRENT_SHOW?.id) return;
+
+  const msgEl = el("showDetailMsg");
+  if (msgEl) msgEl.textContent = "Saving…";
+
+  const user_id = await getUserId();
+  if (!user_id) {
+    if (msgEl) msgEl.textContent = "Not logged in.";
+    return;
+  }
+
+  const payload = {
+    status: el("edit_status")?.value || CURRENT_SHOW.status,
+    ongoing: el("edit_ongoing")?.value || null,
+    show_type: el("edit_show_type")?.value || null,
+
+    release_date: el("edit_release_date")?.value || null,
+    last_watched: el("edit_last_watched")?.value || null,
+
+    rating_stars: toIntOrNull(el("edit_rating")?.value),
+
+    current_season: toIntOrNull(el("edit_current_season")?.value),
+    current_episode: toIntOrNull(el("edit_current_episode")?.value),
+
+    seasons: toIntOrNull(el("edit_seasons")?.value),
+    episodes: toIntOrNull(el("edit_episodes")?.value),
+    episode_length_min: toIntOrNull(el("edit_episode_length_min")?.value),
+
+    movies: toIntOrNull(el("edit_movies")?.value),
+    movie_length_min: toIntOrNull(el("edit_movie_length_min")?.value),
+
+    ovas: (CURRENT_SHOW.category === "Anime") ? toIntOrNull(el("edit_ovas")?.value) : null,
+    ova_length_min: (CURRENT_SHOW.category === "Anime") ? toIntOrNull(el("edit_ova_length_min")?.value) : null,
+
+    description: el("edit_description")?.value?.trim() || null,
+    notes: el("edit_notes")?.value?.trim() || null
+  };
+
+  const { error } = await supabase
+    .from("shows")
+    .update(payload)
+    .eq("id", CURRENT_SHOW.id)
+    .eq("user_id", user_id);
+
+  if (error) {
+    console.error(error);
+    if (msgEl) msgEl.textContent = `Error: ${error.message}`;
+    return;
+  }
+
+  if (msgEl) msgEl.textContent = "Saved!";
+  setInlineEditMode(false);
+
+  await loadShowDetail(CURRENT_SHOW.id);
+  await loadShows();
+}
+// function renderShowDetailBlocks(show, mode = "view") {
+//   d("renderShowDetailBlocks()", { id: show?.id, mode });
+
+//   // Poster
+//   const posterUrl = getPosterUrl(show);
+//   const posterOk = setImg("showPoster", posterUrl, `${show?.title || "Show"} poster`);
+//   if (!posterOk) w("Missing #showPoster (poster won't render)");
+
+//   // Description
+//   const desc = (show?.description || "").trim();
+//   const descHtml = desc ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No description yet.</p>`;
+//   const descOk = setHtml("showDescriptionBlock", descHtml);
+//   if (!descOk) w("Missing #showDescriptionBlock (description won't render)");
+
+//   // Notes
+//   const notes = (show?.notes || "").trim();
+//   const notesHtml = notes ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No notes yet.</p>`;
+//   const notesOk = setHtml("showNotesBlock", notesHtml);
+//   if (!notesOk) w("Missing #showNotesBlock(notes won't render)");
+
+//   // “Your Info” card body
+//   const infoBits = [
+//     labelVal("Status", show?.status),
+//     labelVal("Ongoing", show?.ongoing),
+//     labelVal("Release date", show?.release_date),
+//     labelVal("Last watched", show?.last_watched),
+//     labelVal("Rating", show?.rating_stars ? starsDisplay(show.rating_stars) : null),
+//     labelVal("Seasons", show?.seasons),
+//     labelVal("Episodes", show?.episodes),
+//     labelVal("Ep length (min)", show?.episode_length_min),
+//     labelVal("Movies", show?.movies),
+//     labelVal("Movie length (min)", show?.movie_length_min),
+//     labelVal("OVAs", show?.ovas),
+//     labelVal("OVA length (min)", show?.ova_length_min),
+//   ].join("");
+
+//   const infoOk = setHtml("showInfoBlock", infoBits || `<div class="muted">No info yet.</div>`);
+//   if (!infoOk) w("Missing #showInfoBlock (your info won't render)");
+// }
 
 function renderShowDangerZone(show) {
   d("renderShowDangerZone()", { id: show?.id, title: show?.title });
@@ -2358,7 +2600,9 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
   });
 
   applyCollectionViewMode();
-
+el("inlineEditBtn")?.addEventListener("click", () => setInlineEditMode(true));
+el("inlineCancelBtn")?.addEventListener("click", () => setInlineEditMode(false));
+el("inlineSaveBtn")?.addEventListener("click", saveInlineEdits);
   // Add form (this is NOT login — debug label fixed)
   el("addForm")?.addEventListener("submit", async (e2) => {
     d("ADD SHOW submit clicked");
