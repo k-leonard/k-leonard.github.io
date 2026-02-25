@@ -395,7 +395,13 @@ function syncOvaVisibility() {
     if (ovaLen) ovaLen.value = "";
   }
 }
+function syncFetchAnimeVisibility() {
+  const cat = el("category")?.value || "";
+  const isAnime = cat === "Anime";
 
+  const btn = el("fetchAnimeBtn"); // <-- must match your HTML id
+  if (btn) btn.style.display = isAnime ? "" : "none";
+}
 function syncProgressVisibility() {
   const status = el("status")?.value || document.querySelector('select[name="status"]')?.value;
   const isWatching = status === "Watching";
@@ -1956,6 +1962,11 @@ async function bootstrapWhenAuthed(origin = "unknown") {
     w("bootstrapWhenAuthed: NOT marked bootstrapped (shows not loaded)", { origin });
   }
 }
+
+function setEditMode(on) {
+  EDIT_MODE = !!on;
+  if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
+}
 // --------------------
 // Init
 // --------------------
@@ -2015,7 +2026,41 @@ async function init() {
 
   setupAddShowModal();
 
+el("fetchAnimeBtn")?.addEventListener("click", async () => {
+  try {
+    const cat = el("category")?.value || "";
+    if (cat !== "Anime") return;
 
+    const title = (document.querySelector('#addForm input[name="title"]')?.value || "").trim();
+    if (!title) return;
+
+    const info = await fetchAnimeFromJikan(title);
+    if (!info) {
+      showAddBanner("No anime results found.");
+      return;
+    }
+
+    // Title normalization (optional)
+    if (info.canonical_title) {
+      const t = document.querySelector('#addForm input[name="title"]');
+      if (t) t.value = info.canonical_title;
+    }
+
+    // Autofill fields you actually have
+    const desc = document.querySelector('#addForm textarea[name="description"]');
+    if (desc && info.description) desc.value = info.description;
+
+    const rel = document.querySelector('#addForm input[name="release_date"]');
+    if (rel && info.release_date) rel.value = info.release_date;
+
+    // If you want image_url later, your addShow currently forces image_url=null.
+    // You can store info.image_url somewhere or update addShow to accept it.
+    showToast("Anime info loaded!");
+  } catch (err) {
+    console.error(err);
+    showAddBanner("Fetch failed. Try again in a minute.");
+  }
+});
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
   d("logout button sanity", {
   count: document.querySelectorAll("#logout").length,
@@ -2185,7 +2230,8 @@ if (ok) {
     if (DEV_MODE) rerenderFiltered();
     else loadShows();
   });
-
+el("editShowBtn")?.addEventListener("click", () => setEditMode(true));
+el("cancelEditBtn")?.addEventListener("click", () => setEditMode(false));
   // Router wiring
   wireTabs();
   wireBrowseFilterDrawer();
@@ -2203,8 +2249,12 @@ wireForgotPassword();
   d("Router ready. Current hash =", window.location.hash);
   // ⚠️ DO NOT call route() yet — wait until we restore auth session below
 
-  el("category")?.addEventListener("change", syncOvaVisibility);
+el("category")?.addEventListener("change", () => {
   syncOvaVisibility();
+  syncFetchAnimeVisibility();
+});
+syncOvaVisibility();
+syncFetchAnimeVisibility();
 
   document.querySelector('select[name="status"]')?.addEventListener("change", syncProgressVisibility);
   syncProgressVisibility();
