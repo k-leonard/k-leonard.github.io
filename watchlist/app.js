@@ -2066,56 +2066,126 @@ function wireShowDetailButtons() {
     return;
   }
 
-  fetchBtn.addEventListener("click", async () => {
-    if (!CURRENT_SHOW) return;
+ fetchBtn.addEventListener("click", async () => {
+  if (!CURRENT_SHOW) return;
 
-    // ✅ Hide / block for non-Anime
-    if ((CURRENT_SHOW.category || "") !== "Anime") {
-      showToast("Anime info only (for Anime category).");
+  // ✅ Hide / block for non-Anime
+  if ((CURRENT_SHOW.category || "") !== "Anime") {
+    showToast("Anime info only (for Anime category).");
+    return;
+  }
+
+  fetchBtn.disabled = true;
+  if (editMsg) editMsg.textContent = "Fetching anime info…";
+
+  try {
+    const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+    if (!info) {
+      if (editMsg) editMsg.textContent = "No anime match found.";
       return;
     }
 
-    fetchBtn.disabled = true;
-    if (editMsg) editMsg.textContent = "Fetching anime info…";
+    const user_id = await getUserId();
+    if (!user_id) throw new Error("Not logged in.");
 
-    try {
-      const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
-      if (!info) {
-        if (editMsg) editMsg.textContent = "No anime match found.";
-        return;
-      }
-
-      const user_id = await getUserId();
-
+    // -------------------------
+    // 1) Update show row (WITH WHERE!)
+    // -------------------------
     const updatePayload = {
-  mal_id: info.mal_id,
-  image_url: info.image_url,
-  description: info.description,
-  release_date: info.release_date
-};
+      mal_id: info.mal_id,
+      image_url: info.image_url,
+      // only fill these if empty, so you don't overwrite what you wrote
+      description: CURRENT_SHOW.description ? CURRENT_SHOW.description : (info.description || null),
+      release_date: CURRENT_SHOW.release_date ? CURRENT_SHOW.release_date : (info.release_date || null),
+    };
 
-if (info.canonical_title) {
-  updatePayload.title = info.canonical_title;
-}
-
-const { error } = await supabase
-  .from("shows")
-  .update(updatePayload)
-
-      if (error) throw error;
-
-      if (editMsg) editMsg.textContent = "Anime info updated!";
-      showToast("Anime info updated!");
-
-      await loadShowDetail(CURRENT_SHOW.id);
-      await loadShows(); // refresh caches/collection/home
-    } catch (err) {
-      console.error(err);
-      if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
-    } finally {
-      fetchBtn.disabled = false;
+    // If you want title standardization, set it here (or skip if you don't want auto-rename)
+    if (info.canonical_title) {
+      updatePayload.title = info.canonical_title;
     }
-  });
+
+    const { error: updErr } = await supabase
+      .from("shows")
+      .update(updatePayload)
+      .eq("id", CURRENT_SHOW.id)
+      .eq("user_id", user_id);
+
+    if (updErr) throw updErr;
+
+    // -------------------------
+    // 2) Merge tags (ADD, don't replace)
+    // -------------------------
+
+    // helper: turn current join rows into a Set of names
+    const currentNames = (arr, path) =>
+      new Set((arr || []).map(x => x?.[path]?.name).filter(Boolean).map(s => s.toLowerCase()));
+
+    const currentStudioNames = new Set(
+      (CURRENT_SHOW.show_studios || [])
+        .map(x => x?.studios?.name)
+        .filter(Boolean)
+        .map(s => s.toLowerCase())
+    );
+
+    const currentGenreNames = new Set(
+      (CURRENT_SHOW.show_genres || [])
+        .map(x => x?.genres?.name)
+        .filter(Boolean)
+        .map(s => s.toLowerCase())
+    );
+
+    const currentTropeNames = new Set(
+      (CURRENT_SHOW.show_tropes || [])
+        .map(x => x?.tropes?.name)
+        .filter(Boolean)
+        .map(s => s.toLowerCase())
+    );
+
+    // studios/genres/themes come from Jikan
+    const studiosToAdd = (info.studios || []).filter(n => !currentStudioNames.has(String(n).toLowerCase()));
+    const genresToAdd  = (info.genres  || []).filter(n => !currentGenreNames.has(String(n).toLowerCase()));
+    const tropesToAdd  = (info.themes  || []).filter(n => !currentTropeNames.has(String(n).toLowerCase())); // themes -> tropes
+
+    // Ensure option rows exist + get ids
+    const studioIds = [];
+    for (const name of studiosToAdd) {
+      const row = await getOrCreateOptionRow("studios", name);
+      if (row?.id) studioIds.push(row.id);
+    }
+
+    const genreIds = [];
+    for (const name of genresToAdd) {
+      const row = await getOrCreateOptionRow("genres", name);
+      if (row?.id) genreIds.push(row.id);
+    }
+
+    const tropeIds = [];
+    for (const name of tropesToAdd) {
+      const row = await getOrCreateOptionRow("tropes", name);
+      if (row?.id) tropeIds.push(row.id);
+    }
+
+    // Insert ONLY the new join rows (do not delete existing)
+    await insertJoinRows({ joinTable: "show_studios", user_id, show_id: CURRENT_SHOW.id, fkColumn: "studio_id", ids: studioIds });
+    await insertJoinRows({ joinTable: "show_genres",  user_id, show_id: CURRENT_SHOW.id, fkColumn: "genre_id",  ids: genreIds });
+    await insertJoinRows({ joinTable: "show_tropes",  user_id, show_id: CURRENT_SHOW.id, fkColumn: "trope_id",  ids: tropeIds });
+
+    // If you ALSO want platform auto-add from MAL later, that'd be a different API/source.
+
+    if (editMsg) editMsg.textContent = "Anime info updated!";
+    showToast("Anime info updated!");
+
+    // Reload detail (so CURRENT_SHOW has the newly added joins)
+    await loadShowDetail(CURRENT_SHOW.id);
+    await loadShows();
+    await refreshBrowseFilterOptions();
+  } catch (err) {
+    console.error(err);
+    if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
+  } finally {
+    fetchBtn.disabled = false;
+  }
+});
 
   editBtn.addEventListener("click", () => {
     if (!CURRENT_SHOW) return;
