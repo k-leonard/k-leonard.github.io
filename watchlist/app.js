@@ -1751,23 +1751,26 @@ function buildMinRatingRadios() {
 // --------------------
 // Option rows loader (shared promise)
 // --------------------
-let optionsLoadPromise = null;
+
 
 async function ensureOptionRowsLoaded() {
-  if (PLATFORM_ROWS && GENRE_ROWS && TROPE_ROWS && STUDIO_ROWS) return;
-  if (optionsLoadPromise) return optionsLoadPromise;
+  d("ensureOptionRowsLoaded: START");
 
-  optionsLoadPromise = (async () => {
+  try {
     PLATFORM_ROWS = await loadOptionRows("platforms");
     GENRE_ROWS    = await loadOptionRows("genres");
     TROPE_ROWS    = await loadOptionRows("tropes");
     STUDIO_ROWS   = await loadOptionRows("studios");
-  })();
 
-  try {
-    await optionsLoadPromise;
-  } finally {
-    optionsLoadPromise = null;
+    d("ensureOptionRowsLoaded: DONE", {
+      platforms: PLATFORM_ROWS?.length,
+      genres: GENRE_ROWS?.length,
+      tropes: TROPE_ROWS?.length,
+      studios: STUDIO_ROWS?.length
+    });
+  } catch (err) {
+    e("ensureOptionRowsLoaded FAILED:", err);
+    throw err;
   }
 }
 // =====================
