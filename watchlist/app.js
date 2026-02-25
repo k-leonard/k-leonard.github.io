@@ -2227,7 +2227,10 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     ALL_SHOWS_CACHE = [];
     return;
   }
-
+  // 🔥 ONLY bootstrap on INITIAL_SESSION
+  if (event === "INITIAL_SESSION") {
+    await requestBootstrap("auth:INITIAL_SESSION");
+  }
   // Run bootstrap once when we have a session (refresh/login/restore)
   // Use origin label so logs tell us what triggered it
   await bootstrapWhenAuthed(`auth:${event}`);
