@@ -285,7 +285,39 @@ async function insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
     if (msg) msg.textContent = `Error inserting ${joinTable}: ${r.error.message}`;
   }
 }
+async function mergeJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
+  const cleanIds = (ids || []).map(Number).filter(Boolean);
+  if (!cleanIds.length) return;
 
+  // read existing ids for this show
+  const { data: existing, error: selErr } = await supabase
+    .from(joinTable)
+    .select(fkColumn)
+    .eq("user_id", user_id)
+    .eq("show_id", show_id);
+
+  if (selErr) throw selErr;
+
+  const have = new Set((existing || []).map(r => Number(r[fkColumn])).filter(Boolean));
+  const toAdd = cleanIds.filter(id => !have.has(id));
+
+  if (!toAdd.length) return;
+
+  await insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids: toAdd });
+}
+
+async function namesToIds(tableName, names) {
+  const cleanNames = (names || [])
+    .map(x => String(x || "").trim())
+    .filter(Boolean);
+
+  const ids = [];
+  for (const name of cleanNames) {
+    const row = await getOrCreateOptionRow(tableName, name);
+    if (row?.id) ids.push(row.id);
+  }
+  return ids;
+}
 function showAuthedUI(isAuthed) {
   d("showAuthedUI called:", { isAuthed });
   if (!isAuthed) {
@@ -1542,8 +1574,8 @@ function renderShowDetailBlocks(show, mode = "view") {
   // Notes
   const notes = (show?.notes || "").trim();
   const notesHtml = notes ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No notes yet.</p>`;
-  const notesOk = setHtml("showNotesBody", notesHtml);
-  if (!notesOk) w("Missing #showNotesBody (notes won't render)");
+  const notesOk = setHtml("showNotesBlock", notesHtml);
+  if (!notesOk) w("Missing #showNotesBlock(notes won't render)");
 
   // “Your Info” card body
   const infoBits = [
@@ -1561,8 +1593,8 @@ function renderShowDetailBlocks(show, mode = "view") {
     labelVal("OVA length (min)", show?.ova_length_min),
   ].join("");
 
-  const infoOk = setHtml("showInfoBody", infoBits || `<div class="muted">No info yet.</div>`);
-  if (!infoOk) w("Missing #showInfoBody (your info won't render)");
+  const infoOk = setHtml("showInfoBlock", infoBits || `<div class="muted">No info yet.</div>`);
+  if (!infoOk) w("Missing #showInfoBlock (your info won't render)");
 }
 
 function renderShowDangerZone(show) {
@@ -2191,38 +2223,68 @@ async function init() {
   setupAddShowModal();
 wireShowDetailButtons();
 el("fetchAnimeBtn")?.addEventListener("click", async () => {
+  if (!CURRENT_SHOW?.id) return;
+
+  const msgEl = el("showDetailMsg");
+  if (msgEl) msgEl.textContent = "Fetching anime info…";
+
   try {
-    const cat = el("category")?.value || "";
-    if (cat !== "Anime") return;
+    const user_id = await getUserId();
+    const show_id = CURRENT_SHOW.id;
 
-    const title = (document.querySelector('#addForm input[name="title"]')?.value || "").trim();
-    if (!title) return;
-
-    const info = await fetchAnimeFromJikan(title);
-    if (!info) {
-      showAddBanner("No anime results found.");
+    // Optional gate: only allow for Anime
+    const cat = (CURRENT_SHOW.category || "").trim();
+    if (cat && cat !== "Anime") {
+      if (msgEl) msgEl.textContent = "Fetch anime info is only available for Anime shows.";
       return;
     }
 
-    // Title normalization (optional)
-    if (info.canonical_title) {
-      const t = document.querySelector('#addForm input[name="title"]');
-      if (t) t.value = info.canonical_title;
+    const title = (CURRENT_SHOW.title || "").trim();
+    const info = await fetchAnimeFromJikan(title);
+
+    if (!info) {
+      if (msgEl) msgEl.textContent = "No anime match found.";
+      return;
     }
 
-    // Autofill fields you actually have
-    const desc = document.querySelector('#addForm textarea[name="description"]');
-    if (desc && info.description) desc.value = info.description;
+    // 1) Update base show fields (WITH WHERE ✅)
+    const updatePayload = {
+      mal_id: info.mal_id,
+      image_url: info.image_url,
+      description: info.description,
+      release_date: info.release_date
+    };
 
-    const rel = document.querySelector('#addForm input[name="release_date"]');
-    if (rel && info.release_date) rel.value = info.release_date;
+    // Title standardization (only if present)
+    if (info.canonical_title) updatePayload.title = info.canonical_title;
 
-    // If you want image_url later, your addShow currently forces image_url=null.
-    // You can store info.image_url somewhere or update addShow to accept it.
-    showToast("Anime info loaded!");
+    const upd = await supabase
+      .from("shows")
+      .update(updatePayload)
+      .eq("id", show_id)
+      .eq("user_id", user_id);
+
+    if (upd.error) throw upd.error;
+
+    // 2) Convert MAL names → option ids (themes → tropes)
+    const studioIds = await namesToIds("studios", info.studios);
+    const genreIds  = await namesToIds("genres", info.genres);
+    const tropeIds  = await namesToIds("tropes", info.themes);
+
+    // 3) MERGE into joins (add missing only; do NOT delete)
+    await mergeJoinRows({ joinTable: "show_studios", user_id, show_id, fkColumn: "studio_id", ids: studioIds });
+    await mergeJoinRows({ joinTable: "show_genres",  user_id, show_id, fkColumn: "genre_id",  ids: genreIds });
+    await mergeJoinRows({ joinTable: "show_tropes",  user_id, show_id, fkColumn: "trope_id",  ids: tropeIds });
+
+    // 4) Refresh UI
+    await loadShowDetail(show_id);
+    await loadShows();
+    await refreshBrowseFilterOptions();
+
+    if (msgEl) msgEl.textContent = "Anime info added!";
   } catch (err) {
-    console.error(err);
-    showAddBanner("Fetch failed. Try again in a minute.");
+    console.error("fetchAnimeBtn failed:", err);
+    if (msgEl) msgEl.textContent = `Fetch failed: ${err.message || err}`;
   }
 });
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
