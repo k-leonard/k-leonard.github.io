@@ -797,7 +797,7 @@ async function getUserId() {
   if (error) w("getUserId getUser error:", error);
   CURRENT_USER_ID = data?.user?.id || null;
   return CURRENT_USER_ID;
-}}
+}
 
 async function logout(ev) {
   d("logout() clicked");
