@@ -2129,14 +2129,14 @@ if (duplicate) {
   return;
 }
 
-    await addShow(
+    const ok =  await addShow(
       new FormData(form),
       platformSelect.getIds(),
       genreSelect.getIds(),
       tropeSelect.getIds(),
       studioSelect.getIds()
     );
-const ok = await addShow(...);
+
 if (ok) {
   closeAddShowModal();
   showToast("Show Successfully added!");
