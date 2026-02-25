@@ -60,7 +60,13 @@ console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 // -------------------
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 window.supabase = supabase;
 d("Supabase client created");
 supabase.auth.getSession().then(({ data, error }) => {
@@ -68,6 +74,22 @@ supabase.auth.getSession().then(({ data, error }) => {
 });
 
 let CURRENT_SHOW = null;
+// --------------------
+// AUTH STATE (authoritative)
+// --------------------
+let CURRENT_SESSION = null;
+let CURRENT_USER_ID = null;
+
+async function restoreSessionOnLoad() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) w("restoreSessionOnLoad getSession error:", error);
+
+  CURRENT_SESSION = data?.session ?? null;
+  CURRENT_USER_ID = CURRENT_SESSION?.user?.id ?? null;
+
+  d("restoreSessionOnLoad()", { hasSession: !!CURRENT_SESSION, userId: CURRENT_USER_ID });
+  return CURRENT_SESSION;
+}
 let EDIT_MODE = false;
 const el = (id) => document.getElementById(id);
 
@@ -274,7 +296,7 @@ function showAuthedUI(isAuthed) {
     return;
   }
 
-  route();
+  // route() is controlled by init() / hashchange / auth change
   snap("after showAuthedUI(true)");
 }
 
@@ -428,11 +450,12 @@ function setupAddShowModal() {
   }
 
   async function openModal() {
-      if (!data?.session) {
-    w("Blocked Add Show: not logged in");
-    showAuthedUI(false);
-    return;
-  }
+    const { data } = await supabase.auth.getSession();
+    if (!data?.session) {
+      w("Blocked Add Show: not logged in");
+      showAuthedUI(false);
+      return;
+    }
     try {
       if (typeof ensureOptionRowsLoaded === "function") {
         await ensureOptionRowsLoaded();
@@ -617,7 +640,20 @@ function route() {
   const views = ["home", "browse", "collection", "show"];
 
   const name = views.includes(nameRaw) ? nameRaw : "home";
+  // --------------------
+  // AUTH GATE
+  // --------------------
+  if (!CURRENT_SESSION) {
+    // logged out: always show login card and hide app views
+    showAuthedUI(false);
 
+    // optional: force hash so browser refresh doesn't land on protected view
+    if (window.location.hash !== "#home") {
+      // you can choose "#home" or "#login" — your app uses authCard, so "#home" is fine
+      window.location.hash = "#home";
+    }
+    return;
+  }
   views.forEach(v => {
     setDisplay(`view-${v}`, v === name);
     const t = el(`tab-${v}`);
@@ -754,9 +790,14 @@ function rerenderFiltered() {
 // Auth
 // --------------------
 async function getUserId() {
-  const { data } = await supabase.auth.getUser();
-  return data.user?.id || null;
-}
+  if (CURRENT_USER_ID) return CURRENT_USER_ID;
+
+  // fallback (in case called before restore completes)
+  const { data, error } = await supabase.auth.getUser();
+  if (error) w("getUserId getUser error:", error);
+  CURRENT_USER_ID = data?.user?.id || null;
+  return CURRENT_USER_ID;
+}}
 
 async function logout(ev) {
   d("logout() clicked");
@@ -1956,9 +1997,9 @@ wireForgotPassword();
   wireCollectionClicks();
   wireDeleteModal();
 
-  if (!window.location.hash) window.location.hash = "#home";
+   if (!window.location.hash) window.location.hash = "#home";
   d("Router ready. Current hash =", window.location.hash);
-  route();
+  // ⚠️ DO NOT call route() yet — wait until we restore auth session below
 
   el("category")?.addEventListener("change", syncOvaVisibility);
   syncOvaVisibility();
@@ -1988,9 +2029,14 @@ el("backToCollection")?.addEventListener("click", () => {
   }
 
   // Normal mode boot (Supabase)
-  const { data: { session } } = await supabase.auth.getSession();
-  d("initial getSession (init)", { hasSession: !!session, userId: session?.user?.id });
+  // Restore session FIRST (authoritative)
+  const session = await restoreSessionOnLoad();
+  d("initial restoreSessionOnLoad (init)", { hasSession: !!session, userId: session?.user?.id });
+
   showAuthedUI(!!session);
+
+  // Now that auth UI is correct, route safely
+  route();
 
   // If already logged in on refresh, do the full bootstrap
   if (session) {
@@ -2019,7 +2065,8 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     userId: session?.user?.id,
     accessTokenStart: session?.access_token?.slice(0, 12)
   });
-
+    CURRENT_SESSION = session ?? null;
+  CURRENT_USER_ID = session?.user?.id ?? null;
   showAuthedUI(!!session);
   if (authMsg) authMsg.textContent = session ? "Logged in." : "Logged out.";
   if (!session) return;
