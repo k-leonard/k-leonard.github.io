@@ -1709,7 +1709,11 @@ if (factsEl) {
   }
 
   CURRENT_SHOW = data;
-
+const fetchBtn = el("fetchAnimeBtn");
+if (fetchBtn) {
+  const isAnime = (data.category || "") === "Anime";
+  fetchBtn.style.display = isAnime ? "" : "none";
+}
   // NOTE: your original file calls these; keep them if they exist in your file.
   if (typeof renderShowDetailBlocks === "function") {
     renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
@@ -1741,11 +1745,11 @@ function setImg(id, src, alt = "") {
   return true;
 }
 function wireForgotPassword() {
-  const forgotBtn = el("forgotPasswordBtn"); // <-- make sure this exists in HTML
+  const forgotBtn = el("forgotBtn"); // <-- make sure this exists in HTML
   const loginErr = el("loginError") || el("authMsg") || el("msg");
 
   if (!forgotBtn) {
-    d("wireForgotPassword: no #forgotPasswordBtn found (ok if you haven't added it yet)");
+    d("wireForgotPassword: no #forgotBtn found (ok if you haven't added it yet)");
     return;
   }
 
@@ -1772,6 +1776,162 @@ function wireForgotPassword() {
 
     if (loginErr) loginErr.textContent = "Reset email sent! Check your inbox.";
   });
+}
+function wireShowDetailButtons() {
+  const fetchBtn  = el("fetchAnimeBtn");
+  const editBtn   = el("inlineEditBtn");
+  const saveBtn   = el("inlineSaveBtn");
+  const cancelBtn = el("inlineCancelBtn");
+  const form      = el("editForm");
+  const editMsg   = el("editMsg");
+
+  if (!fetchBtn || !editBtn || !saveBtn || !cancelBtn || !form) {
+    d("wireShowDetailButtons: missing elements (ok if view-show not in DOM yet)");
+    return;
+  }
+
+  fetchBtn.addEventListener("click", async () => {
+    if (!CURRENT_SHOW) return;
+
+    // ✅ Hide / block for non-Anime
+    if ((CURRENT_SHOW.category || "") !== "Anime") {
+      showToast("Anime info only (for Anime category).");
+      return;
+    }
+
+    fetchBtn.disabled = true;
+    if (editMsg) editMsg.textContent = "Fetching anime info…";
+
+    try {
+      const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+      if (!info) {
+        if (editMsg) editMsg.textContent = "No anime match found.";
+        return;
+      }
+
+      const user_id = await getUserId();
+
+      const { error } = await supabase
+        .from("shows")
+        .update({
+          mal_id: info.mal_id,
+          image_url: info.image_url,
+          description: info.description,
+          release_date: info.release_date
+        })
+        .eq("id", CURRENT_SHOW.id)
+        .eq("user_id", user_id);
+
+      if (error) throw error;
+
+      if (editMsg) editMsg.textContent = "Anime info updated!";
+      showToast("Anime info updated!");
+
+      await loadShowDetail(CURRENT_SHOW.id);
+      await loadShows(); // refresh caches/collection/home
+    } catch (err) {
+      console.error(err);
+      if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
+    } finally {
+      fetchBtn.disabled = false;
+    }
+  });
+
+  editBtn.addEventListener("click", () => {
+    if (!CURRENT_SHOW) return;
+    enterEditModeFromCurrentShow();
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    exitEditMode();
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    if (!CURRENT_SHOW) return;
+
+    saveBtn.disabled = true;
+    if (editMsg) editMsg.textContent = "Saving…";
+
+    try {
+      const user_id = await getUserId();
+
+      const payload = {
+        status: form.querySelector("#edit_status")?.value || CURRENT_SHOW.status,
+        rating_stars: toIntOrNull(form.querySelector("#edit_rating")?.value),
+        last_watched: form.querySelector("#edit_last_watched")?.value || null,
+        current_season: toIntOrNull(form.querySelector("#edit_current_season")?.value),
+        current_episode: toIntOrNull(form.querySelector("#edit_current_episode")?.value),
+        description: (form.querySelector("#edit_description")?.value || "").trim() || null,
+        notes: (form.querySelector("#edit_notes")?.value || "").trim() || null,
+        rewatch_count: toIntOrNull(form.querySelector("#edit_rewatch_count")?.value),
+        is_rewatching: (form.querySelector("#edit_is_rewatching")?.value === "true"),
+        last_rewatch_date: form.querySelector("#edit_last_rewatch_date")?.value || null,
+      };
+
+      const { error } = await supabase
+        .from("shows")
+        .update(payload)
+        .eq("id", CURRENT_SHOW.id)
+        .eq("user_id", user_id);
+
+      if (error) throw error;
+
+      if (editMsg) editMsg.textContent = "Saved!";
+      showToast("Saved!");
+
+      exitEditMode();
+      await loadShowDetail(CURRENT_SHOW.id);
+      await loadShows();
+    } catch (err) {
+      console.error(err);
+      if (editMsg) editMsg.textContent = `Save failed: ${err.message || err}`;
+      saveBtn.disabled = false;
+    }
+  });
+}
+function enterEditModeFromCurrentShow() {
+  EDIT_MODE = true;
+
+  const form = el("editForm");
+  const editBtn = el("inlineEditBtn");
+  const saveBtn = el("inlineSaveBtn");
+  const cancelBtn = el("inlineCancelBtn");
+
+  if (form) form.style.display = "";
+  if (editBtn) editBtn.style.display = "none";
+  if (saveBtn) saveBtn.style.display = "";
+  if (cancelBtn) cancelBtn.style.display = "";
+
+  // Fill form from CURRENT_SHOW
+  if (!CURRENT_SHOW) return;
+
+  el("edit_status").value = CURRENT_SHOW.status || "To Be Watched";
+  el("edit_rating").value = (CURRENT_SHOW.rating_stars ?? "");
+  el("edit_last_watched").value = CURRENT_SHOW.last_watched || "";
+  el("edit_current_season").value = CURRENT_SHOW.current_season || "";
+  el("edit_current_episode").value = CURRENT_SHOW.current_episode || "";
+  el("edit_description").value = CURRENT_SHOW.description || "";
+  el("edit_notes").value = CURRENT_SHOW.notes || "";
+  el("edit_rewatch_count").value = CURRENT_SHOW.rewatch_count || 0;
+  el("edit_is_rewatching").value = CURRENT_SHOW.is_rewatching ? "true" : "false";
+  el("edit_last_rewatch_date").value = CURRENT_SHOW.last_rewatch_date || "";
+}
+
+function exitEditMode() {
+  EDIT_MODE = false;
+
+  const form = el("editForm");
+  const editBtn = el("inlineEditBtn");
+  const saveBtn = el("inlineSaveBtn");
+  const cancelBtn = el("inlineCancelBtn");
+  const editMsg = el("editMsg");
+
+  if (form) form.style.display = "none";
+  if (editBtn) editBtn.style.display = "";
+  if (saveBtn) saveBtn.style.display = "none";
+  if (cancelBtn) cancelBtn.style.display = "none";
+  if (editMsg) editMsg.textContent = "";
+  el("inlineSaveBtn") && (el("inlineSaveBtn").disabled = false);
 }
 // --------------------
 // Filters UI builder
@@ -2025,7 +2185,7 @@ async function init() {
   });
 
   setupAddShowModal();
-
+wireShowDetailButtons();
 el("fetchAnimeBtn")?.addEventListener("click", async () => {
   try {
     const cat = el("category")?.value || "";
