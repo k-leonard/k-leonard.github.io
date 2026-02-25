@@ -1,8 +1,6 @@
 # checklist of things to do for this project
 
 
-- [ ] alter the add show button so when you click the submit button it auto closes the miniwindow and a little popup in the lower right shows up green and says "Show Successfully added!" and the "Show already exists" is a redbanner that falls from the top of the add show mini window so you can't miss it
-   
 - [ ] alter filter in browse to account for non anime
    
 - [ ] make it so shows that are "non-anime" do not have a fetch anime info button (perhaps replace with another button to another API) ALSO CHANGE NAME FROM NON ANIME TO SOMETHING ELSE, NARROW DOWN WHAT TYPES OF SHOWS IM PUTTING IN HERE
@@ -18,8 +16,6 @@
 - [ ] maybe do implement a recommender system on the home page but like WAY later down the line
 
 - [ ] add in all of my current shows BUT BEFORE DOING THAT WIPE EVERYTHING CLEAN SO WE START WITH ID OF 1 
-
-
 
 
 ~~- [x] fix collection representaiton when altering filters~~
@@ -52,3 +48,4 @@
 ~~- [x] make it so when i input a new show and it gets the anime info, it standardizes the title to the english alternative title (if it exists)~~
 ~~- [x] alter login method (make it username and password)~~
 ~~- [x] fix home page stats (want them going horizontal across the page)~~
+- [x] alter the add show button so when you click the submit button it auto closes the miniwindow and a little popup in the lower right shows up green and says "Show Successfully added!" and the "Show already exists" is a redbanner that falls from the top of the add show mini window so you can't miss it
