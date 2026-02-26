@@ -223,6 +223,9 @@ async function appendJoinRowsByNames({ tableName, joinTable, user_id, show_id, f
 
   await insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids: toInsert });
 }
+
+
+
 function setupRailPager(rowEl, prevBtn, nextBtn, pageSize = 5) {
   if (!rowEl || !prevBtn || !nextBtn) return;
 
@@ -264,6 +267,7 @@ function setupRailPager(rowEl, prevBtn, nextBtn, pageSize = 5) {
   // Public refresh method (call after you re-render the rail)
   return { refresh: render, reset: () => { page = 0; render(); } };
 }
+
 async function loadHomeRails() {
   const railRecentAdded   = document.getElementById("rail_recent_added");
   const railCurrentlyWatching = document.getElementById("rail_currently_watching");
@@ -276,9 +280,9 @@ async function loadHomeRails() {
   const randomNext = document.getElementById("random_next");
 
   // Bail early if rails aren’t on this page
-  if (!railRecentAdded || !railCurrentlyWatching || !railRandom) return;
+   if (!railRecentAdded || !railCurrentlyWatching || !railRandom) return;
 
-  // helper to render a row (your defensive version)
+// helper to render a row (your defensive version)
   function renderRail(container, rows) {
     container.innerHTML = "";
 
@@ -324,19 +328,15 @@ async function loadHomeRails() {
   let watching = [];
   let err2 = null;
 
-  // Try watching first:
-  {
-     const res = await supabase
+    { const res = await supabase
     .from("shows")
     .select("*")
     .eq("status", "Watching")
     .order("created_at", { ascending: false })
-    .limit(25);
-
-  return res.data || [];
+    .limit(limit);
+      return res.data || [];
   }
-
-  renderRail(railCurrentlyWatching, watching);
+   renderRail(railCurrentlyWatching, watching);
   // (No pager wired for watched yet; you can add later)
 
   // 3) Random Picks
