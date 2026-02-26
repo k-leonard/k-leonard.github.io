@@ -85,7 +85,34 @@
           <div class="kpiValue" id="kpiWatched">–</div>
         </div>
       </div>
+<section class="home-rails">
+  <!-- Recently Added -->
+  <div class="rail">
+    <div class="rail-head">
+      <h2>Recently added</h2>
+      <a class="rail-link" href="./collection.html?sort=recent">View all</a>
+    </div>
+    <div id="rail_recent_added" class="rail-row"></div>
+  </div>
 
+  <!-- Recently Watched -->
+  <div class="rail">
+    <div class="rail-head">
+      <h2>Recently watched</h2>
+      <a class="rail-link" href="./collection.html?filter=watched">View all</a>
+    </div>
+    <div id="rail_recent_watched" class="rail-row"></div>
+  </div>
+
+  <!-- Random Picks -->
+  <div class="rail">
+    <div class="rail-head">
+      <h2>Random picks</h2>
+      <button id="rail_shuffle" class="rail-btn" type="button">Shuffle</button>
+    </div>
+    <div id="rail_random" class="rail-row"></div>
+  </div>
+</section>
       <p id="homeMsg" class="muted"></p>
 
 <!-- this is where the add show once was -->
