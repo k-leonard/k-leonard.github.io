@@ -1399,7 +1399,7 @@ function getPosterUrl(item) {
 }
 function createShowCardForRail(show) {
   // ✅ BEST OPTION: call your existing “collection card” builder:
- return collectionCardHTML(show);
+ return collectionCardHTML(show); }
 function collectionCardHTML(r) {
   const poster = getPosterUrl(r);
   const title = r.title || "Untitled";
