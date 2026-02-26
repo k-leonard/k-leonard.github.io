@@ -266,7 +266,7 @@ function setupRailPager(rowEl, prevBtn, nextBtn, pageSize = 5) {
 }
 async function loadHomeRails() {
   const railRecentAdded   = document.getElementById("rail_recent_added");
-  const railRecentWatched = document.getElementById("rail_recent_watched");
+  const railCurrentlyWatching = document.getElementById("rail_currently_watching");
   const railRandom        = document.getElementById("rail_random");
   const shuffleBtn        = document.getElementById("rail_shuffle");
 
@@ -276,7 +276,7 @@ async function loadHomeRails() {
   const randomNext = document.getElementById("random_next");
 
   // Bail early if rails aren’t on this page
-  if (!railRecentAdded || !railRecentWatched || !railRandom) return;
+  if (!railRecentAdded || !railCurrentlyWatching || !railRandom) return;
 
   // helper to render a row (your defensive version)
   function renderRail(container, rows) {
@@ -321,34 +321,22 @@ async function loadHomeRails() {
   }
 
   // 2) Recently Watched (leave as-is; you said ignore empties for now)
-  let recentWatched = [];
+  let watching = [];
   let err2 = null;
 
-  // Try last_watched_at first:
+  // Try watching first:
   {
-    const res = await supabase
-      .from("shows")
-      .select("*")
-      .not("last_watched_at", "is", null)
-      .order("last_watched_at", { ascending: false })
-      .limit(25);
+     const res = await supabase
+    .from("shows")
+    .select("*")
+    .eq("status", "Watching")
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
-    recentWatched = res.data || [];
-    err2 = res.error;
+  return res.data || [];
   }
 
-  // Fallback: updated_at
-  if (err2) {
-    const res = await supabase
-      .from("shows")
-      .select("*")
-      .order("updated_at", { ascending: false })
-      .limit(25);
-
-    if (!res.error && res.data) recentWatched = res.data;
-  }
-
-  renderRail(railRecentWatched, recentWatched);
+  renderRail(railCurrentlyWatching, watching);
   // (No pager wired for watched yet; you can add later)
 
   // 3) Random Picks
