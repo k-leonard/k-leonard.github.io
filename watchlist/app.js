@@ -279,7 +279,7 @@ async function fetchShowFromTMDb(query) {
     Array.isArray(d.networks) ? d.networks.map(n => n?.name).filter(Boolean) : [];
 
   const studio_like = [...new Set([...(studios || []), ...(networks || [])])];
-  const description = (djson?.overview || "").trim() || null;
+  const description = (d?.overview || "").trim() || null;
   return {
     tmdb_id: id,
     media_type: mediaType,
@@ -2557,7 +2557,8 @@ function wireFetchButtons() {
 
         const updatePayload = {
           image_url: info.image_url,
-          release_date: info.release_date
+          release_date: info.release_date,
+           description: info.description 
         };
 
         if (info.canonical_title) {
@@ -2573,7 +2574,7 @@ function wireFetchButtons() {
 
         // Append genres (TMDb only gives genres)
         await appendTagNames("genres", info.genres, user_id);
-
+        await appendTagNames("studios", info.studios, user_id);
         showToast("Show info updated!");
       }
 
