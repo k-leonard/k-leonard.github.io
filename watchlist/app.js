@@ -75,6 +75,9 @@ d("Supabase client created");
 supabase.auth.getSession().then(({ data, error }) => {
   d("getSession (early probe)", { hasSession: !!data?.session, error });
 });
+
+const TMDB_API_KEY = "0c4eb2a53f1a768d02688b02187a7996"; // <-- add your key
+const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500"; // common base for posters
 // DEBUG: auth storage probe
 setTimeout(() => {
   try {
@@ -155,6 +158,94 @@ let ALL_SHOWS_CACHE = [];
 // --------------------
 // UI helpers
 // --------------------
+async function appendJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
+  const cleanIds = (ids || []).map(Number).filter(Boolean);
+  if (!cleanIds.length) return;
+
+  // fetch existing ids for this show
+  const { data: existing, error: selErr } = await supabase
+    .from(joinTable)
+    .select(fkColumn)
+    .eq("user_id", user_id)
+    .eq("show_id", show_id);
+
+  if (selErr) throw selErr;
+
+  const existingSet = new Set((existing || []).map(r => r[fkColumn]).filter(Boolean));
+  const toInsert = cleanIds.filter(id => !existingSet.has(id));
+  if (!toInsert.length) return;
+
+  const rows = toInsert.map(id => ({
+    user_id,
+    show_id,
+    [fkColumn]: id
+  }));
+
+  const { error: insErr } = await supabase.from(joinTable).insert(rows);
+  if (insErr) throw insErr;
+}
+async function fetchShowFromTMDb(query) {
+  if (!TMDB_API_KEY) throw new Error("Missing TMDB_API_KEY");
+
+  // "multi" search returns movie + tv results
+  const searchUrl =
+    `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_API_KEY)}` +
+    `&query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`;
+
+  const sres = await fetch(searchUrl);
+  if (!sres.ok) throw new Error(`TMDb search error: ${sres.status}`);
+  const sjson = await sres.json();
+
+  const results = (sjson && sjson.results) ? sjson.results : [];
+  const best = results.find(r => r && (r.media_type === "tv" || r.media_type === "movie"));
+  if (!best) return null;
+
+  const mediaType = best.media_type; // "tv" | "movie"
+  const id = best.id;
+
+  const detailsUrl =
+    `https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${encodeURIComponent(TMDB_API_KEY)}` +
+    `&language=en-US`;
+
+  const dres = await fetch(detailsUrl);
+  if (!dres.ok) throw new Error(`TMDb details error: ${dres.status}`);
+  const d = await dres.json();
+
+  const canonical_title =
+    (mediaType === "tv" ? d.name : d.title) ||
+    (mediaType === "tv" ? best.name : best.title) ||
+    null;
+
+  const release_date =
+    (mediaType === "tv" ? d.first_air_date : d.release_date) ||
+    (mediaType === "tv" ? best.first_air_date : best.release_date) ||
+    null;
+
+  const poster_path = d.poster_path || best.poster_path || null;
+  const image_url = poster_path ? `${TMDB_IMG_BASE}${poster_path}` : null;
+
+  const genres = Array.isArray(d.genres) ? d.genres.map(g => g?.name).filter(Boolean) : [];
+
+  // closest equivalents to "studio"
+  const studios =
+    Array.isArray(d.production_companies) ? d.production_companies.map(c => c?.name).filter(Boolean) : [];
+
+  // If you want “network” as studio-like for TV:
+  const networks =
+    Array.isArray(d.networks) ? d.networks.map(n => n?.name).filter(Boolean) : [];
+
+  const studio_like = [...new Set([...(studios || []), ...(networks || [])])];
+
+  return {
+    tmdb_id: id,
+    media_type: mediaType,
+    canonical_title,
+    release_date,
+    image_url,
+    genres,
+    studios: studio_like
+  };
+}
 function withTimeoutAbort(makePromise, ms, label = "timeout") {
   const controller = new AbortController();
   let t;
@@ -1862,7 +1953,13 @@ async function saveInlineEdits() {
 //   const infoOk = setHtml("showInfoBlock", infoBits || `<div class="muted">No info yet.</div>`);
 //   if (!infoOk) w("Missing #showInfoBlock (your info won't render)");
 // }
-
+function updateFetchButtonLabel() {
+  const btn = el("fetchAnimeBtn");
+  if (!btn || !CURRENT_SHOW) return;
+  btn.textContent = (CURRENT_SHOW.category === "Anime")
+    ? "Fetch anime info"
+    : "Fetch show info";
+}
 function renderShowDangerZone(show) {
   d("renderShowDangerZone()", { id: show?.id, title: show?.title });
 
@@ -2008,17 +2105,130 @@ if (factsEl) {
 
   CURRENT_SHOW = data;
 const fetchBtn = el("fetchAnimeBtn");
+const editMsg = el("editMsg");
+
 if (fetchBtn) {
-  const isAnime = (data.category || "") === "Anime";
-  fetchBtn.style.display = isAnime ? "" : "none";
-}
-  // NOTE: your original file calls these; keep them if they exist in your file.
-  if (typeof renderShowDetailBlocks === "function") {
-    renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
-  }
-  if (typeof renderShowDangerZone === "function") {
-    renderShowDangerZone(CURRENT_SHOW);
-  }
+  fetchBtn.addEventListener("click", async () => {
+    if (!CURRENT_SHOW?.id) return;
+
+    fetchBtn.disabled = true;
+    if (editMsg) editMsg.textContent = "Fetching info…";
+
+    try {
+      const user_id = await getUserId();
+      if (!user_id) throw new Error("Not logged in");
+
+      // --------- 1) Fetch info from the right API ----------
+      let info = null;
+
+      if ((CURRENT_SHOW.category || "") === "Anime") {
+        info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+        if (!info) {
+          if (editMsg) editMsg.textContent = "No anime match found.";
+          return;
+        }
+      } else {
+        info = await fetchShowFromTMDb(CURRENT_SHOW.title);
+        if (!info) {
+          if (editMsg) editMsg.textContent = "No show/movie match found.";
+          return;
+        }
+      }
+
+      // --------- 2) Update shows row (WITH WHERE CLAUSE) ----------
+      const updatePayload = {};
+
+      // common
+      if (info.image_url) updatePayload.image_url = info.image_url;
+      if (info.release_date) updatePayload.release_date = info.release_date;
+
+      // Anime: description + mal_id
+      if ((CURRENT_SHOW.category || "") === "Anime") {
+        if (info.mal_id != null) updatePayload.mal_id = info.mal_id;
+        if (info.description) updatePayload.description = info.description;
+      } else {
+        // Optional: store tmdb id if you have a column
+        // updatePayload.tmdb_id = info.tmdb_id ?? null;
+        // updatePayload.tmdb_media_type = info.media_type ?? null;
+      }
+
+      // canonical title (don’t set to null)
+      if (info.canonical_title && info.canonical_title.trim()) {
+        updatePayload.title = info.canonical_title.trim();
+      }
+
+      const { error: upErr } = await supabase
+        .from("shows")
+        .update(updatePayload)
+        .eq("id", CURRENT_SHOW.id); // ✅ REQUIRED
+
+      if (upErr) throw upErr;
+
+      // --------- 3) Upsert + APPEND genres/studios/tropes ----------
+      // Your existing helper should already exist:
+      //   getOrCreateOptionRow(tableName, name) -> returns row with id
+
+      // Studios
+      if (Array.isArray(info.studios) && info.studios.length) {
+        const studioIds = [];
+        for (const name of info.studios) {
+          const row = await getOrCreateOptionRow("studios", name);
+          if (row?.id) studioIds.push(row.id);
+        }
+        await appendJoinRows({
+          joinTable: "show_studios",
+          user_id,
+          show_id: CURRENT_SHOW.id,
+          fkColumn: "studio_id",
+          ids: studioIds
+        });
+      }
+
+      // Genres
+      if (Array.isArray(info.genres) && info.genres.length) {
+        const genreIds = [];
+        for (const name of info.genres) {
+          const row = await getOrCreateOptionRow("genres", name);
+          if (row?.id) genreIds.push(row.id);
+        }
+        await appendJoinRows({
+          joinTable: "show_genres",
+          user_id,
+          show_id: CURRENT_SHOW.id,
+          fkColumn: "genre_id",
+          ids: genreIds
+        });
+      }
+
+      // Tropes (Anime: you said you map Jikan themes -> tropes)
+      if ((CURRENT_SHOW.category || "") === "Anime" && Array.isArray(info.themes) && info.themes.length) {
+        const tropeIds = [];
+        for (const name of info.themes) {
+          const row = await getOrCreateOptionRow("tropes", name);
+          if (row?.id) tropeIds.push(row.id);
+        }
+        await appendJoinRows({
+          joinTable: "show_tropes",
+          user_id,
+          show_id: CURRENT_SHOW.id,
+          fkColumn: "trope_id",
+          ids: tropeIds
+        });
+      }
+
+      if (editMsg) editMsg.textContent = "Info updated!";
+      showToast("Info updated!");
+
+      await loadShowDetail(CURRENT_SHOW.id);
+      await loadShows();
+    } catch (err) {
+      console.error(err);
+      if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
+    } finally {
+      fetchBtn.disabled = false;
+      updateFetchButtonLabel();
+    }
+  });
 }
 
 function setText(id, text) {
