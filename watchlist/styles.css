@@ -1005,12 +1005,17 @@ input[type="checkbox"]{
 .rail-row .media-card{
   scroll-snap-align: start;
 }
-.rail-row {
+.rail-row{
   display: flex;
-  gap: 12px;
-  overflow-x: auto;
+  gap: var(--rail-gap);
+  width: max-content;      /* keep track as wide as its content */
+  transform: translateX(0);
+  transition: transform 220ms ease;
+  will-change: transform;
+
+  overflow: visible;       /* IMPORTANT: track should not clip */
+  scroll-snap-type: none;  /* not needed anymore */
   padding-bottom: 6px;
-  scroll-snap-type: x mandatory;
 }
 
 .rail-row > * {
@@ -1036,7 +1041,14 @@ input[type="checkbox"]{
   --rail-card-w: 200px;   /* match what you set on .rail-row .media-card */
   --rail-page: 5;
 }
-
+.rail-viewport{
+  overflow: hidden;
+  width: calc(
+    (var(--rail-page) * var(--rail-card-w)) +
+    ((var(--rail-page) - 1) * var(--rail-gap))
+  );
+  max-width: 100%;
+}
 /* the horizontal track */
 .rail-row{
   display: flex;
