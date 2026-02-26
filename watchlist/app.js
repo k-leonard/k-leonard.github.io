@@ -223,6 +223,90 @@ async function appendJoinRowsByNames({ tableName, joinTable, user_id, show_id, f
 
   await insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids: toInsert });
 }
+
+async function loadHomeRails() {
+  const railRecentAdded = document.getElementById("rail_recent_added");
+  const railRecentWatched = document.getElementById("rail_recent_watched");
+  const railRandom = document.getElementById("rail_random");
+  const shuffleBtn = document.getElementById("rail_shuffle");
+
+  if (!railRecentAdded || !railRecentWatched || !railRandom) return;
+
+  // helper to render a row
+  function renderRail(container, rows) {
+    container.innerHTML = "";
+    for (const show of rows) {
+      container.appendChild(createShowCardForRail(show));
+    }
+  }
+
+  // 1) Recently Added (assumes created_at exists)
+  const { data: recentAdded, error: err1 } = await supabase
+    .from("shows")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(12);
+
+  if (!err1 && recentAdded) renderRail(railRecentAdded, recentAdded);
+
+  // 2) Recently Watched
+  // Prefer last_watched_at if you have it; otherwise updated_at is a decent fallback.
+  // If you store watched status differently, adjust this query.
+  let recentWatched = [];
+  let err2 = null;
+
+  // Try last_watched_at first:
+  {
+    const res = await supabase
+      .from("shows")
+      .select("*")
+      .not("last_watched_at", "is", null)
+      .order("last_watched_at", { ascending: false })
+      .limit(12);
+
+    recentWatched = res.data || [];
+    err2 = res.error;
+  }
+
+  // Fallback: updated_at (if last_watched_at doesn’t exist or returns error)
+  if (err2) {
+    const res = await supabase
+      .from("shows")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(12);
+    if (!res.error && res.data) recentWatched = res.data;
+  }
+
+  renderRail(railRecentWatched, recentWatched);
+
+  // 3) Random Picks
+  async function loadRandomPicks() {
+    // simplest client-side random: grab ids/titles then shuffle
+    const { data, error } = await supabase
+      .from("shows")
+      .select("*")
+      .limit(200); // cap so you don’t pull your whole DB
+
+    if (error || !data) return;
+
+    // shuffle
+    for (let i = data.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [data[i], data[j]] = [data[j], data[i]];
+    }
+
+    renderRail(railRandom, data.slice(0, 12));
+  }
+
+  await loadRandomPicks();
+
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener("click", loadRandomPicks);
+  }
+}
+
+
 async function fetchShowFromTMDb(query) {
   if (!TMDB_API_KEY) throw new Error("Missing TMDB_API_KEY");
   console.log("[FETCH NON-ANIME] clicked", {
@@ -3282,7 +3366,7 @@ logoutBtn?.addEventListener("click", (ev) => logout(ev));
     applyCollectionViewMode();
     renderCollection();
   });
-
+await loadHomeRails();
   applyCollectionViewMode();
 el("inlineEditBtn")?.addEventListener("click", () => setInlineEditMode(true));
 el("inlineCancelBtn")?.addEventListener("click", () => setInlineEditMode(false));
