@@ -186,6 +186,43 @@ async function appendJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
   const { error: insErr } = await supabase.from(joinTable).insert(rows);
   if (insErr) throw insErr;
 }
+async function getExistingJoinIds({ joinTable, user_id, show_id, fkColumn }) {
+  const { data, error } = await supabase
+    .from(joinTable)
+    .select(fkColumn)
+    .eq("user_id", user_id)
+    .eq("show_id", show_id);
+
+  if (error) throw error;
+  return new Set((data || []).map(r => r[fkColumn]).filter(Boolean));
+}
+
+async function appendJoinRowsByNames({ tableName, joinTable, user_id, show_id, fkColumn, names }) {
+  const cleanNames = (names || [])
+    .map(x => String(x || "").trim())
+    .filter(Boolean);
+
+  if (!cleanNames.length) return;
+
+  // 1) Convert names -> ids (create if missing)
+  const rows = [];
+  for (const name of cleanNames) {
+    const row = await getOrCreateOptionRow(tableName, name); // you already have this
+    if (row?.id) rows.push(row);
+  }
+  if (!rows.length) return;
+
+  // 2) Only insert missing ids (append behavior)
+  const existing = await getExistingJoinIds({ joinTable, user_id, show_id, fkColumn });
+
+  const toInsert = rows
+    .map(r => r.id)
+    .filter(id => !existing.has(id));
+
+  if (!toInsert.length) return;
+
+  await insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids: toInsert });
+}
 async function fetchShowFromTMDb(query) {
   if (!TMDB_API_KEY) throw new Error("Missing TMDB_API_KEY");
   console.log("[FETCH NON-ANIME] clicked", {
@@ -242,7 +279,7 @@ async function fetchShowFromTMDb(query) {
     Array.isArray(d.networks) ? d.networks.map(n => n?.name).filter(Boolean) : [];
 
   const studio_like = [...new Set([...(studios || []), ...(networks || [])])];
-
+  const description = (djson?.overview || "").trim() || null;
   return {
     tmdb_id: id,
     media_type: mediaType,
@@ -250,7 +287,8 @@ async function fetchShowFromTMDb(query) {
     release_date,
     image_url,
     genres,
-    studios: studio_like
+    studios: studio_like,
+    description
   };
 }
 function withTimeoutAbort(makePromise, ms, label = "timeout") {
