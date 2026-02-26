@@ -1120,17 +1120,29 @@ input[type="checkbox"]{
 }
 
 .rail-arrow{
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.6);
+  border: none;
+  background: #1f2937;       /* dark slate */
+  color: #ffffff;            /* arrow color */
   cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease, transform 120ms ease;
+}
+
+.rail-arrow:hover{
+  background: #111827;
+  transform: scale(1.05);
 }
 
 .rail-arrow:disabled{
-  opacity: 0.35;
+  background: #e5e7eb;
+  color: #9ca3af;
+  transform: none;
   cursor: default;
 }
