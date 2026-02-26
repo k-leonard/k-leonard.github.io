@@ -1470,8 +1470,8 @@ function getPosterUrl(item) {
   return s ? s : FALLBACK_POSTER;
 }
 function createShowCardForRail(show) {
-  // ✅ BEST OPTION: call your existing “collection card” builder:
  return collectionCardHTML(show); }
+
 function collectionCardHTML(r) {
   const poster = getPosterUrl(r);
   const title = r.title || "Untitled";
