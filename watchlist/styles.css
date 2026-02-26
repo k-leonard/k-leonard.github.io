@@ -1002,7 +1002,9 @@ input[type="checkbox"]{
   border-radius: 10px;
   cursor: pointer;
 }
-
+.rail-row .media-card{
+  scroll-snap-align: start;
+}
 .rail-row {
   display: flex;
   gap: 12px;
