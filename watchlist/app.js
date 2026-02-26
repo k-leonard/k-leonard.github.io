@@ -186,7 +186,12 @@ async function appendJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
 }
 async function fetchShowFromTMDb(query) {
   if (!TMDB_API_KEY) throw new Error("Missing TMDB_API_KEY");
-
+  console.log("[FETCH NON-ANIME] clicked", {
+  id: CURRENT_SHOW?.id,
+  title: CURRENT_SHOW?.title,
+  category: CURRENT_SHOW?.category,
+  show_type: CURRENT_SHOW?.show_type
+});
   // "multi" search returns movie + tv results
   const searchUrl =
     `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_API_KEY)}` +
@@ -2128,6 +2133,12 @@ if (fetchBtn) {
           return;
         }
       } else {
+        console.log("[FETCH NON-ANIME] clicked", {
+  id: CURRENT_SHOW?.id,
+  title: CURRENT_SHOW?.title,
+  category: CURRENT_SHOW?.category,
+  show_type: CURRENT_SHOW?.show_type
+});
         info = await fetchShowFromTMDb(CURRENT_SHOW.title);
         if (!info) {
           if (editMsg) editMsg.textContent = "No show/movie match found.";
