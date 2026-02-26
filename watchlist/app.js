@@ -2609,14 +2609,7 @@ async function appendTagNames(type, names, user_id) {
   for (const name of names) {
     const row = await getOrCreateOptionRow(cfg.table, name);
     if (!row) continue;
-  const { data, error } = await supabase
-  .from("show_genres")
-  .upsert(joinRows, { onConflict: "user_id,show_id,genre_id" });
-
-if (error) {
-  console.log("[JOIN UPSERT ERROR]", error);
-  throw error;
-}
+    
     await supabase
       .from(cfg.join)
       .upsert({
