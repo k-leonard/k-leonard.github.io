@@ -2230,7 +2230,7 @@ if (fetchBtn) {
     }
   });
 }
-
+}
 function setText(id, text) {
   const n = el(id);
   if (!n) return false;
