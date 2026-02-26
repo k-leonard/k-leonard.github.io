@@ -3131,7 +3131,6 @@ if (event === "INITIAL_SESSION") {
 }
 });
 
-
 // IMPORTANT NOTE:
 // In your original pasted file, you had these lines at top-level:
 //   buildBrowseFiltersUI();  
