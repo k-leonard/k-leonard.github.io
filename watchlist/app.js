@@ -223,53 +223,104 @@ async function appendJoinRowsByNames({ tableName, joinTable, user_id, show_id, f
 
   await insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids: toInsert });
 }
+function setupRailPager(rowEl, prevBtn, nextBtn, pageSize = 5) {
+  if (!rowEl || !prevBtn || !nextBtn) return;
 
+  let page = 0;
+
+  function getStepPx() {
+    const firstCard = rowEl.querySelector(".media-card");
+    if (!firstCard) return 0;
+
+    const cardW = firstCard.getBoundingClientRect().width;
+    const gap = parseFloat(getComputedStyle(rowEl).gap || "0") || 0;
+
+    return (cardW + gap) * pageSize;
+  }
+
+  function maxPage() {
+    const count = rowEl.querySelectorAll(".media-card").length;
+    return Math.max(0, Math.ceil(count / pageSize) - 1);
+  }
+
+  function render() {
+    const step = getStepPx();
+    const maxP = maxPage();
+
+    if (page > maxP) page = maxP;
+    if (page < 0) page = 0;
+
+    rowEl.style.transform = `translateX(${-page * step}px)`;
+    prevBtn.disabled = page === 0;
+    nextBtn.disabled = page === maxP;
+  }
+
+  prevBtn.addEventListener("click", () => { page--; render(); });
+  nextBtn.addEventListener("click", () => { page++; render(); });
+
+  // Recompute sizes on resize so paging stays aligned
+  window.addEventListener("resize", render);
+
+  // Public refresh method (call after you re-render the rail)
+  return { refresh: render, reset: () => { page = 0; render(); } };
+}
 async function loadHomeRails() {
-  const railRecentAdded = document.getElementById("rail_recent_added");
+  const railRecentAdded   = document.getElementById("rail_recent_added");
   const railRecentWatched = document.getElementById("rail_recent_watched");
-  const railRandom = document.getElementById("rail_random");
-  const shuffleBtn = document.getElementById("rail_shuffle");
+  const railRandom        = document.getElementById("rail_random");
+  const shuffleBtn        = document.getElementById("rail_shuffle");
 
+  const addedPrev  = document.getElementById("recent_added_prev");
+  const addedNext  = document.getElementById("recent_added_next");
+  const randomPrev = document.getElementById("random_prev");
+  const randomNext = document.getElementById("random_next");
+
+  // Bail early if rails aren’t on this page
   if (!railRecentAdded || !railRecentWatched || !railRandom) return;
 
-  // helper to render a row
-function renderRail(container, rows) {
-  container.innerHTML = "";
+  // helper to render a row (your defensive version)
+  function renderRail(container, rows) {
+    container.innerHTML = "";
 
-  for (const show of (rows || [])) {
-    const card = createShowCardForRail(show);
+    for (const show of (rows || [])) {
+      const card = createShowCardForRail(show);
 
-    // If your card builder returns HTML as a STRING, support that too:
-    if (typeof card === "string") {
-      const wrap = document.createElement("div");
-      wrap.innerHTML = card.trim();
-      if (wrap.firstElementChild) container.appendChild(wrap.firstElementChild);
-      continue;
+      // If your card builder returns HTML as a STRING, support that too:
+      if (typeof card === "string") {
+        const wrap = document.createElement("div");
+        wrap.innerHTML = card.trim();
+        if (wrap.firstElementChild) container.appendChild(wrap.firstElementChild);
+        continue;
+      }
+
+      // Normal case: must be a DOM Node
+      if (card instanceof Node) {
+        container.appendChild(card);
+        continue;
+      }
+
+      // Debug: see what it is
+      console.warn("createShowCardForRail did not return a Node:", card, "for show:", show);
     }
-
-    // Normal case: must be a DOM Node
-    if (card instanceof Node) {
-      container.appendChild(card);
-      continue;
-    }
-
-    // Debug: see what it is
-    console.warn("createShowCardForRail did not return a Node:", card, "for show:", show);
   }
-}
 
-  // 1) Recently Added (assumes created_at exists)
+  // Set up pagers (safe even if buttons missing; setupRailPager returns null/undefined)
+  const addedPager  = setupRailPager(railRecentAdded, addedPrev, addedNext, 5);
+  const randomPager = setupRailPager(railRandom, randomPrev, randomNext, 5);
+
+  // 1) Recently Added
   const { data: recentAdded, error: err1 } = await supabase
     .from("shows")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(25); // pull more than 12 so paging feels real
 
-  if (!err1 && recentAdded) renderRail(railRecentAdded, recentAdded);
+  if (!err1 && recentAdded) {
+    renderRail(railRecentAdded, recentAdded);
+    if (addedPager) addedPager.reset(); // go back to page 0 + update button states
+  }
 
-  // 2) Recently Watched
-  // Prefer last_watched_at if you have it; otherwise updated_at is a decent fallback.
-  // If you store watched status differently, adjust this query.
+  // 2) Recently Watched (leave as-is; you said ignore empties for now)
   let recentWatched = [];
   let err2 = null;
 
@@ -280,41 +331,44 @@ function renderRail(container, rows) {
       .select("*")
       .not("last_watched_at", "is", null)
       .order("last_watched_at", { ascending: false })
-      .limit(12);
+      .limit(25);
 
     recentWatched = res.data || [];
     err2 = res.error;
   }
 
-  // Fallback: updated_at (if last_watched_at doesn’t exist or returns error)
+  // Fallback: updated_at
   if (err2) {
     const res = await supabase
       .from("shows")
       .select("*")
       .order("updated_at", { ascending: false })
-      .limit(12);
+      .limit(25);
+
     if (!res.error && res.data) recentWatched = res.data;
   }
 
   renderRail(railRecentWatched, recentWatched);
+  // (No pager wired for watched yet; you can add later)
 
   // 3) Random Picks
   async function loadRandomPicks() {
-    // simplest client-side random: grab ids/titles then shuffle
     const { data, error } = await supabase
       .from("shows")
       .select("*")
-      .limit(200); // cap so you don’t pull your whole DB
+      .limit(200);
 
     if (error || !data) return;
 
-    // shuffle
+    // shuffle (Fisher–Yates)
     for (let i = data.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [data[i], data[j]] = [data[j], data[i]];
     }
 
-    renderRail(railRandom, data.slice(0, 12));
+    // render enough to page through (5 at a time)
+    renderRail(railRandom, data.slice(0, 30));
+    if (randomPager) randomPager.reset();
   }
 
   await loadRandomPicks();
