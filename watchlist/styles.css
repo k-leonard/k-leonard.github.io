@@ -1030,15 +1030,30 @@ input[type="checkbox"]{
    HOMEPAGE RAIL CARDS (match compact collection size)
    ========================================================= */
 
-.rail-row .media-card{
-  flex: 0 0 200px;        /* card width (adjust slightly if needed) */
-  width: 200px;
-  height: auto;
+/* ===== Rail carousel (5 at a time) ===== */
+
+.rail-viewport{
+  overflow: hidden; /* hides cards beyond the “page” */
 }
 
-/* Compact poster size */
+/* the horizontal track */
+.rail-row{
+  display: flex;
+  gap: 12px;
+  transform: translateX(0);
+  transition: transform 220ms ease;
+  will-change: transform;
+}
+
+/* force compact-sized cards in rails */
+.rail-row .media-card{
+  flex: 0 0 200px; /* pick a width that makes 5 fit */
+  width: 200px;
+}
+
+/* compact poster height like collection compact */
 .rail-row .media-card__poster{
-  height: 170px;          /* EXACTLY same as compact */
+  height: 170px;
   width: 100%;
   object-fit: contain;
   object-position: center;
@@ -1046,11 +1061,25 @@ input[type="checkbox"]{
   display: block;
 }
 
-/* Clamp like compact */
-.rail-row .media-title{
-  -webkit-line-clamp: 2;
+/* arrows */
+.rail-nav{
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.rail-row .media-meta{
-  -webkit-line-clamp: 4;
+.rail-arrow{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.rail-arrow:disabled{
+  opacity: 0.35;
+  cursor: default;
 }
