@@ -1031,9 +1031,10 @@ input[type="checkbox"]{
    ========================================================= */
 
 /* ===== Rail carousel (5 at a time) ===== */
-
-.rail-viewport{
-  overflow: hidden; /* hides cards beyond the “page” */
+:root{
+  --rail-gap: 12px;
+  --rail-card-w: 200px;   /* match what you set on .rail-row .media-card */
+  --rail-page: 5;
 }
 
 /* the horizontal track */
