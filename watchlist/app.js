@@ -333,7 +333,7 @@ async function loadHomeRails() {
     .select("*")
     .eq("status", "Watching")
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .limit(25);
       return res.data || [];
   }
    renderRail(railCurrentlyWatching, watching);
