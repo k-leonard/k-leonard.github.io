@@ -960,3 +960,67 @@ input[type="checkbox"]{
   opacity: 1;
   transform: translateY(0);
 }
+.home-rails {
+  margin-top: 18px;
+  display: grid;
+  gap: 18px;
+}
+
+.rail {
+  background: var(--panel, transparent);
+  border-radius: 14px;
+}
+
+.rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.rail-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.rail-link {
+  font-size: 0.9rem;
+  color: var(--muted, #777);
+  text-decoration: none;
+}
+
+.rail-link:hover {
+  text-decoration: underline;
+}
+
+.rail-btn {
+  font: inherit;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.rail-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.rail-row > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto; /* keep cards from shrinking */
+}
+
+/* optional: nicer scrollbar */
+.rail-row::-webkit-scrollbar {
+  height: 10px;
+}
+.rail-row::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 999px;
+}
