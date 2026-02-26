@@ -1045,20 +1045,58 @@ input[type="checkbox"]{
   will-change: transform;
 }
 
-/* force compact-sized cards in rails */
+/* Apply same media-card styling outside .collection-grid */
 .rail-row .media-card{
-  flex: 0 0 200px; /* pick a width that makes 5 fit */
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Force compact sizing in rails */
+.rail-row .media-card{
+  flex: 0 0 200px;   /* adjust if needed: 180–210 */
   width: 200px;
 }
 
-/* compact poster height like collection compact */
 .rail-row .media-card__poster{
-  height: 170px;
+  height: 170px;     /* compact height */
   width: 100%;
   object-fit: contain;
   object-position: center;
   background: #e9e9e9;
   display: block;
+  flex: 0 0 auto;
+}
+
+.rail-row .media-card__body{
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+}
+
+.rail-row .media-title{
+  font-weight: 650;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 2; /* compact clamp */
+}
+
+.rail-row .media-meta{
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 4; /* compact clamp */
 }
 
 /* arrows */
