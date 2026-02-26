@@ -233,12 +233,30 @@ async function loadHomeRails() {
   if (!railRecentAdded || !railRecentWatched || !railRandom) return;
 
   // helper to render a row
-  function renderRail(container, rows) {
-    container.innerHTML = "";
-    for (const show of rows) {
-      container.appendChild(createShowCardForRail(show));
+function renderRail(container, rows) {
+  container.innerHTML = "";
+
+  for (const show of (rows || [])) {
+    const card = createShowCardForRail(show);
+
+    // If your card builder returns HTML as a STRING, support that too:
+    if (typeof card === "string") {
+      const wrap = document.createElement("div");
+      wrap.innerHTML = card.trim();
+      if (wrap.firstElementChild) container.appendChild(wrap.firstElementChild);
+      continue;
     }
+
+    // Normal case: must be a DOM Node
+    if (card instanceof Node) {
+      container.appendChild(card);
+      continue;
+    }
+
+    // Debug: see what it is
+    console.warn("createShowCardForRail did not return a Node:", card, "for show:", show);
   }
+}
 
   // 1) Recently Added (assumes created_at exists)
   const { data: recentAdded, error: err1 } = await supabase
