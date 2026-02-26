@@ -1,9 +1,9 @@
 # checklist of things to do for this project
  
 
-- [ ] make it so shows that are "non-anime" do gave their own button/API to auto fill information
+- [x] make it so shows that are "non-anime" do gave their own button/API to auto fill information
 - [ ] change home page to show recently added shows, recently watched, and a random selection (like a recommendation list but without the complex system behind it)
-      
+      -partly through this, need to create "recently added" filter for the collection and fix the view all redirect on the front page
 - [ ] over all fix aesthetic, looks kinda mental hospitcal core right now
     *  decide on aethetic. Dark anime aesthetic? Clean AO3 aesthetic? Or modern glass UI?
     *  add slide animation easing
