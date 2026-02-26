@@ -324,20 +324,27 @@ async function loadHomeRails() {
     if (addedPager) addedPager.reset(); // go back to page 0 + update button states
   }
 
-  // 2) Recently Watched (leave as-is; you said ignore empties for now)
-  let watching = [];
-  let err2 = null;
+ // 2) Currently Watching
+let watching = [];
+let err2 = null;
 
-    { const res = await supabase
+{
+  const { data, error } = await supabase
     .from("shows")
     .select("*")
     .eq("status", "Watching")
     .order("created_at", { ascending: false })
     .limit(25);
-      return res.data || [];
-  }
-   renderRail(railCurrentlyWatching, watching);
-  // (No pager wired for watched yet; you can add later)
+
+  watching = data || [];
+  err2 = error || null;
+}
+
+if (err2) {
+  console.warn("Currently Watching load error:", err2);
+}
+
+renderRail(railCurrentlyWatching, watching);
 
   // 3) Random Picks
   async function loadRandomPicks() {
