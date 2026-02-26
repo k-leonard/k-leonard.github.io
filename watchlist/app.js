@@ -119,7 +119,9 @@ let PLATFORM_ROWS = null;
 let GENRE_ROWS = null;
 let TROPE_ROWS = null;
 let STUDIO_ROWS = null;
-
+let EDIT_GENRE_SELECT = null;
+let EDIT_TROPE_SELECT = null;
+let EDIT_STUDIO_SELECT = null;
 const STATUS_ITEMS = [
   "To Be Watched",
   "Watching",
@@ -416,7 +418,30 @@ async function mergeJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
 
   await insertJoinRows({ joinTable, user_id, show_id, fkColumn, ids: toAdd });
 }
+async function replaceJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
+  const cleanIds = (ids || []).map(Number).filter(Boolean);
 
+  // 1) delete existing joins for this show/user
+  const { error: delErr } = await supabase
+    .from(joinTable)
+    .delete()
+    .eq("user_id", user_id)
+    .eq("show_id", show_id);
+
+  if (delErr) throw delErr;
+
+  // 2) insert new joins (if any)
+  if (!cleanIds.length) return;
+
+  const rows = cleanIds.map(id => ({
+    user_id,
+    show_id,
+    [fkColumn]: id
+  }));
+
+  const { error: insErr } = await supabase.from(joinTable).insert(rows);
+  if (insErr) throw insErr;
+}
 async function namesToIds(tableName, names) {
   const cleanNames = (names || [])
     .map(x => String(x || "").trim())
@@ -1719,7 +1744,54 @@ function renderShowDetailBlocks(show, mode = "view") {
         : `<p class="muted">No notes yet.</p>`;
     }
   }
+  // ---------- TAGS (Genres / Tropes / Studios) ----------
+  const tagsHost = el("showTags");
+  if (tagsHost) {
+    if (mode === "edit") {
+      tagsHost.innerHTML = `
+        <div class="card innerCard" style="margin-top:12px;">
+          <h3 style="margin-top:0;">Tags</h3>
 
+          <div class="field">
+            <span>Genres</span>
+            <button type="button" id="editGenreBtn" class="secondary">Select genres</button>
+            <div id="editGenreMenu" class="menu hidden"></div>
+            <div id="editGenreChips" class="chips"></div>
+          </div>
+
+          <div class="field">
+            <span>Tropes</span>
+            <button type="button" id="editTropeBtn" class="secondary">Select tropes</button>
+            <div id="editTropeMenu" class="menu hidden"></div>
+            <div id="editTropeChips" class="chips"></div>
+          </div>
+
+          <div class="field">
+            <span>Studios</span>
+            <button type="button" id="editStudioBtn" class="secondary">Select studios</button>
+            <div id="editStudioMenu" class="menu hidden"></div>
+            <div id="editStudioChips" class="chips"></div>
+          </div>
+
+          <p class="muted small" style="margin:8px 0 0;">
+            (Same dropdown behavior as Add Show — search + checkbox + add new.)
+          </p>
+        </div>
+      `;
+    } else {
+      // keep your existing read-only display behavior
+      const studios = (show?.show_studios || []).map(x => x.studios?.name).filter(Boolean);
+      const genres  = (show?.show_genres  || []).map(x => x.genres?.name).filter(Boolean);
+      const tropes  = (show?.show_tropes  || []).map(x => x.tropes?.name).filter(Boolean);
+
+      tagsHost.innerHTML = `
+        ${studios.length ? `<div><span class="muted">Studios:</span> ${escapeHtml(studios.join(", "))}</div>` : ""}
+        ${genres.length ? `<div><span class="muted">Genres:</span> ${escapeHtml(genres.join(", "))}</div>` : ""}
+        ${tropes.length ? `<div><span class="muted">Tropes:</span> ${escapeHtml(tropes.join(", "))}</div>` : ""}
+        ${(!studios.length && !genres.length && !tropes.length) ? `<div class="muted">No tags yet.</div>` : ""}
+      `;
+    }
+  }
   // ---------- YOUR INFO ----------
   const factsHost = el("showFactsBlock");
   if (factsHost) {
@@ -1853,15 +1925,83 @@ function setInlineEditMode(on) {
   el("inlineSaveBtn")?.style.setProperty("display", on ? "" : "none");
   el("inlineCancelBtn")?.style.setProperty("display", on ? "" : "none");
 
-  // If you still have the old editForm in HTML, hide it always:
-  el("editForm")?.style.setProperty("display", "none");
-// IMPORTANT: prevent duplicate ids from being "active"
+  // Hide legacy form if present
   const form = el("editForm");
   if (form) form.style.display = "none";
+
   if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, on ? "edit" : "view");
+
+  // ===== INIT INLINE TAG DROPDOWNS (CTRL+F: INIT INLINE TAG DROPDOWNS) =====
+  if (on) {
+    initInlineTagEditors().catch(err => console.error("initInlineTagEditors failed:", err));
+  } else {
+    // cleanup references so you don't accidentally read old selections
+    EDIT_GENRE_SELECT = null;
+    EDIT_TROPE_SELECT = null;
+    EDIT_STUDIO_SELECT = null;
+  }
 }
 
+async function initInlineTagEditors() {
+  if (!CURRENT_SHOW) return;
 
+  // Ensure option rows exist
+  await ensureOptionRowsLoaded();
+
+  // Create the dropdowns (same component as Add Show)
+  EDIT_GENRE_SELECT = setupDbMultiSelect({
+    buttonId: "editGenreBtn",
+    menuId: "editGenreMenu",
+    chipsId: "editGenreChips",
+    tableName: "genres"
+  });
+
+  EDIT_TROPE_SELECT = setupDbMultiSelect({
+    buttonId: "editTropeBtn",
+    menuId: "editTropeMenu",
+    chipsId: "editTropeChips",
+    tableName: "tropes"
+  });
+
+  EDIT_STUDIO_SELECT = setupDbMultiSelect({
+    buttonId: "editStudioBtn",
+    menuId: "editStudioMenu",
+    chipsId: "editStudioChips",
+    tableName: "studios"
+  });
+
+  // Load rows into each
+  // (use cached arrays if you want; reloading is also fine)
+  const [gRows, tRows, sRows] = await Promise.all([
+    loadOptionRows("genres"),
+    loadOptionRows("tropes"),
+    loadOptionRows("studios")
+  ]);
+
+  EDIT_GENRE_SELECT.setRows(gRows);
+  EDIT_TROPE_SELECT.setRows(tRows);
+  EDIT_STUDIO_SELECT.setRows(sRows);
+
+  // Preselect current values from CURRENT_SHOW
+  const currentGenres = (CURRENT_SHOW.show_genres || [])
+    .map(x => x?.genres)
+    .filter(Boolean)
+    .map(r => ({ id: r.id, name: r.name }));
+
+  const currentTropes = (CURRENT_SHOW.show_tropes || [])
+    .map(x => x?.tropes)
+    .filter(Boolean)
+    .map(r => ({ id: r.id, name: r.name }));
+
+  const currentStudios = (CURRENT_SHOW.show_studios || [])
+    .map(x => x?.studios)
+    .filter(Boolean)
+    .map(r => ({ id: r.id, name: r.name }));
+
+  EDIT_GENRE_SELECT.setSelectedRows(currentGenres);
+  EDIT_TROPE_SELECT.setSelectedRows(currentTropes);
+  EDIT_STUDIO_SELECT.setSelectedRows(currentStudios);
+}
 async function saveInlineEdits() {
   if (!CURRENT_SHOW?.id) return;
 
@@ -1912,7 +2052,46 @@ async function saveInlineEdits() {
     if (msgEl) msgEl.textContent = `Error: ${error.message}`;
     return;
   }
+    try {
+    const genreIds  = EDIT_GENRE_SELECT ? EDIT_GENRE_SELECT.getIds() : null;
+    const tropeIds  = EDIT_TROPE_SELECT ? EDIT_TROPE_SELECT.getIds() : null;
+    const studioIds = EDIT_STUDIO_SELECT ? EDIT_STUDIO_SELECT.getIds() : null;
 
+    // Only run if the edit dropdowns exist (edit mode)
+    if (genreIds) {
+      await replaceJoinRows({
+        joinTable: "show_genres",
+        user_id,
+        show_id: CURRENT_SHOW.id,
+        fkColumn: "genre_id",
+        ids: genreIds
+      });
+    }
+
+    if (tropeIds) {
+      await replaceJoinRows({
+        joinTable: "show_tropes",
+        user_id,
+        show_id: CURRENT_SHOW.id,
+        fkColumn: "trope_id",
+        ids: tropeIds
+      });
+    }
+
+    if (studioIds) {
+      await replaceJoinRows({
+        joinTable: "show_studios",
+        user_id,
+        show_id: CURRENT_SHOW.id,
+        fkColumn: "studio_id",
+        ids: studioIds
+      });
+    }
+  } catch (joinErr) {
+    console.error("Saving tag joins failed:", joinErr);
+    if (msgEl) msgEl.textContent = `Saved show info, but tags failed: ${joinErr.message || joinErr}`;
+    // don’t return — keep going so the user doesn’t lose the main save
+  }
   if (msgEl) msgEl.textContent = "Saved!";
   setInlineEditMode(false);
 
