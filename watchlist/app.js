@@ -2111,7 +2111,7 @@ if (factsEl) {
   CURRENT_SHOW = data;
 const fetchBtn = el("fetchAnimeBtn");
 const editMsg = el("editMsg");
-
+}
 // if (fetchBtn) {
 //   fetchBtn.addEventListener("click", async () => {
 //     if (!CURRENT_SHOW?.id) return;
