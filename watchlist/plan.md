@@ -1,6 +1,6 @@
 # checklist of things to do for this project
  
-- [x] make it so shows that are "non-anime" do not have a fetch anime info button
+
 - [ ] make it so shows that are "non-anime" do gave their own button/API to auto fill information
 - [ ] change home page to show recently added shows, recently watched, and a random selection (like a recommendation list but without the complex system behind it)
       
@@ -47,3 +47,4 @@
 ~~- [x] fix home page stats (want them going horizontal across the page)~~
 - [x] alter the add show button so when you click the submit button it auto closes the miniwindow and a little popup in the lower right shows up green and says "Show Successfully added!" and the "Show already exists" is a redbanner that falls from the top of the add show mini window so you can't miss it
 - [x] alter filter in browse to account for non anime
+- [x] make it so shows that are "non-anime" do not have a fetch anime info button
