@@ -2112,136 +2112,136 @@ if (factsEl) {
 const fetchBtn = el("fetchAnimeBtn");
 const editMsg = el("editMsg");
 
-if (fetchBtn) {
-  fetchBtn.addEventListener("click", async () => {
-    if (!CURRENT_SHOW?.id) return;
+// if (fetchBtn) {
+//   fetchBtn.addEventListener("click", async () => {
+//     if (!CURRENT_SHOW?.id) return;
 
-    fetchBtn.disabled = true;
-    if (editMsg) editMsg.textContent = "Fetching info…";
+//     fetchBtn.disabled = true;
+//     if (editMsg) editMsg.textContent = "Fetching info…";
 
-    try {
-      const user_id = await getUserId();
-      if (!user_id) throw new Error("Not logged in");
+//     try {
+//       const user_id = await getUserId();
+//       if (!user_id) throw new Error("Not logged in");
 
-      // --------- 1) Fetch info from the right API ----------
-      let info = null;
+//       // --------- 1) Fetch info from the right API ----------
+//       let info = null;
 
-      if ((CURRENT_SHOW.category || "") === "Anime") {
-        info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
-        if (!info) {
-          if (editMsg) editMsg.textContent = "No anime match found.";
-          return;
-        }
-      } else {
-        console.log("[FETCH NON-ANIME] clicked", {
-  id: CURRENT_SHOW?.id,
-  title: CURRENT_SHOW?.title,
-  category: CURRENT_SHOW?.category,
-  show_type: CURRENT_SHOW?.show_type
-});
-        info = await fetchShowFromTMDb(CURRENT_SHOW.title);
-        if (!info) {
-          if (editMsg) editMsg.textContent = "No show/movie match found.";
-          return;
-        }
-      }
+//       if ((CURRENT_SHOW.category || "") === "Anime") {
+//         info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+//         if (!info) {
+//           if (editMsg) editMsg.textContent = "No anime match found.";
+//           return;
+//         }
+//       } else {
+//         console.log("[FETCH NON-ANIME] clicked", {
+//   id: CURRENT_SHOW?.id,
+//   title: CURRENT_SHOW?.title,
+//   category: CURRENT_SHOW?.category,
+//   show_type: CURRENT_SHOW?.show_type
+// });
+//         info = await fetchShowFromTMDb(CURRENT_SHOW.title);
+//         if (!info) {
+//           if (editMsg) editMsg.textContent = "No show/movie match found.";
+//           return;
+//         }
+//       }
 
-      // --------- 2) Update shows row (WITH WHERE CLAUSE) ----------
-      const updatePayload = {};
+//       // --------- 2) Update shows row (WITH WHERE CLAUSE) ----------
+//       const updatePayload = {};
 
-      // common
-      if (info.image_url) updatePayload.image_url = info.image_url;
-      if (info.release_date) updatePayload.release_date = info.release_date;
+//       // common
+//       if (info.image_url) updatePayload.image_url = info.image_url;
+//       if (info.release_date) updatePayload.release_date = info.release_date;
 
-      // Anime: description + mal_id
-      if ((CURRENT_SHOW.category || "") === "Anime") {
-        if (info.mal_id != null) updatePayload.mal_id = info.mal_id;
-        if (info.description) updatePayload.description = info.description;
-      } else {
-        // Optional: store tmdb id if you have a column
-        // updatePayload.tmdb_id = info.tmdb_id ?? null;
-        // updatePayload.tmdb_media_type = info.media_type ?? null;
-      }
+//       // Anime: description + mal_id
+//       if ((CURRENT_SHOW.category || "") === "Anime") {
+//         if (info.mal_id != null) updatePayload.mal_id = info.mal_id;
+//         if (info.description) updatePayload.description = info.description;
+//       } else {
+//         // Optional: store tmdb id if you have a column
+//         // updatePayload.tmdb_id = info.tmdb_id ?? null;
+//         // updatePayload.tmdb_media_type = info.media_type ?? null;
+//       }
 
-      // canonical title (don’t set to null)
-      if (info.canonical_title && info.canonical_title.trim()) {
-        updatePayload.title = info.canonical_title.trim();
-      }
+//       // canonical title (don’t set to null)
+//       if (info.canonical_title && info.canonical_title.trim()) {
+//         updatePayload.title = info.canonical_title.trim();
+//       }
 
-      const { error: upErr } = await supabase
-        .from("shows")
-        .update(updatePayload)
-        .eq("id", CURRENT_SHOW.id); // ✅ REQUIRED
+//       const { error: upErr } = await supabase
+//         .from("shows")
+//         .update(updatePayload)
+//         .eq("id", CURRENT_SHOW.id); // ✅ REQUIRED
 
-      if (upErr) throw upErr;
+//       if (upErr) throw upErr;
 
-      // --------- 3) Upsert + APPEND genres/studios/tropes ----------
-      // Your existing helper should already exist:
-      //   getOrCreateOptionRow(tableName, name) -> returns row with id
+//       // --------- 3) Upsert + APPEND genres/studios/tropes ----------
+//       // Your existing helper should already exist:
+//       //   getOrCreateOptionRow(tableName, name) -> returns row with id
 
-      // Studios
-      if (Array.isArray(info.studios) && info.studios.length) {
-        const studioIds = [];
-        for (const name of info.studios) {
-          const row = await getOrCreateOptionRow("studios", name);
-          if (row?.id) studioIds.push(row.id);
-        }
-        await appendJoinRows({
-          joinTable: "show_studios",
-          user_id,
-          show_id: CURRENT_SHOW.id,
-          fkColumn: "studio_id",
-          ids: studioIds
-        });
-      }
+//       // Studios
+//       if (Array.isArray(info.studios) && info.studios.length) {
+//         const studioIds = [];
+//         for (const name of info.studios) {
+//           const row = await getOrCreateOptionRow("studios", name);
+//           if (row?.id) studioIds.push(row.id);
+//         }
+//         await appendJoinRows({
+//           joinTable: "show_studios",
+//           user_id,
+//           show_id: CURRENT_SHOW.id,
+//           fkColumn: "studio_id",
+//           ids: studioIds
+//         });
+//       }
 
-      // Genres
-      if (Array.isArray(info.genres) && info.genres.length) {
-        const genreIds = [];
-        for (const name of info.genres) {
-          const row = await getOrCreateOptionRow("genres", name);
-          if (row?.id) genreIds.push(row.id);
-        }
-        await appendJoinRows({
-          joinTable: "show_genres",
-          user_id,
-          show_id: CURRENT_SHOW.id,
-          fkColumn: "genre_id",
-          ids: genreIds
-        });
-      }
+//       // Genres
+//       if (Array.isArray(info.genres) && info.genres.length) {
+//         const genreIds = [];
+//         for (const name of info.genres) {
+//           const row = await getOrCreateOptionRow("genres", name);
+//           if (row?.id) genreIds.push(row.id);
+//         }
+//         await appendJoinRows({
+//           joinTable: "show_genres",
+//           user_id,
+//           show_id: CURRENT_SHOW.id,
+//           fkColumn: "genre_id",
+//           ids: genreIds
+//         });
+//       }
 
-      // Tropes (Anime: you said you map Jikan themes -> tropes)
-      if ((CURRENT_SHOW.category || "") === "Anime" && Array.isArray(info.themes) && info.themes.length) {
-        const tropeIds = [];
-        for (const name of info.themes) {
-          const row = await getOrCreateOptionRow("tropes", name);
-          if (row?.id) tropeIds.push(row.id);
-        }
-        await appendJoinRows({
-          joinTable: "show_tropes",
-          user_id,
-          show_id: CURRENT_SHOW.id,
-          fkColumn: "trope_id",
-          ids: tropeIds
-        });
-      }
+//       // Tropes (Anime: you said you map Jikan themes -> tropes)
+//       if ((CURRENT_SHOW.category || "") === "Anime" && Array.isArray(info.themes) && info.themes.length) {
+//         const tropeIds = [];
+//         for (const name of info.themes) {
+//           const row = await getOrCreateOptionRow("tropes", name);
+//           if (row?.id) tropeIds.push(row.id);
+//         }
+//         await appendJoinRows({
+//           joinTable: "show_tropes",
+//           user_id,
+//           show_id: CURRENT_SHOW.id,
+//           fkColumn: "trope_id",
+//           ids: tropeIds
+//         });
+//       }
 
-      if (editMsg) editMsg.textContent = "Info updated!";
-      showToast("Info updated!");
+//       if (editMsg) editMsg.textContent = "Info updated!";
+//       showToast("Info updated!");
 
-      await loadShowDetail(CURRENT_SHOW.id);
-      await loadShows();
-    } catch (err) {
-      console.error(err);
-      if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
-    } finally {
-      fetchBtn.disabled = false;
-      updateFetchButtonLabel();
-    }
-  });
-}
-}
+//       await loadShowDetail(CURRENT_SHOW.id);
+//       await loadShows();
+//     } catch (err) {
+//       console.error(err);
+//       if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
+//     } finally {
+//       fetchBtn.disabled = false;
+//       updateFetchButtonLabel();
+//     }
+//   });
+// }
+// }
 function setText(id, text) {
   const n = el(id);
   if (!n) return false;
