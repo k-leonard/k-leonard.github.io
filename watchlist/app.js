@@ -125,6 +125,21 @@ const STATUS_ITEMS = [
   "Dropped"
 ];
 
+const CATEGORY_ITEMS = [
+  "Anime",
+  "Western Animation",
+  "Live-Action Series",
+  "Reality / Competition",
+  "Documentary",
+  "Movies",
+  "Animated Movies"
+];
+
+const SHOW_TYPE_ITEMS = [
+  "TV",
+  "Movie",
+  "TV & Movie"
+];
 function setMsg(text) {
   if (homeMsg) homeMsg.textContent = text;
   if (browseMsg) browseMsg.textContent = text;
@@ -838,7 +853,8 @@ function applyClientFilters(rows) {
   const genresWanted = getCheckedValues("genreFilter");
   const tropesWanted = getCheckedValues("tropeFilter");
   const studiosWanted = getCheckedValues("studioFilter");
-
+const categoriesWanted = getCheckedValues("categoryFilter");
+const typesWanted = getCheckedValues("typeFilter");
   const minRatingVal =
     document.querySelector('input[type="radio"][name="minRatingFilter"]:checked')?.value || "";
   const minRating = minRatingVal ? Number(minRatingVal) : null;
@@ -857,7 +873,13 @@ function applyClientFilters(rows) {
       const rowPlatforms = (r.show_platforms || []).map(x => x.platforms?.name).filter(Boolean);
       if (!platformsWanted.some(p => rowPlatforms.includes(p))) return false;
     }
+    if (categoriesWanted.length) {
+  if (!categoriesWanted.includes(r.category)) return false;
+}
 
+if (typesWanted.length) {
+  if (!typesWanted.includes(r.show_type)) return false;
+}
     if (genresWanted.length) {
       const rowGenres = (r.show_genres || []).map(x => x.genres?.name).filter(Boolean);
       if (!genresWanted.some(g => rowGenres.includes(g))) return false;
@@ -2293,7 +2315,19 @@ function buildBrowseFiltersUI() {
     name: "statusFilter",
     onChange: rerenderFiltered
   });
+buildCheckboxList({
+  boxId: "categoryFilterBox",
+  items: CATEGORY_ITEMS,
+  name: "categoryFilter",
+  onChange: rerenderFiltered
+});
 
+buildCheckboxList({
+  boxId: "typeFilterBox",
+  items: SHOW_TYPE_ITEMS,
+  name: "typeFilter",
+  onChange: rerenderFiltered
+});
   buildCheckboxList({
     boxId: "platformFilterBox",
     items: (PLATFORM_ROWS || []).map(r => r.name),
@@ -2761,7 +2795,8 @@ if (ok) {
     clearCheckboxGroup("genreFilter");
     clearCheckboxGroup("tropeFilter");
     clearCheckboxGroup("studioFilter");
-
+    clearCheckboxGroup("categoryFilter");
+clearCheckboxGroup("typeFilter");
     const any = document.querySelector('input[type="radio"][name="minRatingFilter"][value=""]');
     if (any) any.checked = true;
 
