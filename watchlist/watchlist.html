@@ -87,32 +87,45 @@
       </div>
 <section class="home-rails">
   <!-- Recently Added -->
-  <div class="rail">
-    <div class="rail-head">
-      <h2>Recently added</h2>
-      <a class="rail-link" href="./watchlist.html#collection">View all</a>
+<div class="rail">
+  <div class="rail-head">
+    <h2>Recently added</h2>
+
+    <div class="rail-nav">
+      <button class="rail-arrow" type="button" id="recent_added_prev" aria-label="Previous">‹</button>
+      <button class="rail-arrow" type="button" id="recent_added_next" aria-label="Next">›</button>
     </div>
+  </div>
+
+  <div class="rail-viewport">
     <div id="rail_recent_added" class="rail-row"></div>
   </div>
+</div>
 
   <!-- Recently Watched -->
   <div class="rail">
     <div class="rail-head">
-      <h2>Recently watched</h2>
+      <h2>Recently watched NEED TO UPDATE AND FIX BUT IGNORE FOR NOW</h2>
       <a class="rail-link" href="./collection.html?filter=watched">View all</a>
     </div>
     <div id="rail_recent_watched" class="rail-row"></div>
   </div>
 
   <!-- Random Picks -->
-  <div class="rail">
-    <div class="rail-head">
-      <h2>Random picks</h2>
-      <button id="rail_shuffle" class="rail-btn" type="button">Shuffle</button>
+<div class="rail">
+  <div class="rail-head">
+    <h2>Random picks</h2>
+
+    <div class="rail-nav">
+      <button class="rail-arrow" type="button" id="random_prev" aria-label="Previous">‹</button>
+      <button class="rail-arrow" type="button" id="random_next" aria-label="Next">›</button>
     </div>
+  </div>
+
+  <div class="rail-viewport">
     <div id="rail_random" class="rail-row"></div>
   </div>
-</section>
+</div>n>
       <p id="homeMsg" class="muted"></p>
 
 <!-- this is where the add show once was -->
