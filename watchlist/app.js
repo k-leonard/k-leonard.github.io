@@ -121,6 +121,7 @@ let TROPE_ROWS = null;
 let STUDIO_ROWS = null;
 let EDIT_GENRE_SELECT = null;
 let EDIT_TROPE_SELECT = null;
+let EDIT_PLATFORM_SELECT = null;
 let EDIT_STUDIO_SELECT = null;
 const STATUS_ITEMS = [
   "To Be Watched",
