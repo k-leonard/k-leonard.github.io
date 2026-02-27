@@ -1533,11 +1533,11 @@ function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
     if (!menu.classList.contains("hidden")) renderMenu("");
   });
 
-  document.addEventListener("click", (e2) => {
-    if (!menu.contains(e2.target) && e2.target !== btn) {
-      menu.classList.add("hidden");
-    }
-  });
+document.addEventListener("click", (e2) => {
+  if (!menu.contains(e2.target) && !btn.contains(e2.target)) {
+    menu.classList.add("hidden");
+  }
+});
 
   return {
     setRows: (rows) => {
