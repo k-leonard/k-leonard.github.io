@@ -2347,6 +2347,7 @@ function setInlineEditMode(on) {
     EDIT_GENRE_SELECT = null;
     EDIT_TROPE_SELECT = null;
     EDIT_STUDIO_SELECT = null;
+    EDIT_PLATFORM_SELECT= null
   }
 }
 
@@ -2378,17 +2379,25 @@ async function initInlineTagEditors() {
     tableName: "studios"
   });
 
+  EDIT_PLATFORM_SELECT = setupDbMultiSelect({
+    buttonId: "editPlatformBtn",
+    menuId: "editPlatformMenu",
+    chipsId: "editPlatformChips",
+    tableName: "platforms"
+  });
   // Load rows into each
   // (use cached arrays if you want; reloading is also fine)
-  const [gRows, tRows, sRows] = await Promise.all([
+  const [gRows, tRows, sRows, pRows] = await Promise.all([
     loadOptionRows("genres"),
     loadOptionRows("tropes"),
-    loadOptionRows("studios")
+    loadOptionRows("studios"),
+    loadOptionRows('platforms')
   ]);
 
   EDIT_GENRE_SELECT.setRows(gRows);
   EDIT_TROPE_SELECT.setRows(tRows);
   EDIT_STUDIO_SELECT.setRows(sRows);
+  EDIT_PLATFORM_SELECT.setRows(pRows);
 
   // Preselect current values from CURRENT_SHOW
   const currentGenres = (CURRENT_SHOW.show_genres || [])
@@ -2405,11 +2414,16 @@ async function initInlineTagEditors() {
     .map(x => x?.studios)
     .filter(Boolean)
     .map(r => ({ id: r.id, name: r.name }));
-
+const currentPlatforms = (CURRENT_SHOW.show_platforms || [])
+    .map(x => x?.platforms)
+    .filter(Boolean)
+    .map(r => ({ id: r.id, name: r.name }));
   EDIT_GENRE_SELECT.setSelectedRows(currentGenres);
   EDIT_TROPE_SELECT.setSelectedRows(currentTropes);
   EDIT_STUDIO_SELECT.setSelectedRows(currentStudios);
+  EDIT_PLATFORM_SELECT.setSelectedRows(currentPlatforms);
 }
+
 async function saveInlineEdits() {
   if (!CURRENT_SHOW?.id) return;
 
