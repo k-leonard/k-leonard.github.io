@@ -1062,11 +1062,18 @@ function clearCheckboxGroup(name) {
 function route() {
   d("route()", { hash: window.location.hash });
 
-  const raw = (window.location.hash || "#home").slice(1);
-  const [nameRaw] = raw.split("?");
-  const views = ["home", "browse", "collection", "show"];
+  // Normalize hash to a view name: home/browse/collection/show
+  const rawHash = window.location.hash || "#home";
+  const raw = rawHash.replace(/^#/, "");       // remove leading #
+  const [first] = raw.split("?");              // strip query
+  const token = first || "home";
 
-  const name = views.includes(nameRaw) ? nameRaw : "home";
+  // Accept both formats: "collection" and "view-collection"
+  const normalized = token.startsWith("view-") ? token.slice(5) : token;
+
+  const views = ["home", "browse", "collection", "show"];
+  const name = views.includes(normalized) ? normalized : "home";
+
   // --------------------
   // AUTH GATE
   // --------------------
@@ -1075,20 +1082,27 @@ function route() {
     showAuthedUI(false);
     return;
   }
+
+  // --------------------
+  // SHOW THE RIGHT VIEW
+  // --------------------
   views.forEach(v => {
     setDisplay(`view-${v}`, v === name);
+
+    // Tabs are only for home/browse/collection in your HTML
     const t = el(`tab-${v}`);
     if (t) t.classList.toggle("active", v === name);
   });
-  let hash = location.hash || "#view-home"; //NEW
-if (hash === "#home") hash = "#view-home";
-if (hash === "#browse") hash = "#view-browse";
-if (hash === "#collection") hash = "#view-collection";
+
+  // --------------------
+  // VIEW-SPECIFIC LOGIC
+  // --------------------
   if (name === "show") {
     const params = new URLSearchParams(raw.split("?")[1] || "");
     const id = params.get("id");
     if (id) loadShowDetail(Number(id));
   }
+
   if (name === "browse") rerenderFiltered();
   if (name === "collection") renderCollection();
 
