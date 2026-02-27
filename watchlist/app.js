@@ -773,9 +773,46 @@ function syncProgressVisibility() {
     if (e2) e2.value = "";
   }
 }
+function extractYearFromDateInput(s) {
+  if (!s) return null;
 
-async function fetchAnimeFromJikan(title) {
-  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
+  // If it's YYYY-MM-DD (from <input type="date">)
+  const iso = String(s).match(/^(\d{4})-\d{2}-\d{2}$/);
+  if (iso) return iso[1];
+
+  // If it's something like 10-20-1999 or 10/20/1999, grab a 4-digit year
+  const m = String(s).match(/\b(19|20)\d{2}\b/);
+  return m ? m[0] : null;
+}
+
+function yearFromJikanAnime(a) {
+  const from = a?.aired?.from;
+  if (!from) return null;
+  // from is typically ISO datetime like "1999-10-20T00:00:00+00:00"
+  return String(from).slice(0, 4);
+}
+
+// Map your app's "Type" to what Jikan returns in a.type
+function normalizeWantedJikanTypes(appType) {
+  // Jikan a.type values: "TV", "Movie", "OVA", "Special", "ONA", "Music", etc.
+  // Your app types: TV / Movie / TV & Movie (maybe others later)
+  if (!appType) return null;
+
+  const t = String(appType).toLowerCase();
+  if (t === "tv") return ["TV"];
+  if (t === "movie") return ["Movie"];
+  if (t === "tv & movie") return ["TV", "Movie"]; // allow both
+  return null;
+}
+
+async function fetchAnimeFromJikan(title, opts = {}) {
+  const {
+    releaseDate = null,     // a date string from your form (optional)
+    useReleaseYear = false, // toggle
+    showType = null         // "TV" / "Movie" / "TV & Movie" (optional)
+  } = opts;
+
+  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=10`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
   const json = await res.json();
@@ -783,26 +820,77 @@ async function fetchAnimeFromJikan(title) {
   const results = json?.data || [];
   if (!results.length) return null;
 
-  const a = results[0];
+  const wantedYear = useReleaseYear ? extractYearFromDateInput(releaseDate) : null;
+  const wantedTypes = normalizeWantedJikanTypes(showType); // may be null
 
-  const release_date = a.aired?.from ? a.aired.from.split("T")[0] : null;
+  // Score candidates instead of blindly taking results[0]
+  const queryLower = String(title).trim().toLowerCase();
 
-  const studios = (a.studios || []).map(s => s?.name).filter(Boolean);
-  const genres = (a.genres || []).map(g => g?.name).filter(Boolean);
-  const themes = (a.themes || []).map(t => t?.name).filter(Boolean);
+  function score(a) {
+    let s = 0;
+
+    // Prefer matching type (TV vs Movie)
+    if (wantedTypes && a?.type) {
+      if (wantedTypes.includes(a.type)) s += 6;
+      else s -= 3;
+    }
+
+    // Prefer matching release year
+    if (wantedYear) {
+      const y = yearFromJikanAnime(a);
+      if (y && y === wantedYear) s += 8;
+      else if (y) s -= 2; // small penalty if year exists but doesn't match
+    }
+
+    // Boost exact-ish title matches (English / default title)
+    const candTitles = [];
+    if (a?.title) candTitles.push(a.title);
+    if (a?.title_english) candTitles.push(a.title_english);
+    if (Array.isArray(a?.titles)) {
+      for (const t of a.titles) if (t?.title) candTitles.push(t.title);
+    }
+
+    const candLower = candTitles.map(x => String(x).trim().toLowerCase()).filter(Boolean);
+
+    if (candLower.some(x => x === queryLower)) s += 5;
+    if (candLower.some(x => x.includes(queryLower))) s += 2;
+
+    // Small boost for more members/popularity signals (optional)
+    if (typeof a?.members === "number") s += Math.min(2, a.members / 500000);
+
+    return s;
+  }
+
+  // Pick best scored
+  let best = results[0];
+  let bestScore = -Infinity;
+
+  for (const a of results) {
+    const sc = score(a);
+    if (sc > bestScore) {
+      bestScore = sc;
+      best = a;
+    }
+  }
+
+  const release_date = best.aired?.from ? best.aired.from.split("T")[0] : null;
+
+  const studios = (best.studios || []).map(s => s?.name).filter(Boolean);
+  const genres = (best.genres || []).map(g => g?.name).filter(Boolean);
+  const themes = (best.themes || []).map(t => t?.name).filter(Boolean);
 
   const canonical_title =
-    (a.title_english && a.title_english.trim()) ||
-    (Array.isArray(a.titles)
-      ? (a.titles.find(x => x?.type === "English")?.title || "").trim()
+    (best.title_english && best.title_english.trim()) ||
+    (Array.isArray(best.titles)
+      ? (best.titles.find(x => x?.type === "English")?.title || "").trim()
       : "") ||
-    (a.title && a.title.trim()) ||
+    (best.title && best.title.trim()) ||
     null;
 
   return {
-    mal_id: a.mal_id ?? null,
-    image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
-    description: a.synopsis ?? null,
+    mal_id: best.mal_id ?? null,
+    image_url: best.images?.jpg?.image_url ?? best.images?.webp?.image_url ?? null,
+    description: best.synopsis ?? null,
     release_date,
     studios,
     genres,
@@ -810,6 +898,42 @@ async function fetchAnimeFromJikan(title) {
     canonical_title
   };
 }
+// async function fetchAnimeFromJikan(title) {
+//   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
+//   const res = await fetch(url);
+//   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
+//   const json = await res.json();
+
+//   const results = json?.data || [];
+//   if (!results.length) return null;
+
+//   const a = results[0];
+
+//   const release_date = a.aired?.from ? a.aired.from.split("T")[0] : null;
+
+//   const studios = (a.studios || []).map(s => s?.name).filter(Boolean);
+//   const genres = (a.genres || []).map(g => g?.name).filter(Boolean);
+//   const themes = (a.themes || []).map(t => t?.name).filter(Boolean);
+
+//   const canonical_title =
+//     (a.title_english && a.title_english.trim()) ||
+//     (Array.isArray(a.titles)
+//       ? (a.titles.find(x => x?.type === "English")?.title || "").trim()
+//       : "") ||
+//     (a.title && a.title.trim()) ||
+//     null;
+
+//   return {
+//     mal_id: a.mal_id ?? null,
+//     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
+//     description: a.synopsis ?? null,
+//     release_date,
+//     studios,
+//     genres,
+//     themes,
+//     canonical_title
+//   };
+// }
 
 function syncTypeVisibility() {
   const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
@@ -2715,13 +2839,28 @@ function wireFetchButtons() {
     try {
       const user_id = await getUserId();
       if (!user_id) throw new Error("Not authenticated");
+      // ===== Read CURRENT form values (this enables "edit then click again") =====
+      const titleEl = el("editTitle") || el("titleInput") || el("showTitle"); // use your real id
+      const dateEl  = el("editReleaseDate") || el("releaseDateInput") || el("release_date"); // use your real id
+      const toggleEl = el("useReleaseYearToggle"); // optional, add if you create it
+      const typeEl = el("editType") || el("typeSelect"); // optional
+
+      const liveTitle = (titleEl?.value ?? CURRENT_SHOW.title ?? "").trim();
+      const liveReleaseDate = (dateEl?.value ?? "").trim();
+      const useReleaseYear = toggleEl ? !!toggleEl.checked : !!liveReleaseDate; 
+      // ^ if you don't have a toggle yet, this makes it auto-use year when date is present
+
+      const liveType = typeEl?.value ?? null; // "TV" / "Movie" / "TV & Movie" if you have it
 
       // =====================================================
       // 🔵 ANIME → JIKAN
       // =====================================================
       if ((CURRENT_SHOW.category || "") === "Anime") {
-
-        const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+        const info = await fetchAnimeFromJikan(liveTitle, {
+          releaseDate: liveReleaseDate,
+          useReleaseYear,
+          showType: liveType
+        });
 
         if (!info) {
           if (editMsg) editMsg.textContent = "No anime match found.";
@@ -2743,17 +2882,54 @@ function wireFetchButtons() {
         const { error } = await supabase
           .from("shows")
           .update(updatePayload)
-          .eq("id", CURRENT_SHOW.id); // 🔴 CRITICAL FIX
+          .eq("id", CURRENT_SHOW.id);
 
         if (error) throw error;
 
-        // ✅ APPEND TAGS (not replace)
         await appendTagNames("studios", info.studios, user_id);
         await appendTagNames("genres", info.genres, user_id);
         await appendTagNames("tropes", info.themes, user_id);
 
         showToast("Anime info updated!");
       }
+      // // =====================================================
+      // // 🔵 ANIME → JIKAN
+      // // =====================================================
+      // if ((CURRENT_SHOW.category || "") === "Anime") {
+
+      //   const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
+
+      //   if (!info) {
+      //     if (editMsg) editMsg.textContent = "No anime match found.";
+      //     showToast("No anime match found.");
+      //     return;
+      //   }
+
+      //   const updatePayload = {
+      //     mal_id: info.mal_id,
+      //     image_url: info.image_url,
+      //     description: info.description,
+      //     release_date: info.release_date
+      //   };
+
+      //   if (info.canonical_title) {
+      //     updatePayload.title = info.canonical_title;
+      //   }
+
+      //   const { error } = await supabase
+      //     .from("shows")
+      //     .update(updatePayload)
+      //     .eq("id", CURRENT_SHOW.id); // 🔴 CRITICAL FIX
+
+      //   if (error) throw error;
+
+      //   // ✅ APPEND TAGS (not replace)
+      //   await appendTagNames("studios", info.studios, user_id);
+      //   await appendTagNames("genres", info.genres, user_id);
+      //   await appendTagNames("tropes", info.themes, user_id);
+
+      //   showToast("Anime info updated!");
+      // }
 
       // =====================================================
       // 🟢 NON-ANIME → TMDB
