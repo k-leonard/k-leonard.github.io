@@ -2159,12 +2159,25 @@ function renderShowDetailBlocks(show, mode = "view") {
       tagsHost.innerHTML = `
         <div class="card innerCard" style="margin-top:12px;">
           <h3 style="margin-top:0;">Tags</h3>
-
+<div class="field">
+            <span>Studios</span>
+            <button type="button" id="editStudioBtn" class="secondary">Select studios</button>
+            <div id="editStudioMenu" class="menu hidden"></div>
+            <div id="editStudioChips" class="chips"></div>
+          </div>
+          
           <div class="field">
             <span>Genres</span>
             <button type="button" id="editGenreBtn" class="secondary">Select genres</button>
             <div id="editGenreMenu" class="menu hidden"></div>
             <div id="editGenreChips" class="chips"></div>
+          </div>
+          
+  <div class="field">
+            <span>Platforms</span>
+            <button type="button" id="editPlatformBtn" class="secondary">Select platforms</button>
+            <div id="editPlatformMenu" class="menu hidden"></div>
+            <div id="editPlatformChips" class="chips"></div>
           </div>
 
           <div class="field">
@@ -2174,12 +2187,7 @@ function renderShowDetailBlocks(show, mode = "view") {
             <div id="editTropeChips" class="chips"></div>
           </div>
 
-          <div class="field">
-            <span>Studios</span>
-            <button type="button" id="editStudioBtn" class="secondary">Select studios</button>
-            <div id="editStudioMenu" class="menu hidden"></div>
-            <div id="editStudioChips" class="chips"></div>
-          </div>
+          
 
           <p class="muted small" style="margin:8px 0 0;">
             (Same dropdown behavior as Add Show — search + checkbox + add new.)
