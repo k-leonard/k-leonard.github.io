@@ -1597,7 +1597,7 @@ function getCollectionRows() {
 }
 
 function renderCollection() {
-  const wrap = el("collectionList");
+  const wrap = el("collectionGrid"); //was collectionList, swapped while troubleshooting collection list
   const note = el("collectionMsg");
   if (!wrap) return;
 
@@ -1619,7 +1619,7 @@ function renderCollection() {
 }
 
 function wireCollectionClicks() {
-  const wrap = el("collectionList");
+  const wrap = el("collectionGrid"); //was collectionList, swapped while troubleshooting collection list
   if (!wrap) return;
 
   wrap.addEventListener("click", (e2) => {
