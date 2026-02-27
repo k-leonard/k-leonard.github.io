@@ -2188,7 +2188,6 @@ function renderShowDetailBlocks(show, mode = "view") {
             <div id="editTropeChips" class="chips"></div>
           </div>
 
-          
 
           <p class="muted small" style="margin:8px 0 0;">
             (Same dropdown behavior as Add Show — search + checkbox + add new.)
@@ -2200,11 +2199,12 @@ function renderShowDetailBlocks(show, mode = "view") {
       const studios = (show?.show_studios || []).map(x => x.studios?.name).filter(Boolean);
       const genres  = (show?.show_genres  || []).map(x => x.genres?.name).filter(Boolean);
       const tropes  = (show?.show_tropes  || []).map(x => x.tropes?.name).filter(Boolean);
-
+      const platforms =  (show?.show_platforms  || []).map(x => x.platforms?.name).filter(Boolean);
       tagsHost.innerHTML = `
         ${studios.length ? `<div><span class="muted">Studios:</span> ${escapeHtml(studios.join(", "))}</div>` : ""}
         ${genres.length ? `<div><span class="muted">Genres:</span> ${escapeHtml(genres.join(", "))}</div>` : ""}
         ${tropes.length ? `<div><span class="muted">Tropes:</span> ${escapeHtml(tropes.join(", "))}</div>` : ""}
+        ${platforms.length ? `<div><span class="muted">Platforms:</span> ${escapeHtml(platforms.join(", "))}</div>` : ""}
         ${(!studios.length && !genres.length && !tropes.length) ? `<div class="muted">No tags yet.</div>` : ""}
       `;
     }
