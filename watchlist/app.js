@@ -1060,20 +1060,27 @@ function clearCheckboxGroup(name) {
 // Hash Router (Home / Browse / Collection / Show)
 // --------------------
 function route() {
+  // d("route()", { hash: window.location.hash });
+
+  // // Normalize hash to a view name: home/browse/collection/show
+  // const rawHash = window.location.hash || "#home";
+  // const raw = rawHash.replace(/^#/, "");       // remove leading #
+  // const [first] = raw.split("?");              // strip query
+  // const token = first || "home";
+
+  // // Accept both formats: "collection" and "view-collection"
+  // const normalized = token.startsWith("view-") ? token.slice(5) : token;
+
+  // const views = ["home", "browse", "collection", "show"];
+  // const name = views.includes(normalized) ? normalized : "home";
   d("route()", { hash: window.location.hash });
 
-  // Normalize hash to a view name: home/browse/collection/show
-  const rawHash = window.location.hash || "#home";
-  const raw = rawHash.replace(/^#/, "");       // remove leading #
-  const [first] = raw.split("?");              // strip query
-  const token = first || "home";
-
-  // Accept both formats: "collection" and "view-collection"
-  const normalized = token.startsWith("view-") ? token.slice(5) : token;
+  const raw = (window.location.hash || "#home").slice(1);
+  const [nameRaw0] = raw.split("?");
+  const nameRaw = nameRaw0.startsWith("view-") ? nameRaw0.slice(5) : nameRaw0;
 
   const views = ["home", "browse", "collection", "show"];
-  const name = views.includes(normalized) ? normalized : "home";
-
+  const name = views.includes(nameRaw) ? nameRaw : "home";
   // --------------------
   // AUTH GATE
   // --------------------
