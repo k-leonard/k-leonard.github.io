@@ -123,6 +123,10 @@ let EDIT_GENRE_SELECT = null;
 let EDIT_TROPE_SELECT = null;
 let EDIT_PLATFORM_SELECT = null;
 let EDIT_STUDIO_SELECT = null;
+let ADD_GENRE_SELECT = null;
+let ADD_TROPE_SELECT = null;
+let ADD_STUDIO_SELECT = null;
+let ADD_PLATFORM_SELECT = null;
 const STATUS_ITEMS = [
   "To Be Watched",
   "Watching",
@@ -899,42 +903,7 @@ async function fetchAnimeFromJikan(title, opts = {}) {
     canonical_title
   };
 }
-// async function fetchAnimeFromJikan(title) {
-//   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`;
-//   const res = await fetch(url);
-//   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
-//   const json = await res.json();
 
-//   const results = json?.data || [];
-//   if (!results.length) return null;
-
-//   const a = results[0];
-
-//   const release_date = a.aired?.from ? a.aired.from.split("T")[0] : null;
-
-//   const studios = (a.studios || []).map(s => s?.name).filter(Boolean);
-//   const genres = (a.genres || []).map(g => g?.name).filter(Boolean);
-//   const themes = (a.themes || []).map(t => t?.name).filter(Boolean);
-
-//   const canonical_title =
-//     (a.title_english && a.title_english.trim()) ||
-//     (Array.isArray(a.titles)
-//       ? (a.titles.find(x => x?.type === "English")?.title || "").trim()
-//       : "") ||
-//     (a.title && a.title.trim()) ||
-//     null;
-
-//   return {
-//     mal_id: a.mal_id ?? null,
-//     image_url: a.images?.jpg?.image_url ?? a.images?.webp?.image_url ?? null,
-//     description: a.synopsis ?? null,
-//     release_date,
-//     studios,
-//     genres,
-//     themes,
-//     canonical_title
-//   };
-// }
 
 function syncTypeVisibility() {
   const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
@@ -1001,6 +970,7 @@ function setupAddShowModal() {
     return;
   }
 
+
   async function openModal() {
     const { data } = await supabase.auth.getSession();
     if (!data?.session) {
@@ -1012,7 +982,55 @@ function setupAddShowModal() {
       if (typeof ensureOptionRowsLoaded === "function") {
         await ensureOptionRowsLoaded();
       }
+    // Create selects once
+if (!ADD_GENRE_SELECT) {
+  ADD_GENRE_SELECT = setupDbMultiSelect({
+    buttonId: "genreBtn",
+    menuId: "genreMenu",
+    chipsId: "genreChips",
+    tableName: "genres"
+  });
 
+  ADD_TROPE_SELECT = setupDbMultiSelect({
+    buttonId: "tropeBtn",
+    menuId: "tropeMenu",
+    chipsId: "tropeChips",
+    tableName: "tropes"
+  });
+
+  ADD_STUDIO_SELECT = setupDbMultiSelect({
+    buttonId: "studioBtn",
+    menuId: "studioMenu",
+    chipsId: "studioChips",
+    tableName: "studios"
+  });
+
+  ADD_PLATFORM_SELECT = setupDbMultiSelect({
+    buttonId: "platformBtn",
+    menuId: "platformMenu",
+    chipsId: "platformChips",
+    tableName: "platforms"
+  });
+}
+
+// Load rows (fresh or cached)
+const [gRows, tRows, sRows, pRows] = await Promise.all([
+  loadOptionRows("genres"),
+  loadOptionRows("tropes"),
+  loadOptionRows("studios"),
+  loadOptionRows("platforms")
+]);
+
+ADD_GENRE_SELECT.setRows(gRows);
+ADD_TROPE_SELECT.setRows(tRows);
+ADD_STUDIO_SELECT.setRows(sRows);
+ADD_PLATFORM_SELECT.setRows(pRows);
+
+// Clear any previous selections (super important for modal re-open)
+ADD_GENRE_SELECT.setSelectedRows([]);
+ADD_TROPE_SELECT.setSelectedRows([]);
+ADD_STUDIO_SELECT.setSelectedRows([]);
+ADD_PLATFORM_SELECT.setSelectedRows([]);
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
 
@@ -1026,6 +1044,11 @@ function setupAddShowModal() {
   function closeModal() {
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
+    
+  ADD_GENRE_SELECT?.setSelectedRows([]);
+  ADD_TROPE_SELECT?.setSelectedRows([]);
+  ADD_STUDIO_SELECT?.setSelectedRows([]);
+  ADD_PLATFORM_SELECT?.setSelectedRows([]);
   }
 
   openBtn.addEventListener("click", openModal);
@@ -1185,19 +1208,6 @@ function clearCheckboxGroup(name) {
 // Hash Router (Home / Browse / Collection / Show)
 // --------------------
 function route() {
-  // d("route()", { hash: window.location.hash });
-
-  // // Normalize hash to a view name: home/browse/collection/show
-  // const rawHash = window.location.hash || "#home";
-  // const raw = rawHash.replace(/^#/, "");       // remove leading #
-  // const [first] = raw.split("?");              // strip query
-  // const token = first || "home";
-
-  // // Accept both formats: "collection" and "view-collection"
-  // const normalized = token.startsWith("view-") ? token.slice(5) : token;
-
-  // const views = ["home", "browse", "collection", "show"];
-  // const name = views.includes(normalized) ? normalized : "home";
   d("route()", { hash: window.location.hash });
 
   const raw = (window.location.hash || "#home").slice(1);
@@ -1301,41 +1311,7 @@ function wireBrowseFilterDrawer() {
   // ✅ ensure closed on boot
   close();
 }
-// function wireBrowseFilterDrawer() {
-//   const toggleBtn = el("filtersToggle");
-//   const closeBtn = el("filtersClose");
-//   const panel = el("browseFiltersPanel");
-//   const overlay = el("filtersOverlay");
 
-//   if (!toggleBtn || !panel || !overlay) return;
-
-//   function open() {
-//     panel.classList.add("open");
-//     overlay.classList.remove("hidden");
-//     panel.setAttribute("aria-hidden", "false");
-//     toggleBtn.setAttribute("aria-expanded", "true");
-//   }
-
-//   function close() {
-//     panel.classList.remove("open");
-//     overlay.classList.add("hidden");
-//     panel.setAttribute("aria-hidden", "true");
-//     toggleBtn.setAttribute("aria-expanded", "false");
-//   }
-
-//   toggleBtn.addEventListener("click", () => {
-//     const isOpen = panel.classList.contains("open");
-//     if (isOpen) close();
-//     else open();
-//   });
-
-//   closeBtn?.addEventListener("click", close);
-//   overlay.addEventListener("click", close);
-
-//   document.addEventListener("keydown", (e2) => {
-//     if (e2.key === "Escape" && panel.classList.contains("open")) close();
-//   });
-// }
 
 // --------------------
 // Browse render
@@ -2529,45 +2505,7 @@ async function saveInlineEdits() {
   await loadShowDetail(CURRENT_SHOW.id);
   await loadShows();
 }
-// function renderShowDetailBlocks(show, mode = "view") {
-//   d("renderShowDetailBlocks()", { id: show?.id, mode });
 
-//   // Poster
-//   const posterUrl = getPosterUrl(show);
-//   const posterOk = setImg("showPoster", posterUrl, `${show?.title || "Show"} poster`);
-//   if (!posterOk) w("Missing #showPoster (poster won't render)");
-
-//   // Description
-//   const desc = (show?.description || "").trim();
-//   const descHtml = desc ? `<p>${escapeHtml(desc).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No description yet.</p>`;
-//   const descOk = setHtml("showDescriptionBlock", descHtml);
-//   if (!descOk) w("Missing #showDescriptionBlock (description won't render)");
-
-//   // Notes
-//   const notes = (show?.notes || "").trim();
-//   const notesHtml = notes ? `<p>${escapeHtml(notes).replaceAll("\n", "<br>")}</p>` : `<p class="muted">No notes yet.</p>`;
-//   const notesOk = setHtml("showNotesBlock", notesHtml);
-//   if (!notesOk) w("Missing #showNotesBlock(notes won't render)");
-
-//   // “Your Info” card body
-//   const infoBits = [
-//     labelVal("Status", show?.status),
-//     labelVal("Ongoing", show?.ongoing),
-//     labelVal("Release date", show?.release_date),
-//     labelVal("Last watched", show?.last_watched),
-//     labelVal("Rating", show?.rating_stars ? starsDisplay(show.rating_stars) : null),
-//     labelVal("Seasons", show?.seasons),
-//     labelVal("Episodes", show?.episodes),
-//     labelVal("Ep length (min)", show?.episode_length_min),
-//     labelVal("Movies", show?.movies),
-//     labelVal("Movie length (min)", show?.movie_length_min),
-//     labelVal("OVAs", show?.ovas),
-//     labelVal("OVA length (min)", show?.ova_length_min),
-//   ].join("");
-
-//   const infoOk = setHtml("showInfoBlock", infoBits || `<div class="muted">No info yet.</div>`);
-//   if (!infoOk) w("Missing #showInfoBlock (your info won't render)");
-// }
 function updateFetchButtonLabel() {
   const btn = el("fetchAnimeBtn");
   if (!btn || !CURRENT_SHOW) return;
@@ -2722,136 +2660,7 @@ if (factsEl) {
 const fetchBtn = el("fetchAnimeBtn");
 const editMsg = el("editMsg");
 }
-// if (fetchBtn) {
-//   fetchBtn.addEventListener("click", async () => {
-//     if (!CURRENT_SHOW?.id) return;
 
-//     fetchBtn.disabled = true;
-//     if (editMsg) editMsg.textContent = "Fetching info…";
-
-//     try {
-//       const user_id = await getUserId();
-//       if (!user_id) throw new Error("Not logged in");
-
-//       // --------- 1) Fetch info from the right API ----------
-//       let info = null;
-
-//       if ((CURRENT_SHOW.category || "") === "Anime") {
-//         info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
-//         if (!info) {
-//           if (editMsg) editMsg.textContent = "No anime match found.";
-//           return;
-//         }
-//       } else {
-//         console.log("[FETCH NON-ANIME] clicked", {
-//   id: CURRENT_SHOW?.id,
-//   title: CURRENT_SHOW?.title,
-//   category: CURRENT_SHOW?.category,
-//   show_type: CURRENT_SHOW?.show_type
-// });
-//         info = await fetchShowFromTMDb(CURRENT_SHOW.title);
-//         if (!info) {
-//           if (editMsg) editMsg.textContent = "No show/movie match found.";
-//           return;
-//         }
-//       }
-
-//       // --------- 2) Update shows row (WITH WHERE CLAUSE) ----------
-//       const updatePayload = {};
-
-//       // common
-//       if (info.image_url) updatePayload.image_url = info.image_url;
-//       if (info.release_date) updatePayload.release_date = info.release_date;
-
-//       // Anime: description + mal_id
-//       if ((CURRENT_SHOW.category || "") === "Anime") {
-//         if (info.mal_id != null) updatePayload.mal_id = info.mal_id;
-//         if (info.description) updatePayload.description = info.description;
-//       } else {
-//         // Optional: store tmdb id if you have a column
-//         // updatePayload.tmdb_id = info.tmdb_id ?? null;
-//         // updatePayload.tmdb_media_type = info.media_type ?? null;
-//       }
-
-//       // canonical title (don’t set to null)
-//       if (info.canonical_title && info.canonical_title.trim()) {
-//         updatePayload.title = info.canonical_title.trim();
-//       }
-
-//       const { error: upErr } = await supabase
-//         .from("shows")
-//         .update(updatePayload)
-//         .eq("id", CURRENT_SHOW.id); // ✅ REQUIRED
-
-//       if (upErr) throw upErr;
-
-//       // --------- 3) Upsert + APPEND genres/studios/tropes ----------
-//       // Your existing helper should already exist:
-//       //   getOrCreateOptionRow(tableName, name) -> returns row with id
-
-//       // Studios
-//       if (Array.isArray(info.studios) && info.studios.length) {
-//         const studioIds = [];
-//         for (const name of info.studios) {
-//           const row = await getOrCreateOptionRow("studios", name);
-//           if (row?.id) studioIds.push(row.id);
-//         }
-//         await appendJoinRows({
-//           joinTable: "show_studios",
-//           user_id,
-//           show_id: CURRENT_SHOW.id,
-//           fkColumn: "studio_id",
-//           ids: studioIds
-//         });
-//       }
-
-//       // Genres
-//       if (Array.isArray(info.genres) && info.genres.length) {
-//         const genreIds = [];
-//         for (const name of info.genres) {
-//           const row = await getOrCreateOptionRow("genres", name);
-//           if (row?.id) genreIds.push(row.id);
-//         }
-//         await appendJoinRows({
-//           joinTable: "show_genres",
-//           user_id,
-//           show_id: CURRENT_SHOW.id,
-//           fkColumn: "genre_id",
-//           ids: genreIds
-//         });
-//       }
-
-//       // Tropes (Anime: you said you map Jikan themes -> tropes)
-//       if ((CURRENT_SHOW.category || "") === "Anime" && Array.isArray(info.themes) && info.themes.length) {
-//         const tropeIds = [];
-//         for (const name of info.themes) {
-//           const row = await getOrCreateOptionRow("tropes", name);
-//           if (row?.id) tropeIds.push(row.id);
-//         }
-//         await appendJoinRows({
-//           joinTable: "show_tropes",
-//           user_id,
-//           show_id: CURRENT_SHOW.id,
-//           fkColumn: "trope_id",
-//           ids: tropeIds
-//         });
-//       }
-
-//       if (editMsg) editMsg.textContent = "Info updated!";
-//       showToast("Info updated!");
-
-//       await loadShowDetail(CURRENT_SHOW.id);
-//       await loadShows();
-//     } catch (err) {
-//       console.error(err);
-//       if (editMsg) editMsg.textContent = `Fetch failed: ${err.message || err}`;
-//     } finally {
-//       fetchBtn.disabled = false;
-//       updateFetchButtonLabel();
-//     }
-//   });
-// }
-// }
 function setText(id, text) {
   const n = el(id);
   if (!n) return false;
@@ -2948,44 +2757,6 @@ function wireFetchButtons() {
 
         showToast("Anime info updated!");
       }
-      // // =====================================================
-      // // 🔵 ANIME → JIKAN
-      // // =====================================================
-      // if ((CURRENT_SHOW.category || "") === "Anime") {
-
-      //   const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
-
-      //   if (!info) {
-      //     if (editMsg) editMsg.textContent = "No anime match found.";
-      //     showToast("No anime match found.");
-      //     return;
-      //   }
-
-      //   const updatePayload = {
-      //     mal_id: info.mal_id,
-      //     image_url: info.image_url,
-      //     description: info.description,
-      //     release_date: info.release_date
-      //   };
-
-      //   if (info.canonical_title) {
-      //     updatePayload.title = info.canonical_title;
-      //   }
-
-      //   const { error } = await supabase
-      //     .from("shows")
-      //     .update(updatePayload)
-      //     .eq("id", CURRENT_SHOW.id); // 🔴 CRITICAL FIX
-
-      //   if (error) throw error;
-
-      //   // ✅ APPEND TAGS (not replace)
-      //   await appendTagNames("studios", info.studios, user_id);
-      //   await appendTagNames("genres", info.genres, user_id);
-      //   await appendTagNames("tropes", info.themes, user_id);
-
-      //   showToast("Anime info updated!");
-      // }
 
       // =====================================================
       // 🟢 NON-ANIME → TMDB
@@ -3593,71 +3364,7 @@ async function init() {
   setupAddShowModal();
 wireShowDetailButtons();
   wireFetchButtons()
-// el("fetchAnimeBtn")?.addEventListener("click", async () => {
-//   if (!CURRENT_SHOW?.id) return;
 
-//   const msgEl = el("showDetailMsg");
-//   if (msgEl) msgEl.textContent = "Fetching anime info…";
-
-//   try {
-//     const user_id = await getUserId();
-//     const show_id = CURRENT_SHOW.id;
-
-//     // Optional gate: only allow for Anime
-//     const cat = (CURRENT_SHOW.category || "").trim();
-//     if (cat && cat !== "Anime") {
-//       if (msgEl) msgEl.textContent = "Fetch anime info is only available for Anime shows.";
-//       return;
-//     }
-
-//     const title = (CURRENT_SHOW.title || "").trim();
-//     const info = await fetchAnimeFromJikan(title);
-
-//     if (!info) {
-//       if (msgEl) msgEl.textContent = "No anime match found.";
-//       return;
-//     }
-
-//     // 1) Update base show fields (WITH WHERE ✅)
-//     const updatePayload = {
-//       mal_id: info.mal_id,
-//       image_url: info.image_url,
-//       description: info.description,
-//       release_date: info.release_date
-//     };
-
-//     // Title standardization (only if present)
-//     if (info.canonical_title) updatePayload.title = info.canonical_title;
-
-//     const upd = await supabase
-//       .from("shows")
-//       .update(updatePayload)
-//       .eq("id", show_id)
-//       .eq("user_id", user_id);
-
-//     if (upd.error) throw upd.error;
-
-//     // 2) Convert MAL names → option ids (themes → tropes)
-//     const studioIds = await namesToIds("studios", info.studios);
-//     const genreIds  = await namesToIds("genres", info.genres);
-//     const tropeIds  = await namesToIds("tropes", info.themes);
-
-//     // 3) MERGE into joins (add missing only; do NOT delete)
-//     await mergeJoinRows({ joinTable: "show_studios", user_id, show_id, fkColumn: "studio_id", ids: studioIds });
-//     await mergeJoinRows({ joinTable: "show_genres",  user_id, show_id, fkColumn: "genre_id",  ids: genreIds });
-//     await mergeJoinRows({ joinTable: "show_tropes",  user_id, show_id, fkColumn: "trope_id",  ids: tropeIds });
-
-//     // 4) Refresh UI
-//     await loadShowDetail(show_id);
-//     await loadShows();
-//     await refreshBrowseFilterOptions();
-
-//     if (msgEl) msgEl.textContent = "Anime info added!";
-//   } catch (err) {
-//     console.error("fetchAnimeBtn failed:", err);
-//     if (msgEl) msgEl.textContent = `Fetch failed: ${err.message || err}`;
-//   }
-// });
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
   d("logout button sanity", {
   count: document.querySelectorAll("#logout").length,
