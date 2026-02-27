@@ -373,7 +373,7 @@ renderRail(railCurrentlyWatching, watching);
   }
 }
 
-
+ 
 async function fetchShowFromTMDb(query) {
   if (!TMDB_API_KEY) throw new Error("Missing TMDB_API_KEY");
   console.log("[FETCH NON-ANIME] clicked", {
