@@ -1741,7 +1741,40 @@ function renderCollection() {
 
   wrap.innerHTML = rows.map(collectionCardHTML).join("");
 }
+function wireHomeRailClicks() {
+  const containers = [
+    el("rail_currently_watching"),
+    el("rail_recent_added"),
+    el("rail_random")
+  ].filter(Boolean);
 
+  for (const wrap of containers) {
+    // Click to open
+    wrap.addEventListener("click", (e) => {
+      const card = e.target.closest(".media-card");
+      if (!card) return;
+      const id = card?.dataset?.id;
+      if (!id) return;
+
+      window.location.hash = `#show?id=${id}`;
+      route();
+    });
+
+    // Keyboard (Enter/Space) to open
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const card = e.target.closest(".media-card");
+      if (!card) return;
+      e.preventDefault();
+
+      const id = card?.dataset?.id;
+      if (!id) return;
+
+      window.location.hash = `#show?id=${id}`;
+      route();
+    });
+  }
+}
 function wireCollectionClicks() {
   const wrap = el("collectionGrid"); //was collectionList, swapped while troubleshooting collection list
   if (!wrap) return;
@@ -3787,6 +3820,7 @@ wireForgotPassword();
   });
 
   wireCollectionClicks();
+   wireHomeRailClicks();
   wireDeleteModal();
 
    if (!window.location.hash) window.location.hash = "#home";
