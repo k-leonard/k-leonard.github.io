@@ -1080,7 +1080,10 @@ function route() {
     const t = el(`tab-${v}`);
     if (t) t.classList.toggle("active", v === name);
   });
-
+  let hash = location.hash || "#view-home"; //NEW
+if (hash === "#home") hash = "#view-home";
+if (hash === "#browse") hash = "#view-browse";
+if (hash === "#collection") hash = "#view-collection";
   if (name === "show") {
     const params = new URLSearchParams(raw.split("?")[1] || "");
     const id = params.get("id");
