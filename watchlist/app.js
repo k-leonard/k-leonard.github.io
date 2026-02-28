@@ -2201,7 +2201,14 @@ function renderShowDetailBlocks(show, mode = "view") {
     if (mode === "edit") {
       factsHost.innerHTML = `
         <div class="grid" style="gap:10px;">
-
+            <label class="field">
+  <span>Category</span>
+  <select id="edit_category">
+    ${CATEGORY_ITEMS
+      .map(c => `<option value="${escapeHtml(c)}" ${c === (show?.category || "") ? "selected" : ""}>${escapeHtml(c)}</option>`)
+      .join("")}
+  </select>
+</label>
           <label class="field">
             <span>Status</span>
             <select id="edit_status">
@@ -2344,6 +2351,28 @@ function setInlineEditMode(on) {
     EDIT_STUDIO_SELECT = null;
     EDIT_PLATFORM_SELECT= null
   }
+// ===== CTRL+F: INLINE CATEGORY CHANGE LISTENER =====
+setTimeout(() => {
+  const catSel = el("edit_category");
+  if (!catSel) return;
+
+  catSel.addEventListener("change", () => {
+    if (!CURRENT_SHOW) return;
+
+    // update CURRENT_SHOW temporarily so the edit UI can re-render correctly
+    CURRENT_SHOW = { ...CURRENT_SHOW, category: catSel.value };
+
+    // re-render edit blocks so Anime-only fields appear/disappear
+    renderShowDetailBlocks(CURRENT_SHOW, "edit");
+
+    // re-init the tag dropdowns because re-render nukes the DOM
+    initInlineTagEditors().catch(console.error);
+
+    // update fetch button label/visibility if you’re using it
+    updateFetchButtonLabel();
+  });
+}, 0);
+  
 }
 
 async function initInlineTagEditors() {
@@ -2432,6 +2461,7 @@ async function saveInlineEdits() {
   }
 
   const payload = {
+    category: el("edit_category")?.value || CURRENT_SHOW.category,
     status: el("edit_status")?.value || CURRENT_SHOW.status,
     ongoing: el("edit_ongoing")?.value || null,
     show_type: el("edit_show_type")?.value || null,
@@ -2457,7 +2487,11 @@ async function saveInlineEdits() {
     description: el("edit_description")?.value?.trim() || null,
     notes: el("edit_notes")?.value?.trim() || null
   };
-
+const newCategory = payload.category;
+if (newCategory !== "Anime") {
+  payload.ovas = null;
+  payload.ova_length_min = null;
+}
   const { error } = await supabase
     .from("shows")
     .update(payload)
