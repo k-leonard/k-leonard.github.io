@@ -806,7 +806,7 @@ input[type="checkbox"]{
   border-radius: 10px;
   border: none;
 
-  background: #1f2937;        /* match rail-arrow */
+  background: #1f2937;        /* match -arrow */
   color: #ffffff;
 
   font-size: 20px;            /* bigger X */
@@ -993,7 +993,7 @@ input[type="checkbox"]{
   padding: 16px 18px 18px;
   border: 1px solid #e9ecf4;
   box-shadow: 0 4px 18px rgba(0,0,0,0.04);
-  padding-right: 120px;
+  padding-right: 190px;
 }
 
 .rail-head {
