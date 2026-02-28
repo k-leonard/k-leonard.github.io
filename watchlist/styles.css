@@ -797,18 +797,37 @@ input[type="checkbox"]{
 }
 
 /* Close icon button */
+/* Close icon button (make it more noticeable) */
 .iconBtn{
-  border: 0;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  padding: 0;                 /* override your 6px 10px */
+  border-radius: 10px;
+  border: none;
+
+  background: #1f2937;        /* match rail-arrow */
+  color: #ffffff;
+
+  font-size: 20px;            /* bigger X */
+  font-weight: 800;           /* bolder X */
   line-height: 1;
-  padding: 6px 10px;
-  border-radius: 8px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background 150ms ease, transform 120ms ease;
 }
 
 .iconBtn:hover{
-  background: rgba(0,0,0,0.06);
+  background: #111827;
+  transform: scale(1.05);
+}
+
+.iconBtn:focus-visible{
+  outline: 3px solid rgba(47,111,237,0.35); /* your --primary-ish */
+  outline-offset: 2px;
 }
 
 /* If you use "btn" classes anywhere */
