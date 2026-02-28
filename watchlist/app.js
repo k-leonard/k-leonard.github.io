@@ -982,36 +982,46 @@ function setupAddShowModal() {
       if (typeof ensureOptionRowsLoaded === "function") {
         await ensureOptionRowsLoaded();
       }
+      ADD_PLATFORM_SELECT?.setRows(await loadOptionRows("platforms"));
+ADD_GENRE_SELECT?.setRows(await loadOptionRows("genres"));
+ADD_TROPE_SELECT?.setRows(await loadOptionRows("tropes"));
+ADD_STUDIO_SELECT?.setRows(await loadOptionRows("studios"));
+
+// clear on open
+ADD_PLATFORM_SELECT?.setSelectedRows([]);
+ADD_GENRE_SELECT?.setSelectedRows([]);
+ADD_TROPE_SELECT?.setSelectedRows([]);
+ADD_STUDIO_SELECT?.setSelectedRows([]);
     // Create selects once
-if (!ADD_GENRE_SELECT) {
-  ADD_GENRE_SELECT = setupDbMultiSelect({
-    buttonId: "genreBtn",
-    menuId: "genreMenu",
-    chipsId: "genreChips",
-    tableName: "genres"
-  });
+// if (!ADD_GENRE_SELECT) {
+//   ADD_GENRE_SELECT = setupDbMultiSelect({
+//     buttonId: "genreBtn",
+//     menuId: "genreMenu",
+//     chipsId: "genreChips",
+//     tableName: "genres"
+//   });
 
-  ADD_TROPE_SELECT = setupDbMultiSelect({
-    buttonId: "tropeBtn",
-    menuId: "tropeMenu",
-    chipsId: "tropeChips",
-    tableName: "tropes"
-  });
+//   ADD_TROPE_SELECT = setupDbMultiSelect({
+//     buttonId: "tropeBtn",
+//     menuId: "tropeMenu",
+//     chipsId: "tropeChips",
+//     tableName: "tropes"
+//   });
 
-  ADD_STUDIO_SELECT = setupDbMultiSelect({
-    buttonId: "studioBtn",
-    menuId: "studioMenu",
-    chipsId: "studioChips",
-    tableName: "studios"
-  });
+//   ADD_STUDIO_SELECT = setupDbMultiSelect({
+//     buttonId: "studioBtn",
+//     menuId: "studioMenu",
+//     chipsId: "studioChips",
+//     tableName: "studios"
+//   });
 
-  ADD_PLATFORM_SELECT = setupDbMultiSelect({
-    buttonId: "platformBtn",
-    menuId: "platformMenu",
-    chipsId: "platformChips",
-    tableName: "platforms"
-  });
-}
+//   ADD_PLATFORM_SELECT = setupDbMultiSelect({
+//     buttonId: "platformBtn",
+//     menuId: "platformMenu",
+//     chipsId: "platformChips",
+//     tableName: "platforms"
+//   });
+// }
 
 // Load rows (fresh or cached)
 const [gRows, tRows, sRows, pRows] = await Promise.all([
@@ -2463,7 +2473,7 @@ async function saveInlineEdits() {
     const genreIds  = EDIT_GENRE_SELECT ? EDIT_GENRE_SELECT.getIds() : null;
     const tropeIds  = EDIT_TROPE_SELECT ? EDIT_TROPE_SELECT.getIds() : null;
     const studioIds = EDIT_STUDIO_SELECT ? EDIT_STUDIO_SELECT.getIds() : null;
-
+const platformIds = EDIT_PLATFORM_SELECT ? EDIT_PLATFORM_SELECT.getIds() : null;
     // Only run if the edit dropdowns exist (edit mode)
     if (genreIds) {
       await replaceJoinRows({
@@ -2484,7 +2494,15 @@ async function saveInlineEdits() {
         ids: tropeIds
       });
     }
-
+if (platformIds) {
+  await replaceJoinRows({
+    joinTable: "show_platforms",
+    user_id,
+    show_id: CURRENT_SHOW.id,
+    fkColumn: "platform_id",
+    ids: platformIds
+  });
+}
     if (studioIds) {
       await replaceJoinRows({
         joinTable: "show_studios",
@@ -3327,34 +3345,60 @@ async function init() {
     tabsRow: !!document.querySelector(".tabsRow")
   });
 
-  const platformSelect = setupDbMultiSelect({
-    buttonId: "platformBtn",
-    menuId: "platformMenu",
-    chipsId: "platformChips",
-    tableName: "platforms"
-  });
+  // const platformSelect = setupDbMultiSelect({
+  //   buttonId: "platformBtn",
+  //   menuId: "platformMenu",
+  //   chipsId: "platformChips",
+  //   tableName: "platforms"
+  // });
 
-  const genreSelect = setupDbMultiSelect({
-    buttonId: "genreBtn",
-    menuId: "genreMenu",
-    chipsId: "genreChips",
-    tableName: "genres"
-  });
+  // const genreSelect = setupDbMultiSelect({
+  //   buttonId: "genreBtn",
+  //   menuId: "genreMenu",
+  //   chipsId: "genreChips",
+  //   tableName: "genres"
+  // });
 
-  const tropeSelect = setupDbMultiSelect({
-    buttonId: "tropeBtn",
-    menuId: "tropeMenu",
-    chipsId: "tropeChips",
-    tableName: "tropes"
-  });
+  // const tropeSelect = setupDbMultiSelect({
+  //   buttonId: "tropeBtn",
+  //   menuId: "tropeMenu",
+  //   chipsId: "tropeChips",
+  //   tableName: "tropes"
+  // });
 
-  const studioSelect = setupDbMultiSelect({
-    buttonId: "studioBtn",
-    menuId: "studioMenu",
-    chipsId: "studioChips",
-    tableName: "studios"
-  });
+  // const studioSelect = setupDbMultiSelect({
+  //   buttonId: "studioBtn",
+  //   menuId: "studioMenu",
+  //   chipsId: "studioChips",
+  //   tableName: "studios"
+  // });
+ADD_PLATFORM_SELECT = setupDbMultiSelect({
+  buttonId: "platformBtn",
+  menuId: "platformMenu",
+  chipsId: "platformChips",
+  tableName: "platforms"
+});
 
+ADD_GENRE_SELECT = setupDbMultiSelect({
+  buttonId: "genreBtn",
+  menuId: "genreMenu",
+  chipsId: "genreChips",
+  tableName: "genres"
+});
+
+ADD_TROPE_SELECT = setupDbMultiSelect({
+  buttonId: "tropeBtn",
+  menuId: "tropeMenu",
+  chipsId: "tropeChips",
+  tableName: "tropes"
+});
+
+ADD_STUDIO_SELECT = setupDbMultiSelect({
+  buttonId: "studioBtn",
+  menuId: "studioMenu",
+  chipsId: "studioChips",
+  tableName: "studios"
+});
   const starUI = setupStarRating({
     containerId: "ratingStars",
     inputId: "my_rating",
@@ -3362,7 +3406,7 @@ async function init() {
   });
 
   setupAddShowModal();
-wireShowDetailButtons();
+//wireShowDetailButtons();
   wireFetchButtons()
 
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
@@ -3490,10 +3534,14 @@ if (duplicate) {
 
     const ok =  await addShow(
       new FormData(form),
-      platformSelect.getIds(),
-      genreSelect.getIds(),
-      tropeSelect.getIds(),
-      studioSelect.getIds()
+      ADD_PLATFORM_SELECT.getIds(),
+ADD_GENRE_SELECT.getIds(),
+ADD_TROPE_SELECT.getIds(),
+ADD_STUDIO_SELECT.getIds()
+      // platformSelect.getIds(),
+      // genreSelect.getIds(),
+      // tropeSelect.getIds(),
+      // studioSelect.getIds()
     );
 
 if (ok) {
@@ -3502,10 +3550,14 @@ if (ok) {
 }
     form.reset();
     starUI.clear();
-    platformSelect.clear();
-    genreSelect.clear();
-    tropeSelect.clear();
-    studioSelect.clear();
+    ADD_PLATFORM_SELECT.clear();
+ADD_GENRE_SELECT.clear();
+ADD_TROPE_SELECT.clear();
+ADD_STUDIO_SELECT.clear();
+    // platformSelect.clear();
+    // genreSelect.clear();
+    // tropeSelect.clear();
+    // studioSelect.clear();
     syncOvaVisibility();
 
     await loadShows();
