@@ -987,12 +987,18 @@ input[type="checkbox"]{
    - Currently Watching, Recently Added, Random
    ========================================================= */
 
-.rail {
+.rail{
   background: #f3f5fb;
   border-radius: 18px;
-  padding: 18px 22px 20px;
   border: 1px solid #e2e6f2;
   box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+
+  /* IMPORTANT */
+  width: 100%;
+  box-sizing: border-box;
+
+  /* equal left/right spacing */
+  padding: 18px 22px 20px; /* left/right BOTH 22px */
 }
 
 .home-rails {
