@@ -998,7 +998,7 @@ input[type="checkbox"]{
   box-sizing: border-box;
 
   /* equal left/right spacing */
-  padding: 18px 22px 20px; /* left/right BOTH 22px */
+  padding: 18px 10px 20px; /* left/right BOTH 22px */
 }
 
 .home-rails {
