@@ -984,7 +984,7 @@ input[type="checkbox"]{
   margin-top: 18px;
   display: grid;
   gap: 26px;
-   padding-right: 12px;
+   padding-right: 120px;
 }
 
 .rail {
