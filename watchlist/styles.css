@@ -1014,6 +1014,8 @@ input[type="checkbox"]{
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
+padding: 0;        /* ensure no weird asymmetry */
+  margin: 0 0 10px;  /* keep bottom spacing only */
 }
 
 .rail-head h2 {
@@ -1080,11 +1082,9 @@ input[type="checkbox"]{
 }
 .rail-viewport{
   overflow: hidden;
-  width: calc(
-    (var(--rail-page) * var(--rail-card-w)) +
-    ((var(--rail-page) - 1) * var(--rail-gap))
-  );
+  width: 100%;        /* fill rail inner area */
   max-width: 100%;
+  box-sizing: border-box;
 }
 /* the horizontal track */
 .rail-row{
