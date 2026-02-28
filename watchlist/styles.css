@@ -984,7 +984,7 @@ input[type="checkbox"]{
   margin-top: 18px;
   display: grid;
   gap: 26px;
-
+  padding-right: 190px;
 }
 
 .rail {
@@ -993,7 +993,7 @@ input[type="checkbox"]{
   padding: 16px 18px 18px;
   border: 1px solid #e9ecf4;
   box-shadow: 0 4px 18px rgba(0,0,0,0.04);
-  padding-right: 190px;
+
 }
 
 .rail-head {
