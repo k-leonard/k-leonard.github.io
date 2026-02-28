@@ -2675,6 +2675,7 @@ if (factsEl) {
   }
 
   CURRENT_SHOW = data;
+  renderShowDangerZone(CURRENT_SHOW);
 const fetchBtn = el("fetchAnimeBtn");
 const editMsg = el("editMsg");
 }
