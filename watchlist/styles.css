@@ -999,7 +999,6 @@ input[type="checkbox"]{
 
   /* equal left/right spacing */
   padding: 18px 22px 20px; /* left/right BOTH 22px */
-    padding-right: 28px 
 }
 
 .home-rails {
@@ -1015,8 +1014,6 @@ input[type="checkbox"]{
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
-padding: 0;        /* ensure no weird asymmetry */
-  margin: 0 0 10px;  /* keep bottom spacing only */
 }
 
 .rail-head h2 {
@@ -1083,11 +1080,11 @@ padding: 0;        /* ensure no weird asymmetry */
 }
 .rail-viewport{
   overflow: hidden;
-   width: calc(
+  width: calc(
     (var(--rail-page) * var(--rail-card-w)) +
     ((var(--rail-page) - 1) * var(--rail-gap))
-  );     /* fill rail inner area */
-  box-sizing: border-box;
+  );
+  max-width: 100%;
 }
 /* the horizontal track */
 .rail-row{
