@@ -458,8 +458,6 @@ input[type="checkbox"]{
 
   transform: translateX(102%);
   transition: transform 180ms ease;
-
-  padding: 14px;
   overflow: auto;
 }
 
@@ -472,8 +470,9 @@ input[type="checkbox"]{
   top: 0;
   z-index: 1;
   background: #f7f8fc;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
+
+  padding: 14px;      /* instead of only padding-bottom */
+  margin: 0;          /* remove margin gap */
   border-bottom: 1px solid #e5e7eb;
 
   display: flex;
@@ -486,6 +485,7 @@ input[type="checkbox"]{
   display: flex;
   flex-direction: column;
   gap: 10px;
+   .filters-drawer__body{
 }
 
 .filters-drawer select[multiple]{
