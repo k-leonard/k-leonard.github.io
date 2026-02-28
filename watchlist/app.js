@@ -1678,7 +1678,9 @@ function collectionCardHTML(r) {
 function getCollectionRows() {
   const group = el("collectionGroup")?.value || "";
   const sort = el("collectionSort")?.value || "recent";
-
+   // ✅ NEW: recently added filter dropdown (you said HTML value is "recently_added")
+  const recently = el("recently_added")?.value || ""; 
+  // expected values could be: "" (any), "7", "14", "30" etc — see notes below
   let rows = (ALL_SHOWS_CACHE || []).slice();
   if (group) rows = rows.filter(r => r.category === group);
 
@@ -1692,7 +1694,13 @@ function getCollectionRows() {
       const bd = b.release_date ? Date.parse(b.release_date) : (sort === "release_oldest" ? Infinity : -Infinity);
       return (sort === "release_oldest") ? (ad - bd) : (bd - ad);
     });
-  } else {
+    } else if (sort === "recently_added") {
+    // newest created_at first
+    rows.sort((a, b) => {
+      const ac = a.created_at ? Date.parse(a.created_at) : -Infinity;
+      const bc = b.created_at ? Date.parse(b.created_at) : -Infinity;
+      return bc - ac;
+    }); } else {
     rows.sort((a, b) => {
       const aw = a.last_watched ? Date.parse(a.last_watched) : -Infinity;
       const bw = b.last_watched ? Date.parse(b.last_watched) : -Infinity;
