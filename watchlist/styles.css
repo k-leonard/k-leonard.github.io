@@ -561,6 +561,7 @@ input[type="checkbox"]{
 .collection-grid{
   display: grid;
   gap: 14px;
+   margin-top: 16px; 
 }
 
 /* View modes */
