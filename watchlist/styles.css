@@ -999,6 +999,7 @@ input[type="checkbox"]{
 
   /* equal left/right spacing */
   padding: 18px 22px 20px; /* left/right BOTH 22px */
+    padding-right: 28px 
 }
 
 .home-rails {
@@ -1082,8 +1083,10 @@ padding: 0;        /* ensure no weird asymmetry */
 }
 .rail-viewport{
   overflow: hidden;
-  width: 100%;        /* fill rail inner area */
-  max-width: 100%;
+   width: calc(
+    (var(--rail-page) * var(--rail-card-w)) +
+    ((var(--rail-page) - 1) * var(--rail-gap))
+  );     /* fill rail inner area */
   box-sizing: border-box;
 }
 /* the horizontal track */
