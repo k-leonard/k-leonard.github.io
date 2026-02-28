@@ -1,7 +1,8 @@
 # checklist of things to do for this project
- 
 
-- [ ] make it so you can add a date to the MAL look up
+- [x] enable recently added filter in collection
+- [x] add in ability to edit what type of show a show is in the detail editor
+- [x] add back in the delete show modal bc that got lost somewhere
 
 - [ ] over all fix aesthetic, looks kinda mental hospitcal core right now
     *  decide on aethetic. Dark anime aesthetic? Clean AO3 aesthetic? Or modern glass UI?
@@ -9,8 +10,8 @@
     *  add slight shadow depth
     *  add a subtle border glow
     *  shift main content slightly right when drawer opens (like Notion)
+     
 - [ ] maybe do implement a recommender system on the home page but like WAY later down the line
-
 - [ ] add in all of my current shows BUT BEFORE DOING THAT WIPE EVERYTHING CLEAN SO WE START WITH ID OF 1 
 
 
@@ -51,3 +52,7 @@
       -partly through this, need to create "recently added" filter for the collection and fix the view all redirects on the front page
 
 - [x] make it so shows that are "non-anime" do gave their own button/API to auto fill information
+- [x] make it so you can add a date to the MAL look up
+- [x] make home page cards clickable
+- [x] fix add show studio/platform drop downs
+- [x] fix detail editor to allow editing of platform
