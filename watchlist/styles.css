@@ -983,12 +983,16 @@ input[type="checkbox"]{
 .home-rails {
   margin-top: 18px;
   display: grid;
-  gap: 18px;
+  gap: 26px;
+   
 }
 
 .rail {
-  background: var(--panel, transparent);
-  border-radius: 14px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px 18px 18px;
+  border: 1px solid #e9ecf4;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.04);
 }
 
 .rail-head {
