@@ -2841,7 +2841,8 @@ function wireFetchButtons() {
         const { error } = await supabase
           .from("shows")
           .update(updatePayload)
-          .eq("id", CURRENT_SHOW.id);
+          .eq("id", CURRENT_SHOW.id)
+          .select();
 
         if (error) throw error;
 
@@ -2894,7 +2895,13 @@ function wireFetchButtons() {
       await loadShows();
     }
     catch (err) {
-      console.error("[FETCH ERROR]", err);
+       console.error("[FETCH ERROR FULL]", {
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+    code: error.code,
+    attemptedTitle: updatePayload?.title
+  });
       if (editMsg) editMsg.textContent =
         `Fetch failed: ${err.message || err}`;
     }
