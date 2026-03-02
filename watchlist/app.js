@@ -1257,7 +1257,13 @@ function route() {
   }
 
   if (name === "browse") rerenderFiltered();
-  if (name === "collection") renderCollection();
+  if (name === "collection") {
+  renderCollection();
+
+  // ✅ restore scroll after DOM updates
+  const y = Number(sessionStorage.getItem("scroll:#collection") || "0");
+  setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "auto" }), 0);
+}
 
   snap("after route()");
 }
@@ -1802,6 +1808,7 @@ function wireCollectionClicks() {
     if (!card) return;
     e2.preventDefault();
     const id = card.dataset.id;
+      sessionStorage.setItem("scroll:#collection", String(window.scrollY || 0));
     window.location.hash = `#show?id=${id}`;
     route();
   });
