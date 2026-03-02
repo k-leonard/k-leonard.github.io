@@ -2896,10 +2896,10 @@ function wireFetchButtons() {
     }
     catch (err) {
        console.error("[FETCH ERROR FULL]", {
-    message: error.message,
-    details: error.details,
-    hint: error.hint,
-    code: error.code,
+    message: err.message,
+    details: err.details,
+    hint: err.hint,
+    code: err.code,
     attemptedTitle: updatePayload?.title
   });
       if (editMsg) editMsg.textContent =
