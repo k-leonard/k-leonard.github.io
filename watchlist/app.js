@@ -2919,14 +2919,13 @@ attemptedTitle = updatePayload.title ?? (CURRENT_SHOW?.title ?? null);
     }
   };
 }
-
 async function appendTagNames(type, names, user_id) {
   if (!Array.isArray(names) || !names.length) return;
 
   const joinMap = {
-    studios:  { join: "show_studios",  fk: "studio_id",  table: "studios" },
-    genres:   { join: "show_genres",   fk: "genre_id",   table: "genres" },
-    tropes:   { join: "show_tropes",   fk: "trope_id",   table: "tropes" }
+    studios: { join: "show_studios", fk: "studio_id", table: "studios" },
+    genres:  { join: "show_genres",  fk: "genre_id",  table: "genres" },
+    tropes:  { join: "show_tropes",  fk: "trope_id",  table: "tropes" }
   };
 
   const cfg = joinMap[type];
@@ -2935,16 +2934,56 @@ async function appendTagNames(type, names, user_id) {
   for (const name of names) {
     const row = await getOrCreateOptionRow(cfg.table, name);
     if (!row) continue;
-    
-    await supabase
+
+    const payload = {
+      user_id,
+      show_id: CURRENT_SHOW?.id,
+      [cfg.fk]: row.id
+    };
+
+    const { error } = await supabase
       .from(cfg.join)
-      .upsert({
-        user_id,
-        show_id: CURRENT_SHOW.id,
-        [cfg.fk]: row.id
-      }, { onConflict: "user_id,show_id," + cfg.fk });
+      .upsert(payload, { onConflict: `user_id,show_id,${cfg.fk}` })
+      .select();
+
+    if (error) {
+      console.error("[APPEND TAG UPSERT FAILED]", {
+        type,
+        joinTable: cfg.join,
+        payload,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+    }
   }
 }
+// async function appendTagNames(type, names, user_id) {
+//   if (!Array.isArray(names) || !names.length) return;
+
+//   const joinMap = {
+//     studios:  { join: "show_studios",  fk: "studio_id",  table: "studios" },
+//     genres:   { join: "show_genres",   fk: "genre_id",   table: "genres" },
+//     tropes:   { join: "show_tropes",   fk: "trope_id",   table: "tropes" }
+//   };
+
+//   const cfg = joinMap[type];
+//   if (!cfg) return;
+
+//   for (const name of names) {
+//     const row = await getOrCreateOptionRow(cfg.table, name);
+//     if (!row) continue;
+    
+//     await supabase
+//       .from(cfg.join)
+//       .upsert({
+//         user_id,
+//         show_id: CURRENT_SHOW.id,
+//         [cfg.fk]: row.id
+//       }, { onConflict: "user_id,show_id," + cfg.fk });
+//   }
+// }
 function wireForgotPassword() {
   const forgotBtn = el("forgotBtn"); // <-- make sure this exists in HTML
   const loginErr = el("loginError") || el("authMsg") || el("msg");
