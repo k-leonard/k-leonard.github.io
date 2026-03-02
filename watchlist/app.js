@@ -1700,14 +1700,25 @@ function getCollectionRows() {
       const ac = a.created_at ? Date.parse(a.created_at) : -Infinity;
       const bc = b.created_at ? Date.parse(b.created_at) : -Infinity;
       return bc - ac;
-    }); } else {
+    }); } } else if (sort === "recent") {
+  // recently watched (newest last_watched first; tie-break by created_at)
+  rows.sort((a, b) => {
+    const aw = a.last_watched ? Date.parse(a.last_watched) : -Infinity;
+    const bw = b.last_watched ? Date.parse(b.last_watched) : -Infinity;
+    if (bw !== aw) return bw - aw;
+
+    const ac = a.created_at ? Date.parse(a.created_at) : -Infinity;
+    const bc = b.created_at ? Date.parse(b.created_at) : -Infinity;
+    return bc - ac;
+  });
+} else {
     rows.sort((a, b) => {
       const aw = a.last_watched ? Date.parse(a.last_watched) : -Infinity;
       const bw = b.last_watched ? Date.parse(b.last_watched) : -Infinity;
       if (bw !== aw) return bw - aw;
 
-      const ac = a.created_at ? Date.parse(a.created_at) : 0;
-      const bc = b.created_at ? Date.parse(b.created_at) : 0;
+      const ac = a.created_at ? Date.parse(a.created_at) : -Infinity;
+const bc = b.created_at ? Date.parse(b.created_at) : -Infinity;
       return bc - ac;
     });
   }
