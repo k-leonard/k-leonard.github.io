@@ -2785,7 +2785,9 @@ function wireFetchButtons() {
   // IMPORTANT: using onclick replaces any previous handler (no stacking)
   fetchBtn.onclick = async () => {
     if (!CURRENT_SHOW) return;
-
+    let attemptedTitle = null;
+let attemptedPayload = null;
+let attemptedShowId = CURRENT_SHOW?.id ?? null;
     console.log("[FETCH] clicked", {
       id: CURRENT_SHOW.id,
       title: CURRENT_SHOW.title,
@@ -2833,11 +2835,12 @@ function wireFetchButtons() {
           description: info.description,
           release_date: info.release_date
         };
-
+        
         if (info.canonical_title) {
           updatePayload.title = info.canonical_title;
         }
-
+attemptedPayload = updatePayload;
+attemptedTitle = updatePayload.title ?? (CURRENT_SHOW?.title ?? null);
         const { error } = await supabase
           .from("shows")
           .update(updatePayload)
@@ -2875,7 +2878,8 @@ function wireFetchButtons() {
         if (info.canonical_title) {
           updatePayload.title = info.canonical_title;
         }
-
+attemptedPayload = updatePayload;
+attemptedTitle = updatePayload.title ?? (CURRENT_SHOW?.title ?? null);
         const { error } = await supabase
           .from("shows")
           .update(updatePayload)
@@ -2895,16 +2899,21 @@ function wireFetchButtons() {
       await loadShows();
     }
     catch (err) {
-       console.error("[FETCH ERROR FULL]", {
-    message: err.message,
-    details: err.details,
-    hint: err.hint,
-    code: err.code,
-    attemptedTitle: updatePayload?.title
+  console.error("[FETCH ERROR FULL]", {
+    showId: attemptedShowId,
+    beforeTitle: CURRENT_SHOW?.title ?? null,
+    attemptedTitle,
+    attemptedPayload,
+    message: err?.message,
+    details: err?.details,
+    hint: err?.hint,
+    code: err?.code,
+    raw: err
   });
-      if (editMsg) editMsg.textContent =
-        `Fetch failed: ${err.message || err}`;
-    }
+
+  if (editMsg) editMsg.textContent =
+    `Fetch failed: ${err?.message || err}`;
+}
     finally {
       fetchBtn.disabled = false;
     }
