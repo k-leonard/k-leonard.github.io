@@ -1260,9 +1260,18 @@ function route() {
   if (name === "collection") {
   renderCollection();
 
-  // ✅ restore scroll after DOM updates
-  const y = Number(sessionStorage.getItem("scroll:#collection") || "0");
-  setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "auto" }), 0);
+ const shouldRestore = sessionStorage.getItem("restoreCollectionScroll") === "1";
+  if (shouldRestore) {
+    const y = Number(sessionStorage.getItem("scroll:#collection") || "0");
+
+    // consume the flag so normal tab clicks won't restore
+    sessionStorage.removeItem("restoreCollectionScroll");
+
+    setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "auto" }), 0);
+  } else {
+    // normal “go to collection” behavior: start at top
+    setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }), 0);
+  }
 }
 
   snap("after route()");
@@ -1287,6 +1296,9 @@ function wireTabs() {
 
     e.preventDefault();
     const hash = a.getAttribute("href");
+    if (hash === "#collection") {
+  sessionStorage.removeItem("restoreCollectionScroll");
+}
     window.location.hash = hash;
     route();
   });
@@ -1797,7 +1809,9 @@ function wireCollectionClicks() {
     if (!card) return;
     const id = card?.dataset?.id;
     if (!id) return;
-  sessionStorage.setItem("scroll:#collection", String(window.scrollY || 0));
+  // ✅ save where you were in collection AND mark that we should restore when returning
+sessionStorage.setItem("scroll:#collection", String(window.scrollY || 0));
+sessionStorage.setItem("restoreCollectionScroll", "1");
     window.location.hash = `#show?id=${id}`;
     route();
   });
