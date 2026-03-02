@@ -1700,7 +1700,7 @@ function getCollectionRows() {
       const ac = a.created_at ? Date.parse(a.created_at) : -Infinity;
       const bc = b.created_at ? Date.parse(b.created_at) : -Infinity;
       return bc - ac;
-    }); } } else if (sort === "recent") {
+    }); } else if (sort === "recent") {
   // recently watched (newest last_watched first; tie-break by created_at)
   rows.sort((a, b) => {
     const aw = a.last_watched ? Date.parse(a.last_watched) : -Infinity;
