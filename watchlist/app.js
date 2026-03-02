@@ -1252,6 +1252,7 @@ function route() {
   if (name === "show") {
     const params = new URLSearchParams(raw.split("?")[1] || "");
     const id = params.get("id");
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     if (id) loadShowDetail(Number(id));
   }
 
