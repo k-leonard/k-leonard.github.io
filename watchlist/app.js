@@ -3388,7 +3388,10 @@ async function init() {
     return;
   }
   window.__WATCHLIST_INIT_RAN = true;
-
+// ✅ prevent browser from auto-restoring scroll on back/forward
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
   d("init() starting");
   snap("init start");
 
