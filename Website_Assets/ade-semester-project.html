@@ -213,41 +213,51 @@
  </ul>
       </p>
 
-      <h3>Key Components</h3>
-      <ul>
-        <li>
-          <strong>Automated Ingestion (Airflow):</strong>
-          Developed multiple DAGs to extract rider and fare data from APIs and export to MinIO (S3) as JSON/Parquet.
-          Tasks used <code>CronDataIntervalTimetable</code> for precise scheduling and custom logging for traceability.
-        </li>
-        <li>
-          <strong>Warehouse Design (PostgreSQL):</strong>
-          Created a star-schema warehouse with dimension tables for riders, passengers, fare types, stations, rides, and segments,
-          and fact tables for ridership, fares, and durations. Schema evolved to accommodate new features like tap pairing and fare linking.
-        </li>
-        <li>
-          <strong>Transform &amp; Load:</strong>
-          Airflow and PostgresHook handled extraction from S3, data normalization, and incremental upserts.
-          Type-2 dimension tracking and timezone alignment ensured historical consistency and accuracy across DuckDB and PostgreSQL.
-        </li>
-        <li>
-          <strong>Analytical Workflows:</strong>
-          Designed “Business Questions” that guided warehouse logic and analytics:
-          <ol>
-            <li>Daily and peak ridership patterns</li>
-            <li>Fare type equity and distribution</li>
-            <li>Ride durations and flow between stations</li>
-            <li>High-traffic segments and congestion</li>
-            <li>Real-time wait times via Kafka event streams</li>
-          </ol>
-        </li>
-        <li>
-          <strong>Dashboards (Grafana):</strong>
-          Built interactive dashboards to display key metrics:
-          ridership over time, fare type usage, segment congestion, and equity indicators.
-          Iterative design feedback led to improved labeling, cleaner comparisons, and standardized color schemes.
-        </li>
-      </ul>
+     <h3>Key Components</h3>
+<ul>
+  <li>
+    <strong>Data Ingestion & Integration (Airflow):</strong>
+    Built automated DAGs to ingest and unify data from REST APIs (ridership and fares), Kafka streams (real-time train events), MongoDB collections (station metadata and overrides), and parquet datasets stored in S3 (MinIO).
+    Implemented <code>CronDataIntervalTimetable</code> for precise scheduling and custom logging to ensure traceability and reliable data movement across sources.
+  </li>
+
+  <li>
+    <strong>Data Validation & Reliability:</strong>
+    Developed validation checks to monitor missing or incomplete ride records, timestamp inconsistencies, timezone drift, schema mismatches, and data completeness across daily loads.
+    These checks improved trust in downstream analytics and reduced silent data failures.
+  </li>
+
+  <li>
+    <strong>Warehouse Design (PostgreSQL):</strong>
+    Designed a star-schema warehouse with dimension tables for riders, passengers, fare types, stations, and segments, and fact tables for ridership, fares, ride durations, segment traffic, and wait times.
+    Implemented Type-2 slowly changing dimensions, incremental upserts, and ensured consistency between DuckDB and PostgreSQL.
+  </li>
+
+  <li>
+    <strong>Transformation & Feature Engineering:</strong>
+    Built Airflow and SQL workflows to pair entry/exit taps into complete ride records, compute ride durations, and generate station-to-station segments using graph-based logic (<code>NetworkX</code>).
+    Engineered time-based and behavioral features (intervals, peak periods) to support time-series and flow analysis.
+  </li>
+
+  <li>
+    <strong>Analytical Workflows:</strong>
+    Wrote complex SQL queries to validate transformations, investigate data discrepancies, and analyze ridership trends, congestion, and fare distribution.
+    Key analyses included:
+    <ol>
+      <li>Daily and peak ridership patterns</li>
+      <li>Fare type equity and distribution</li>
+      <li>Ride durations and station-to-station flow</li>
+      <li>High-traffic segments and congestion</li>
+      <li>Real-time wait times via Kafka event streams</li>
+    </ol>
+  </li>
+
+  <li>
+    <strong>Dashboards & Reporting (Grafana):</strong>
+    Designed interactive dashboards to visualize ridership trends, fare usage, segment congestion, and real-time wait time metrics.
+    Iterated on design to improve clarity, standardize visuals, and communicate system performance effectively to stakeholders.
+  </li>
+</ul>
 
       <h3>Milestone Highlights</h3>
       <ul>
