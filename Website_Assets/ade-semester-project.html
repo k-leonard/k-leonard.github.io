@@ -146,9 +146,11 @@
     <section class="project-section">
       <h2>Overview</h2>
       <p>
-        This project delivers an end-to-end data pipeline for analyzing public transportation ridership and fare data.
+        This project delivers a production-style data platform for analyzing public transportation ridership, fare usage, and system performance.
         The system ingests, processes, and visualizes daily rider behavior and fare usage trends using Airflow, PostgreSQL, and Grafana.
         The goal was to support data-driven decisions around fare policy, rider equity, and system performance while practicing real-world data engineering techniques.
+         The pipeline processes 15,000+ metro ride records alongside real-time train event streams, integrating multiple data sources into a centralized warehouse for analytics and reporting.
+The system was designed to support data reliability, operational monitoring, and data-driven decision-making, with a focus on reproducibility, validation, and scalability across distributed data sources.
       </p>
     </section>
 
@@ -158,11 +160,12 @@
         <p>
           This was a <strong>class-wide collaborative project</strong> built as part of an advanced data engineering course. 
           Each milestone rotated between teams — meaning that my group would begin a new phase using another team’s previous milestone as our starting point. 
-          While my team (including Tatum, Jon, and mentor Jed) contributed substantially to multiple phases, the nature of this rotation means that 
+          While my team (including Tatum, Jon, and mentor Jed Rembold) contributed substantially to multiple phases, the nature of this rotation means that 
           code ownership was shared and iterative. 
         </p>
         <p>
           Additionally, all work was conducted on our professor’s managed server environment, so I do not have direct access to the full source code or logs. 
+          I am currently attempting to gain access to copies of our work.
           The content presented here reflects my team’s architectural contributions, debugging solutions, and analysis deliverables throughout the project.
         </p>
       </div>
@@ -173,11 +176,13 @@
       <ul>
         <li>Python (pandas, psycopg2, boto3, networkx)</li>
         <li>SQL (PostgreSQL, DuckDB)</li>
-        <li>Apache Airflow (DAG scheduling, dependency management)</li>
+        <li>Apache Airflow (Workflow orchestration, DAG scheduling, dependency management)</li>
+        <li>MongoDB (document-based ingestion)</li>
         <li>Grafana (dashboarding, time-series analytics)</li>
-        <li>Cloud storage with S3 (MinIO)</li>
+        <li>S3 / MinIO (cloud storage, parquet datasets)</li>
         <li>Kafka (real-time event processing)</li>
         <li>GitHub for version control and collaboration</li>
+        
       </ul>
     </section>
 
@@ -189,10 +194,21 @@
 
       <h3>What This Project Is</h3>
       <p>
-        “Riding the Data Pipeline” is a production-style data engineering initiative for a public transit system.
+        “Riding the Data Pipeline” is a production-style data engineering initiative for a public transit system that integrates batch and streaming data sources into a unified analytics platform.
         We built an automated data infrastructure that ingests ridership and fare data, structures it in a relational warehouse,
-        and visualizes system performance through Grafana dashboards. The system simulates real-world data challenges:
-        distributed ingestion, schema evolution, incremental updates, and accurate timestamp handling.
+        and visualizes system performance through Grafana dashboards. 
+
+        The pipeline simulates real-world challenges including:
+
+        <li>Multi-source ingestion (APIs, Kafka, document DBs, parquet files)</li>
+        
+        <li>Incremental data updates and schema evolution</li>
+        
+        <li>Data validation and anomaly detection</li>
+        
+        <li>Timezone consistency across distributed systems</li>
+        
+        <li>Analytical feature engineering for downstream insights</li>
       </p>
 
       <h3>Key Components</h3>
