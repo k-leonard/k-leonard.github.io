@@ -2530,6 +2530,17 @@ async function saveInlineEdits() {
     description: el("edit_description")?.value?.trim() || null,
     notes: el("edit_notes")?.value?.trim() || null
   };
+    // Auto-fill last_watched when marking as Watched, unless user already entered a date
+  if (payload.status === "Watched" && !payload.last_watched) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    payload.last_watched = today.toISOString().slice(0, 10);
+  }
+
+  // Optional: clear last_watched when moved back to To Be Watched
+  if (payload.status === "To Be Watched") {
+    payload.last_watched = null;
+  }
 const newCategory = payload.category;
 if (newCategory !== "Anime") {
   payload.ovas = null;
