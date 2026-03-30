@@ -281,6 +281,8 @@ async function loadHomeRails() {
 
   const addedPrev  = document.getElementById("recent_added_prev");
   const addedNext  = document.getElementById("recent_added_next");
+  const watchingPrev  = document.getElementById("watching_prev");
+const watchingNext  = document.getElementById("watching_next");
   const randomPrev = document.getElementById("random_prev");
   const randomNext = document.getElementById("random_next");
 
@@ -316,7 +318,7 @@ async function loadHomeRails() {
   // Set up pagers (safe even if buttons missing; setupRailPager returns null/undefined)
   const addedPager  = setupRailPager(railRecentAdded, addedPrev, addedNext, 5);
   const randomPager = setupRailPager(railRandom, randomPrev, randomNext, 5);
-
+const watchingPager = setupRailPager(railCurrentlyWatching, watchingPrev, watchingNext, 5);
   // 1) Recently Added
   const { data: recentAdded, error: err1 } = await supabase
     .from("shows")
@@ -350,7 +352,7 @@ if (err2) {
 }
 
 renderRail(railCurrentlyWatching, watching);
-
+if (watchingPager) watchingPager.reset();
   // 3) Random Picks
   async function loadRandomPicks() {
     const { data, error } = await supabase
