@@ -381,15 +381,17 @@ if (watchingPager) watchingPager.reset();
 }
 
  
-async function fetchShowFromTMDb(query) {
+async function fetchShowFromTMDb(query, opts = {}) {
+  const {
+    releaseDate = null,
+    useReleaseYear = false,
+    showType = null
+  } = opts;
+
   if (!TMDB_API_KEY) throw new Error("Missing TMDB_API_KEY");
-  console.log("[FETCH NON-ANIME] clicked", {
-  id: CURRENT_SHOW?.id,
-  title: CURRENT_SHOW?.title,
-  category: CURRENT_SHOW?.category,
-  show_type: CURRENT_SHOW?.show_type
-});
-  // "multi" search returns movie + tv results
+
+  const wantedYear = useReleaseYear ? extractYearFromDateInput(releaseDate) : null;
+
   const searchUrl =
     `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_API_KEY)}` +
     `&query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`;
@@ -398,11 +400,70 @@ async function fetchShowFromTMDb(query) {
   if (!sres.ok) throw new Error(`TMDb search error: ${sres.status}`);
   const sjson = await sres.json();
 
-  const results = (sjson && sjson.results) ? sjson.results : [];
-  const best = results.find(r => r && (r.media_type === "tv" || r.media_type === "movie"));
-  if (!best) return null;
+  const results = (sjson?.results || [])
+    .filter(r => r && (r.media_type === "tv" || r.media_type === "movie"));
 
-  const mediaType = best.media_type; // "tv" | "movie"
+  if (!results.length) return null;
+
+  function tmdbYear(r) {
+    const date = r.media_type === "tv" ? r.first_air_date : r.release_date;
+    return date ? String(date).slice(0, 4) : null;
+  }
+
+  function wantedMediaTypes(appType) {
+    const t = String(appType || "").toLowerCase();
+    if (t === "movie") return ["movie"];
+    if (t === "tv") return ["tv"];
+    if (t === "tv & movie") return ["tv", "movie"];
+    return null;
+  }
+
+  const wantedTypes = wantedMediaTypes(showType);
+  const queryLower = String(query || "").trim().toLowerCase();
+
+  function score(r) {
+    let s = 0;
+
+    if (wantedTypes) {
+      if (wantedTypes.includes(r.media_type)) s += 8;
+      else s -= 5;
+    }
+
+    if (wantedYear) {
+      const y = tmdbYear(r);
+      if (y === wantedYear) s += 12;
+      else if (y) s -= 4;
+    }
+
+    const title =
+      r.media_type === "tv"
+        ? r.name || r.original_name || ""
+        : r.title || r.original_title || "";
+
+    const titleLower = title.trim().toLowerCase();
+
+    if (titleLower === queryLower) s += 5;
+    else if (titleLower.includes(queryLower)) s += 2;
+
+    if (typeof r.popularity === "number") {
+      s += Math.min(3, r.popularity / 50);
+    }
+
+    return s;
+  }
+
+  let best = results[0];
+  let bestScore = -Infinity;
+
+  for (const r of results) {
+    const sc = score(r);
+    if (sc > bestScore) {
+      bestScore = sc;
+      best = r;
+    }
+  }
+
+  const mediaType = best.media_type;
   const id = best.id;
 
   const detailsUrl =
@@ -426,18 +487,21 @@ async function fetchShowFromTMDb(query) {
   const poster_path = d.poster_path || best.poster_path || null;
   const image_url = poster_path ? `${TMDB_IMG_BASE}${poster_path}` : null;
 
-  const genres = Array.isArray(d.genres) ? d.genres.map(g => g?.name).filter(Boolean) : [];
+  const genres = Array.isArray(d.genres)
+    ? d.genres.map(g => g?.name).filter(Boolean)
+    : [];
 
-  // closest equivalents to "studio"
-  const studios =
-    Array.isArray(d.production_companies) ? d.production_companies.map(c => c?.name).filter(Boolean) : [];
+  const studios = Array.isArray(d.production_companies)
+    ? d.production_companies.map(c => c?.name).filter(Boolean)
+    : [];
 
-  // If you want “network” as studio-like for TV:
-  const networks =
-    Array.isArray(d.networks) ? d.networks.map(n => n?.name).filter(Boolean) : [];
+  const networks = Array.isArray(d.networks)
+    ? d.networks.map(n => n?.name).filter(Boolean)
+    : [];
 
-  const studio_like = [...new Set([...(studios || []), ...(networks || [])])];
+  const studio_like = [...new Set([...studios, ...networks])];
   const description = (d?.overview || "").trim() || null;
+
   return {
     tmdb_id: id,
     media_type: mediaType,
@@ -2815,9 +2879,12 @@ let attemptedShowId = CURRENT_SHOW?.id ?? null;
       if (!user_id) throw new Error("Not authenticated");
       // ===== Read CURRENT form values (this enables "edit then click again") =====
       const titleEl = el("editTitle") || el("titleInput") || el("showTitle"); // use your real id
-      const dateEl  = el("editReleaseDate") || el("releaseDateInput") || el("release_date"); // use your real id
+      const dateEl  =   el("edit_release_date") ||
+  el("editReleaseDate") ||
+  el("releaseDateInput") ||
+  el("release_date"); // use your real id
       const toggleEl = el("useReleaseYearToggle"); // optional, add if you create it
-      const typeEl = el("editType") || el("typeSelect"); // optional
+      const typeEl =  el("edit_show_type") ||el("editType") || el("typeSelect"); // optional
 
       const liveTitle = (titleEl?.value ?? CURRENT_SHOW.title ?? "").trim();
       const liveReleaseDate = (dateEl?.value ?? "").trim();
@@ -2874,7 +2941,11 @@ attemptedTitle = updatePayload.title ?? (CURRENT_SHOW?.title ?? null);
       // =====================================================
       else {
 
-        const info = await fetchShowFromTMDb(CURRENT_SHOW.title);
+        const info = await fetchShowFromTMDb(liveTitle, {
+          releaseDate: liveReleaseDate || CURRENT_SHOW.release_date,
+          useReleaseYear,
+          showType: liveType || CURRENT_SHOW.show_type
+        });
 
         if (!info) {
           if (editMsg) editMsg.textContent = "No show/movie match found.";
