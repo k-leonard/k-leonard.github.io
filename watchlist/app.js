@@ -1037,7 +1037,264 @@ async function fetchAnimeFromJikan(title, opts = {}) {
     canonical_title
   };
 }
+// Map your app's show types to AniList format enum values.
+function normalizeWantedAniListFormats(appType) {
+  if (!appType) return null;
 
+  const type = String(appType).toLowerCase();
+
+  if (type === "tv") {
+    return ["TV", "TV_SHORT"];
+  }
+
+  if (type === "movie") {
+    return ["MOVIE"];
+  }
+
+  if (type === "tv & movie") {
+    return ["TV", "TV_SHORT", "MOVIE"];
+  }
+
+  return null;
+}
+
+// Convert AniList's { year, month, day } object into YYYY-MM-DD.
+function aniListDateToString(date) {
+  if (!date?.year) return null;
+
+  const month = String(date.month ?? 1).padStart(2, "0");
+  const day = String(date.day ?? 1).padStart(2, "0");
+
+  return `${date.year}-${month}-${day}`;
+}
+
+// AniList descriptions can contain HTML formatting.
+function cleanAniListDescription(description) {
+  if (!description) return null;
+
+  const temp = document.createElement("div");
+  temp.innerHTML = description;
+
+  return temp.textContent?.trim() || null;
+}
+// =====================================================
+// ANILIST METADATA PROVIDER
+// =====================================================
+// Searches AniList for an anime title, scores the results,
+// and converts the selected result into the same normalized
+// shape currently returned by fetchAnimeFromJikan().
+//
+// This function is not active yet. We will test it first.
+async function fetchAnimeFromAniList(title, opts = {}) {
+  const {
+    releaseDate = null,
+    useReleaseYear = false,
+    showType = null
+  } = opts;
+
+  const query = `
+    query SearchAnime($search: String!, $page: Int!, $perPage: Int!) {
+      Page(page: $page, perPage: $perPage) {
+        media(search: $search, type: ANIME) {
+          id
+          idMal
+
+          title {
+            romaji
+            english
+            native
+            userPreferred
+          }
+
+          synonyms
+          description(asHtml: false)
+          format
+          status
+          episodes
+          duration
+          popularity
+
+          startDate {
+            year
+            month
+            day
+          }
+
+          coverImage {
+            extraLarge
+            large
+            medium
+          }
+
+          genres
+
+          tags {
+            name
+            category
+            rank
+            isGeneralSpoiler
+            isMediaSpoiler
+            isAdult
+          }
+
+          studios(isMain: true) {
+            nodes {
+              id
+              name
+            }
+          }
+
+          siteUrl
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    search: title,
+    page: 1,
+    perPage: 10
+  };
+
+  const response = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query,
+      variables
+    })
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || result.errors?.length) {
+    const message =
+      result.errors?.map(error => error.message).join("; ") ||
+      `AniList error: ${response.status}`;
+
+    throw new Error(message);
+  }
+
+  const results = result.data?.Page?.media ?? [];
+
+  if (!results.length) {
+    return null;
+  }
+
+  const wantedYear = useReleaseYear
+    ? extractYearFromDateInput(releaseDate)
+    : null;
+
+  const wantedFormats = normalizeWantedAniListFormats(showType);
+  const queryLower = String(title || "").trim().toLowerCase();
+
+  function score(anime) {
+    let value = 0;
+
+    // Prefer the requested TV/movie format.
+    if (wantedFormats && anime?.format) {
+      if (wantedFormats.includes(anime.format)) {
+        value += 6;
+      } else {
+        value -= 3;
+      }
+    }
+
+    // Prefer the requested release year.
+    if (wantedYear && anime?.startDate?.year) {
+      if (String(anime.startDate.year) === wantedYear) {
+        value += 8;
+      } else {
+        value -= 2;
+      }
+    }
+
+    // Compare all known titles.
+    const candidateTitles = [
+      anime?.title?.english,
+      anime?.title?.romaji,
+      anime?.title?.native,
+      anime?.title?.userPreferred,
+      ...(anime?.synonyms ?? [])
+    ]
+      .map(value => String(value || "").trim().toLowerCase())
+      .filter(Boolean);
+
+    if (candidateTitles.some(candidate => candidate === queryLower)) {
+      value += 5;
+    }
+
+    if (candidateTitles.some(candidate => candidate.includes(queryLower))) {
+      value += 2;
+    }
+
+    // Small popularity-based tie breaker.
+    if (typeof anime?.popularity === "number") {
+      value += Math.min(2, anime.popularity / 500000);
+    }
+
+    return value;
+  }
+
+  let best = results[0];
+  let bestScore = -Infinity;
+
+  for (const anime of results) {
+    const candidateScore = score(anime);
+
+    if (candidateScore > bestScore) {
+      best = anime;
+      bestScore = candidateScore;
+    }
+  }
+
+  const release_date = aniListDateToString(best.startDate);
+
+  const studios = (best.studios?.nodes ?? [])
+    .map(studio => studio?.name)
+    .filter(Boolean);
+
+  const genres = [...(best.genres ?? [])];
+
+  // For now, AniList tags are mapped to your existing "themes" output.
+  // Your active fetch handler currently saves themes into the tropes table.
+  const themes = (best.tags ?? [])
+    .filter(tag =>
+      tag.rank >= 60 &&
+      !tag.isAdult &&
+      !tag.isGeneralSpoiler &&
+      !tag.isMediaSpoiler
+    )
+    .map(tag => tag.name)
+    .filter(Boolean);
+
+  const canonical_title =
+    best.title?.english?.trim() ||
+    best.title?.romaji?.trim() ||
+    best.title?.userPreferred?.trim() ||
+    null;
+
+  return {
+    anilist_id: best.id ?? null,
+    mal_id: best.idMal ?? null,
+
+    image_url:
+      best.coverImage?.extraLarge ||
+      best.coverImage?.large ||
+      best.coverImage?.medium ||
+      null,
+
+    description: cleanAniListDescription(best.description),
+    release_date,
+    studios,
+    genres,
+    themes,
+    canonical_title
+  };
+}
 // =====================================================
 // ANIME METADATA PROVIDER
 // =====================================================
