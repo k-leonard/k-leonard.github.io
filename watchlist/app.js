@@ -1307,7 +1307,7 @@ window.fetchAnimeFromAniList = fetchAnimeFromAniList;
 // Later, we will swap the implementation to AniList without
 // rewriting wireFetchButtons(), Supabase updates, or tag handling.
 async function fetchAnimeMetadata(title, opts = {}) {
-  return fetchAnimeFromJikan(title, opts);
+  return fetchAnimeFromAniList(title, opts);
 }
 // -----------------------------------------------------------------------------
 // [MIGRATION:JIKAN->ANILIST] END — JIKAN-SPECIFIC MATCHING AND NORMALIZATION
