@@ -3239,11 +3239,11 @@ let attemptedShowId = CURRENT_SHOW?.id ?? null;
 
         const updatePayload = {
           // [DATABASE SCHEMA] Add `anilist_id` separately; do not store it in mal_id.
-           anilist_id: info.anilist_id,
-          mal_id: info.mal_id,
-          image_url: info.image_url,
-          description: info.description,
-          release_date: info.release_date
+            anilist_id: info.anilist_id ?? CURRENT_SHOW.anilist_id ?? null,
+  mal_id: info.mal_id ?? CURRENT_SHOW.mal_id ?? null,
+  image_url: info.image_url ?? CURRENT_SHOW.image_url ?? null,
+  description: CURRENT_SHOW.description || info.description || null,
+  release_date: CURRENT_SHOW.release_date || info.release_date || null
         };
         
         if (info.canonical_title) {
