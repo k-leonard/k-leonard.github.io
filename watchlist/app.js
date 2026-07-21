@@ -883,7 +883,7 @@ async function fetchAnimeFromJikan(title, opts = {}) {
     showType = null         // "TV" / "Movie" / "TV & Movie" (optional)
   } = opts;
 
-  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=10`;
+  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=10`; 
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
   const json = await res.json();
@@ -1058,36 +1058,7 @@ ADD_PLATFORM_SELECT?.setSelectedRows([]);
 ADD_GENRE_SELECT?.setSelectedRows([]);
 ADD_TROPE_SELECT?.setSelectedRows([]);
 ADD_STUDIO_SELECT?.setSelectedRows([]);
-    // Create selects once
-// if (!ADD_GENRE_SELECT) {
-//   ADD_GENRE_SELECT = setupDbMultiSelect({
-//     buttonId: "genreBtn",
-//     menuId: "genreMenu",
-//     chipsId: "genreChips",
-//     tableName: "genres"
-//   });
-
-//   ADD_TROPE_SELECT = setupDbMultiSelect({
-//     buttonId: "tropeBtn",
-//     menuId: "tropeMenu",
-//     chipsId: "tropeChips",
-//     tableName: "tropes"
-//   });
-
-//   ADD_STUDIO_SELECT = setupDbMultiSelect({
-//     buttonId: "studioBtn",
-//     menuId: "studioMenu",
-//     chipsId: "studioChips",
-//     tableName: "studios"
-//   });
-
-//   ADD_PLATFORM_SELECT = setupDbMultiSelect({
-//     buttonId: "platformBtn",
-//     menuId: "platformMenu",
-//     chipsId: "platformChips",
-//     tableName: "platforms"
-//   });
-// }
+    
 
 // Load rows (fresh or cached)
 const [gRows, tRows, sRows, pRows] = await Promise.all([
@@ -3043,31 +3014,7 @@ async function appendTagNames(type, names, user_id) {
     }
   }
 }
-// async function appendTagNames(type, names, user_id) {
-//   if (!Array.isArray(names) || !names.length) return;
 
-//   const joinMap = {
-//     studios:  { join: "show_studios",  fk: "studio_id",  table: "studios" },
-//     genres:   { join: "show_genres",   fk: "genre_id",   table: "genres" },
-//     tropes:   { join: "show_tropes",   fk: "trope_id",   table: "tropes" }
-//   };
-
-//   const cfg = joinMap[type];
-//   if (!cfg) return;
-
-//   for (const name of names) {
-//     const row = await getOrCreateOptionRow(cfg.table, name);
-//     if (!row) continue;
-    
-//     await supabase
-//       .from(cfg.join)
-//       .upsert({
-//         user_id,
-//         show_id: CURRENT_SHOW.id,
-//         [cfg.fk]: row.id
-//       }, { onConflict: "user_id,show_id," + cfg.fk });
-//   }
-// }
 function wireForgotPassword() {
   const forgotBtn = el("forgotBtn"); // <-- make sure this exists in HTML
   const loginErr = el("loginError") || el("authMsg") || el("msg");
@@ -3560,33 +3507,7 @@ async function init() {
     tabsRow: !!document.querySelector(".tabsRow")
   });
 
-  // const platformSelect = setupDbMultiSelect({
-  //   buttonId: "platformBtn",
-  //   menuId: "platformMenu",
-  //   chipsId: "platformChips",
-  //   tableName: "platforms"
-  // });
-
-  // const genreSelect = setupDbMultiSelect({
-  //   buttonId: "genreBtn",
-  //   menuId: "genreMenu",
-  //   chipsId: "genreChips",
-  //   tableName: "genres"
-  // });
-
-  // const tropeSelect = setupDbMultiSelect({
-  //   buttonId: "tropeBtn",
-  //   menuId: "tropeMenu",
-  //   chipsId: "tropeChips",
-  //   tableName: "tropes"
-  // });
-
-  // const studioSelect = setupDbMultiSelect({
-  //   buttonId: "studioBtn",
-  //   menuId: "studioMenu",
-  //   chipsId: "studioChips",
-  //   tableName: "studios"
-  // });
+ 
 ADD_PLATFORM_SELECT = setupDbMultiSelect({
   buttonId: "platformBtn",
   menuId: "platformMenu",
@@ -3868,24 +3789,7 @@ route();
 
 snap("init end");
 
-  // // If already logged in on refresh, do the full bootstrap
-  // if (session) {
-  //   await ensureOptionRowsLoaded();
 
-  //   platformSelect.setRows(PLATFORM_ROWS);
-  //   genreSelect.setRows(GENRE_ROWS);
-  //   tropeSelect.setRows(TROPE_ROWS);
-  //   studioSelect.setRows(STUDIO_ROWS);
-
-  //   buildBrowseFiltersUI();
-  //   await loadShows();
-  //   updateHomeCounts();
-  //   renderCollection();
-  //   route();
-  // }
-
-  // snap("init end");
-}
 
 // Keep UI in sync when auth changes (login/logout)
 supabase.auth.onAuthStateChange(async (event, session) => {
@@ -3913,19 +3817,11 @@ if (!session) {
   return;
 }
 
-// ✅ only bootstrap once, on INITIAL_SESSION
+//  only bootstrap once, on INITIAL_SESSION
 if (event === "INITIAL_SESSION") {
   await bootstrapWhenAuthed("auth:INITIAL_SESSION");
 }
 });
 
-// IMPORTANT NOTE:
-// In your original pasted file, you had these lines at top-level:
-//   buildBrowseFiltersUI();  
-//   await loadShows();
-//   updateHomeCounts();
-// That would HARD BREAK the script (top-level await not allowed here),
-// causing the “half logged in” / stuck UI behavior.
-// They are intentionally removed — bootstrap now only happens inside init() or auth change.
 
 init().catch(err => console.error("INIT FAILED:", err));
