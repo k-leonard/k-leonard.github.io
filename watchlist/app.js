@@ -1038,6 +1038,17 @@ async function fetchAnimeFromJikan(title, opts = {}) {
   };
 }
 
+// =====================================================
+// ANIME METADATA PROVIDER
+// =====================================================
+// This is the only function the rest of the app should call.
+//
+// For now, it still uses Jikan so nothing changes.
+// Later, we will swap the implementation to AniList without
+// rewriting wireFetchButtons(), Supabase updates, or tag handling.
+async function fetchAnimeMetadata(title, opts = {}) {
+  return fetchAnimeFromJikan(title, opts);
+}
 // -----------------------------------------------------------------------------
 // [MIGRATION:JIKAN->ANILIST] END — JIKAN-SPECIFIC MATCHING AND NORMALIZATION
 // -----------------------------------------------------------------------------
@@ -2954,7 +2965,7 @@ let attemptedShowId = CURRENT_SHOW?.id ?? null;
       // =====================================================
       if ((CURRENT_SHOW.category || "") === "Anime") {
         // [MIGRATION:JIKAN->ANILIST] ACTIVE CALL SITE
-        const info = await fetchAnimeFromJikan(liveTitle, {
+        const info = await fetchAnimeMetadata(liveTitle, {
           releaseDate: liveReleaseDate,
           useReleaseYear,
           showType: liveType
