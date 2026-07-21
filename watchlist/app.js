@@ -1295,6 +1295,9 @@ async function fetchAnimeFromAniList(title, opts = {}) {
     canonical_title
   };
 }
+// TEMPORARY: expose AniList fetcher for browser-console testing.
+// Remove this after the migration is working.
+window.fetchAnimeFromAniList = fetchAnimeFromAniList;
 // =====================================================
 // ANIME METADATA PROVIDER
 // =====================================================
