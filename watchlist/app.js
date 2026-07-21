@@ -2444,7 +2444,7 @@ const { data, error } = await withTimeoutAbort(
         id, user_id, title, status, rating_stars, last_watched, created_at,
         category, show_type, ongoing, release_date, rewatch_count,
         is_rewatching, last_rewatch_date,
-        description, image_url,
+        description, image_url,  mal_id, anilist_id,
         seasons, episodes, episode_length_min,
         movies, movie_length_min,
         ovas, ova_length_min,
@@ -3049,7 +3049,7 @@ const tagsEl   = el("showTags");
       category, show_type, ongoing, release_date,
       seasons, episodes, episode_length_min, rewatch_count,
       is_rewatching, last_rewatch_date,
-      notes, description, image_url, mal_id,
+      notes, description, image_url, mal_id, anilist_id,
       movies, movie_length_min,
       ovas, ova_length_min,
       current_season, current_episode,
@@ -3239,6 +3239,7 @@ let attemptedShowId = CURRENT_SHOW?.id ?? null;
 
         const updatePayload = {
           // [DATABASE SCHEMA] Add `anilist_id` separately; do not store it in mal_id.
+           anilist_id: info.anilist_id,
           mal_id: info.mal_id,
           image_url: info.image_url,
           description: info.description,
