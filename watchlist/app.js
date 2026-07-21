@@ -3928,5 +3928,5 @@ if (event === "INITIAL_SESSION") {
 }
 });
 
-
+}
 init().catch(err => console.error("INIT FAILED:", err));
