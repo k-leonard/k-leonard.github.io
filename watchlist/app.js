@@ -1,8 +1,49 @@
+/*
+===============================================================================
+WATCHLIST APPLICATION — REORGANIZED / ANNOTATED MIGRATION COPY
+===============================================================================
+
+PURPOSE OF THIS COPY
+- Preserve the current runtime behavior while making app.js easier to navigate.
+- Clearly separate application concerns with numbered section headers.
+- Mark Jikan-dependent code that must change during the AniList migration.
+- Identify legacy/competing implementations without deleting them prematurely.
+
+SEARCHABLE MARKERS
+- [MIGRATION:JIKAN->ANILIST]  Directly affected by the API migration.
+- [API:TMDB]                 TMDb-specific code; not part of the anime migration.
+- [ACTIVE PATH]              Code currently wired during init().
+- [LEGACY / INACTIVE]        Code present but not currently initialized.
+- [REFACTOR CANDIDATE]       Safe target for a later cleanup pass.
+- [DATABASE SCHEMA]          Potential Supabase-column or relationship impact.
+
+IMPORTANT MIGRATION DESIGN
+Keep the rest of the app independent of the metadata provider. The eventual
+AniList function should return the same normalized object shape currently
+returned by fetchAnimeFromJikan():
+
+{
+  mal_id,
+  anilist_id,
+  image_url,
+  description,
+  release_date,
+  studios,
+  genres,
+  themes,
+  canonical_title
+}
+
+If that contract stays stable, the Supabase update and UI code will need far
+fewer changes.
+===============================================================================
+*/
+
 console.count("app.js executed");
 
-// =========================
-// DEBUG KIT
-// =========================
+// ============================================================================
+// 01. DEBUGGING, GLOBAL ERROR CAPTURE, AND DOM SNAPSHOTS
+// ============================================================================
 const DEBUG = true;
 
 function d(...args) {
@@ -55,10 +96,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const DEV_MODE = false; // allows me to still work on aspects if supabase is down
 console.log("WATCHLIST app.js loaded - DEV_MODE =", DEV_MODE);
 
-// -------------------
-// Constants
-// -------------------
+// ============================================================================
+// 02. EXTERNAL CLIENTS, CONFIGURATION, AND APPLICATION CONSTANTS
+// ============================================================================
 const SUPABASE_URL = "https://lldpkdwbnlqfuwjbbirt.supabase.co";
+// Supabase anon keys are intended for browser use when RLS is configured.
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZHBrZHdibmxxZnV3amJiaXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTc3NTcsImV4cCI6MjA4NjQzMzc1N30.OGKn4tElV2k1_ZJKOVjPxBSQUixZB5ywMYo5eGZTDe4";
 const supabase = window.__SUPABASE__ || createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -76,6 +118,7 @@ supabase.auth.getSession().then(({ data, error }) => {
   d("getSession (early probe)", { hasSession: !!data?.session, error });
 });
 
+// [REFACTOR CANDIDATE] Move API keys/config into a server-side proxy or env config.
 const TMDB_API_KEY = "0c4eb2a53f1a768d02688b02187a7996"; // <-- add your key
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500"; // common base for posters
 // DEBUG: auth storage probe
@@ -91,9 +134,9 @@ setTimeout(() => {
   }
 }, 500);
 let CURRENT_SHOW = null;
-// --------------------
-// AUTH STATE (authoritative)
-// --------------------
+// ============================================================================
+// 03. GLOBAL APPLICATION STATE AND AUTH SESSION STATE
+// ============================================================================
 let CURRENT_SESSION = null;
 let CURRENT_USER_ID = null;
 
@@ -162,9 +205,9 @@ const authCard = el("authCard");
 // Cache for client-side filtering
 let ALL_SHOWS_CACHE = [];
 
-// --------------------
-// UI helpers
-// --------------------
+// ============================================================================
+// 04. SHARED DATABASE-JOIN AND GENERAL UI HELPERS
+// ============================================================================
 async function appendJoinRows({ joinTable, user_id, show_id, fkColumn, ids }) {
   const cleanIds = (ids || []).map(Number).filter(Boolean);
   if (!cleanIds.length) return;
@@ -273,6 +316,9 @@ function setupRailPager(rowEl, prevBtn, nextBtn, pageSize = 5) {
   return { refresh: render, reset: () => { page = 0; render(); } };
 }
 
+// ============================================================================
+// 05. HOME-PAGE RAILS
+// ============================================================================
 async function loadHomeRails() {
   const railRecentAdded   = document.getElementById("rail_recent_added");
   const railCurrentlyWatching = document.getElementById("rail_currently_watching");
@@ -381,6 +427,11 @@ if (watchingPager) watchingPager.reset();
 }
 
  
+// ============================================================================
+// 06. EXTERNAL METADATA PROVIDERS
+// ============================================================================
+
+// [API:TMDB] Non-anime metadata provider. This code is not replaced by AniList.
 async function fetchShowFromTMDb(query, opts = {}) {
   const {
     releaseDate = null,
@@ -513,6 +564,9 @@ async function fetchShowFromTMDb(query, opts = {}) {
     description
   };
 }
+// ============================================================================
+// 07. SESSION, TIMEOUT, VIEW-MODE, AND GENERAL DISPLAY HELPERS
+// ============================================================================
 function withTimeoutAbort(makePromise, ms, label = "timeout") {
   const controller = new AbortController();
   let t;
@@ -856,6 +910,12 @@ function extractYearFromDateInput(s) {
   return m ? m[0] : null;
 }
 
+// -----------------------------------------------------------------------------
+// [MIGRATION:JIKAN->ANILIST] START — JIKAN-SPECIFIC MATCHING AND NORMALIZATION
+// -----------------------------------------------------------------------------
+// These three functions depend directly on Jikan field names and response shape.
+// During migration, replace them with AniList equivalents, ideally behind one
+// provider-neutral function such as fetchAnimeMetadata().
 function yearFromJikanAnime(a) {
   const from = a?.aired?.from;
   if (!from) return null;
@@ -877,17 +937,23 @@ function normalizeWantedJikanTypes(appType) {
 }
 
 async function fetchAnimeFromJikan(title, opts = {}) {
+  // [MIGRATION:JIKAN->ANILIST]
+  // Replacement target: fetchAnimeFromAniList(title, opts).
+  // Preserve this function's RETURN SHAPE so downstream Supabase/UI code can
+  // remain mostly unchanged.
   const {
     releaseDate = null,     // a date string from your form (optional)
     useReleaseYear = false, // toggle
     showType = null         // "TV" / "Movie" / "TV & Movie" (optional)
   } = opts;
 
+  // [MIGRATION:JIKAN->ANILIST] Replace REST URL with GraphQL POST + variables.
   const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=10`; 
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Jikan error: ${res.status}`);
   const json = await res.json();
 
+  // [MIGRATION:JIKAN->ANILIST] AniList search results live at data.Page.media.
   const results = json?.data || [];
   if (!results.length) return null;
 
@@ -959,7 +1025,9 @@ async function fetchAnimeFromJikan(title, opts = {}) {
     null;
 
   return {
+    // [DATABASE SCHEMA] Keep MAL and AniList IDs in separate columns.
     mal_id: best.mal_id ?? null,
+    // anilist_id: null, // add when AniList migration begins
     image_url: best.images?.jpg?.image_url ?? best.images?.webp?.image_url ?? null,
     description: best.synopsis ?? null,
     release_date,
@@ -970,6 +1038,9 @@ async function fetchAnimeFromJikan(title, opts = {}) {
   };
 }
 
+// -----------------------------------------------------------------------------
+// [MIGRATION:JIKAN->ANILIST] END — JIKAN-SPECIFIC MATCHING AND NORMALIZATION
+// -----------------------------------------------------------------------------
 
 function syncTypeVisibility() {
   const type = el("show_type")?.value || document.querySelector('select[name="show_type"]')?.value || "";
@@ -995,6 +1066,9 @@ function syncTypeVisibility() {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Shared formatting, parsing, and timing utilities
+// -----------------------------------------------------------------------------
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -1026,6 +1100,9 @@ function debounce(fn, ms) {
   };
 }
 
+// ============================================================================
+// 08. ADD-SHOW AND DELETE MODALS
+// ============================================================================
 function setupAddShowModal() {
   const modal = document.getElementById("addShowModal");
   const openBtn = document.getElementById("openAddShowBtn");
@@ -1208,9 +1285,9 @@ function wireDeleteModal() {
   });
 }
 
-// --------------------
-// Filter helper functions
-// --------------------
+// ============================================================================
+// 09. FILTER UI HELPERS
+// ============================================================================
 function buildCheckboxList({ boxId, items, name, searchInputId, onChange }) {
   const box = el(boxId);
   if (!box) return;
@@ -1251,9 +1328,9 @@ function clearCheckboxGroup(name) {
   document.querySelectorAll(`input[type="checkbox"][name="${name}"]`).forEach(cb => { cb.checked = false; });
 }
 
-// --------------------
-// Hash Router (Home / Browse / Collection / Show)
-// --------------------
+// ============================================================================
+// 10. HASH ROUTER AND PRIMARY NAVIGATION
+// ============================================================================
 function route() {
   d("route()", { hash: window.location.hash });
 
@@ -1379,9 +1456,9 @@ function wireBrowseFilterDrawer() {
 }
 
 
-// --------------------
-// Browse render
-// --------------------
+// ============================================================================
+// 11. BROWSE FILTERING AND TABLE RENDERING
+// ============================================================================
 function applyClientFilters(rows) {
   const q = (el("q")?.value || "").trim().toLowerCase();
 
@@ -1442,9 +1519,9 @@ function rerenderFiltered() {
   if (msg) msg.textContent = filtered.length ? "" : "No results.";
 }
 
-// --------------------
-// Auth
-// --------------------
+// ============================================================================
+// 12. AUTHENTICATION HELPERS AND LOGOUT
+// ============================================================================
 async function getUserId() {
   if (CURRENT_USER_ID) return CURRENT_USER_ID;
 
@@ -1501,9 +1578,9 @@ async function logout(ev) {
   setTimeout(() => location.reload(), 50);
 }
 
-// --------------------
-// DB-backed MultiSelect (search + add new)
-// --------------------
+// ============================================================================
+// 13. DATABASE-BACKED MULTISELECT COMPONENT
+// ============================================================================
 function setupDbMultiSelect({ buttonId, menuId, chipsId, tableName }) {
   const btn = el(buttonId);
   const menu = el(menuId);
@@ -1623,9 +1700,9 @@ document.addEventListener("click", (e2) => {
   };
 }
 
-// --------------------
-// Home KPIs + Collection
-// --------------------
+// ============================================================================
+// 14. HOME DASHBOARD, COLLECTION CARDS, AND COLLECTION NAVIGATION
+// ============================================================================
 function updateHomeCounts() {
   const rows = (ALL_SHOWS_CACHE || []);
 
@@ -1865,9 +1942,10 @@ sessionStorage.setItem("restoreCollectionScroll", "1");
   });
 }
 
-// --------------------
-// Clickable Stars for Ratings
-// --------------------
+// ============================================================================
+// 15. STAR-RATING COMPONENT
+// ============================================================================
+// [UI COMPONENT] Interactive 0–5 star selector used by Add Show.
 function setupStarRating({ containerId, inputId, clearId }) {
   const wrap = el(containerId);
   const hidden = el(inputId);
@@ -1907,9 +1985,9 @@ function setupStarRating({ containerId, inputId, clearId }) {
   };
 }
 
-// --------------------
-// DB helpers
-// --------------------
+// ============================================================================
+// 16. LOOKUP-TABLE DATABASE HELPERS
+// ============================================================================
 async function loadOptionRows(tableName) {
   d(`loadOptionRows START: ${tableName}`);
 
@@ -1961,9 +2039,9 @@ async function getOrCreateOptionRow(tableName, name) {
   return inserted;
 }
 
-// --------------------
-// CRUD
-// --------------------
+// ============================================================================
+// 17. SHOW CRUD AND CACHE LOADING
+// ============================================================================
 async function addShow(formData, platformIds, genreIds, tropeIds, studioIds) {
   const user_id = await getUserId();
   if (!user_id) {
@@ -2128,9 +2206,9 @@ const { data, error } = await withTimeoutAbort(
 });
 }
 
-// --------------------
-// Render table (Browse)
-// --------------------
+// ============================================================================
+// 18. BROWSE TABLE RENDERING
+// ============================================================================
 function renderTable(rows) {
   const table = el("table");
   if (!table) return;
@@ -2166,9 +2244,9 @@ function renderTable(rows) {
   });
 }
 
-// --------------------
-// Show detail (kept as-is from your file; only minimal glue here)
-// --------------------
+// ============================================================================
+// 19. SHOW-DETAIL VIEW AND CURRENT INLINE-EDIT SYSTEM
+// ============================================================================
 function labelVal(label, val) {
   const v2 = (val === null || val === undefined || val === "") ? "—" : String(val);
   return `<div class="factRow"><div class="factLabel muted">${escapeHtml(label)}</div><div class="factValue">${escapeHtml(v2)}</div></div>`;
@@ -2406,6 +2484,7 @@ function renderShowDetailBlocks(show, mode = "view") {
   }
 }
 
+// [ACTIVE PATH] Current inline edit system rendered directly into detail blocks.
 function setInlineEditMode(on) {
   EDIT_MODE = on;
 
@@ -2824,6 +2903,11 @@ function setImg(id, src, alt = "") {
   n.alt = alt;
   return true;
 }
+// ============================================================================
+// 20. EXTERNAL-METADATA FETCH WORKFLOW — CURRENTLY ACTIVE
+// ============================================================================
+// [ACTIVE PATH] init() calls wireFetchButtons(). This is the primary migration
+// integration point. The anime branch currently calls fetchAnimeFromJikan().
 function wireFetchButtons() {
   const fetchBtn = el("fetchAnimeBtn"); // you are reusing same button id
   const editMsg = el("editMsg");
@@ -2865,9 +2949,11 @@ let attemptedShowId = CURRENT_SHOW?.id ?? null;
       const liveType = typeEl?.value ?? null; // "TV" / "Movie" / "TV & Movie" if you have it
 
       // =====================================================
-      // 🔵 ANIME → JIKAN
+      // 🔵 ANIME METADATA
+      // [MIGRATION:JIKAN->ANILIST] Replace provider call; keep normalized output.
       // =====================================================
       if ((CURRENT_SHOW.category || "") === "Anime") {
+        // [MIGRATION:JIKAN->ANILIST] ACTIVE CALL SITE
         const info = await fetchAnimeFromJikan(liveTitle, {
           releaseDate: liveReleaseDate,
           useReleaseYear,
@@ -2881,6 +2967,7 @@ let attemptedShowId = CURRENT_SHOW?.id ?? null;
         }
 
         const updatePayload = {
+          // [DATABASE SCHEMA] Add `anilist_id` separately; do not store it in mal_id.
           mal_id: info.mal_id,
           image_url: info.image_url,
           description: info.description,
@@ -2902,6 +2989,9 @@ attemptedTitle = updatePayload.title ?? (CURRENT_SHOW?.title ?? null);
 
         await appendTagNames("studios", info.studios, user_id);
         await appendTagNames("genres", info.genres, user_id);
+        // Current Jikan mapping: themes -> app tropes.
+        // AniList decision: likely selected tags -> genres or tropes, depending
+        // on the migration rule you choose.
         await appendTagNames("tropes", info.themes, user_id);
 
         showToast("Anime info updated!");
@@ -2974,6 +3064,7 @@ attemptedTitle = updatePayload.title ?? (CURRENT_SHOW?.title ?? null);
     }
   };
 }
+// Provider-neutral helper: this can be reused with AniList after normalization.
 async function appendTagNames(type, names, user_id) {
   if (!Array.isArray(names) || !names.length) return;
 
@@ -3048,6 +3139,14 @@ function wireForgotPassword() {
     if (loginErr) loginErr.textContent = "Reset email sent! Check your inbox.";
   });
 }
+// ============================================================================
+// 22. LEGACY SHOW-DETAIL FORM / SECOND ANIME-FETCH IMPLEMENTATION
+// ============================================================================
+// [LEGACY / INACTIVE] This function is currently NOT called because init()
+// contains `//wireShowDetailButtons();`. It duplicates editing and Jikan-fetch
+// behavior already handled by setInlineEditMode()/saveInlineEdits() and
+// wireFetchButtons(). Keep temporarily for comparison, then remove after the
+// active path is confirmed complete.
 function wireShowDetailButtons() {
   const fetchBtn  = el("fetchAnimeBtn");
   const editBtn   = el("inlineEditBtn");
@@ -3074,6 +3173,7 @@ function wireShowDetailButtons() {
   if (editMsg) editMsg.textContent = "Fetching anime info…";
 
   try {
+    // [MIGRATION:JIKAN->ANILIST] LEGACY/INACTIVE CALL SITE
     const info = await fetchAnimeFromJikan(CURRENT_SHOW.title);
     if (!info) {
       if (editMsg) editMsg.textContent = "No anime match found.";
@@ -3234,6 +3334,7 @@ function wireShowDetailButtons() {
     }
   });
 }
+// [LEGACY / INACTIVE] Old form-based edit mode paired with wireShowDetailButtons.
 function enterEditModeFromCurrentShow() {
   EDIT_MODE = true;
 
@@ -3262,6 +3363,7 @@ function enterEditModeFromCurrentShow() {
   el("edit_last_rewatch_date").value = CURRENT_SHOW.last_rewatch_date || "";
 }
 
+// [LEGACY / INACTIVE] Old form-based edit mode cleanup.
 function exitEditMode() {
   EDIT_MODE = false;
 
@@ -3278,9 +3380,9 @@ function exitEditMode() {
   if (editMsg) editMsg.textContent = "";
   el("inlineSaveBtn") && (el("inlineSaveBtn").disabled = false);
 }
-// --------------------
-// Filters UI builder
-// --------------------
+// ============================================================================
+// 23. FILTER UI CONSTRUCTION
+// ============================================================================
 function buildBrowseFiltersUI() {
   buildCheckboxList({
     boxId: "statusFilterBox",
@@ -3353,9 +3455,9 @@ function buildMinRatingRadios() {
   });
 }
 
-// --------------------
-// Option rows loader (shared promise)
-// --------------------
+// ============================================================================
+// 24. SHARED LOOKUP-OPTION LOADER / AUTHENTICATED BOOTSTRAP
+// ============================================================================
 
 
 // ===== PATCH: ENSURE OPTIONS FAIL-OPEN =====
@@ -3484,9 +3586,9 @@ function setEditMode(on) {
   EDIT_MODE = !!on;
   if (CURRENT_SHOW) renderShowDetailBlocks(CURRENT_SHOW, EDIT_MODE ? "edit" : "view");
 }
-// --------------------
-// Init
-// --------------------
+// ============================================================================
+// 25. APPLICATION INITIALIZATION AND EVENT WIRING
+// ============================================================================
 async function init() {
   // single-init guard
   if (window.__WATCHLIST_INIT_RAN) {
@@ -3542,8 +3644,11 @@ ADD_STUDIO_SELECT = setupDbMultiSelect({
   });
 
   setupAddShowModal();
-//wireShowDetailButtons();
-  wireFetchButtons()
+// [LEGACY / INACTIVE] Old duplicate detail-form/fetch system:
+  // wireShowDetailButtons();
+
+  // [ACTIVE PATH] Current metadata fetch system:
+  wireFetchButtons();
 
 logoutBtn?.addEventListener("click", (ev) => logout(ev));
   d("logout button sanity", {
