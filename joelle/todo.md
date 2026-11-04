@@ -10,4 +10,5 @@
 
 ## Design
 - [ ] fix color of header
+- [ ] fit fonts (see if she wants a specific font)
 - [ ] Make name in header same size as rest in header
