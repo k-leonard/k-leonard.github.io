@@ -5,8 +5,8 @@
 }
 
 .header-logo {
-  height: 50px;          /* Set a fixed height that fits your header */
-  width: auto;           /* Auto width prevents the logo from being squished */
+  height: 100px;          /* Set a fixed height that fits your header */
+  width: 100px;           /* Auto width prevents the logo from being squished */
   flex-shrink: 0;        /* Prevents Flexbox from squeezing the image */
 }
 
