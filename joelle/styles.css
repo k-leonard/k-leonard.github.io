@@ -1,0 +1,15 @@
+.site-header {
+  display: flex;         /* Aligns logo and text side-by-side */
+  align-items: center;   /* Centers them vertically relative to each other */
+  gap: 15px;             /* Adds clean spacing between the logo and text */
+}
+
+.header-logo {
+  height: 50px;          /* Set a fixed height that fits your header */
+  width: auto;           /* Auto width prevents the logo from being squished */
+  flex-shrink: 0;        /* Prevents Flexbox from squeezing the image */
+}
+
+.site-name {
+  margin: 0;             /* Removes default margin to prevent alignment issues */
+}
