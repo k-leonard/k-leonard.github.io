@@ -13,3 +13,103 @@
 .site-name {
   margin: 0;             /* Removes default margin to prevent alignment issues */
 }
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 18px;
+  position: relative;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.site-nav a,
+.more-button {
+  color: var(--ink);
+  text-decoration: none;
+  font: 400 16px "Oswald", sans-serif;
+  white-space: nowrap;
+}
+
+.site-nav a:hover,
+.more-button:hover {
+  color: var(--muted);
+}
+
+/* More dropdown */
+.more-menu {
+  position: relative;
+  display: none;
+  flex-shrink: 0;
+}
+
+.more-menu.active {
+  display: block;
+}
+
+.more-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  margin-left: 3px;
+}
+
+.more-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 170px;
+  background: var(--paper);
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  z-index: 100;
+  padding: 8px 0;
+}
+
+.more-menu.open .more-dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.more-dropdown a {
+  display: block;
+  padding: 8px 16px;
+}
+
+.more-dropdown a:hover {
+  background: var(--soft);
+}
+
+/* Mobile spacing */
+@media (max-width: 600px) {
+  .site-header {
+    padding: 24px 18px;
+  }
+
+  .site-nav {
+    gap: 16px;
+  }
+
+  .nav-links {
+    gap: 16px;
+  }
+
+  .art-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .art-section {
+    padding: 22px 0 30px;
+  }
+}
