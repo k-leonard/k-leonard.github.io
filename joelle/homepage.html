@@ -75,66 +75,79 @@
   <span class="C9DxTc " style="color: #000000; font-family: 'Open Sans', Arial; font-size: 12.0pt; font-variant: normal; font-weight: 400; vertical-align: baseline;">This work may not be used to train AI.</span>
 
   
-  <script>
+ 
+<script>
   const nav = document.querySelector(".site-nav");
   const navLinks = document.querySelector(".nav-links");
   const moreMenu = document.querySelector(".more-menu");
   const moreDropdown = document.querySelector(".more-dropdown");
   const moreButton = document.querySelector(".more-button");
 
-  // Keep a copy of the original links
+  // Keep the original navigation links and their order
   const originalLinks = Array.from(navLinks.children);
 
-function updateNavigation() {
-  // Close dropdown during resizing
-  moreMenu.classList.remove("open");
-  moreButton.setAttribute("aria-expanded", "false");
+  function updateNavigation() {
+    // Close dropdown when recalculating
+    moreMenu.classList.remove("open");
+    moreButton.setAttribute("aria-expanded", "false");
 
-  // Restore all links to their original positions
-  originalLinks.forEach(link => {
-    navLinks.appendChild(link);
-  });
-
-  moreMenu.classList.remove("active");
-
-  const navWidth = nav.clientWidth;
-  const navStyle = getComputedStyle(nav);
-  const linksStyle = getComputedStyle(navLinks);
-
-  const navGap = parseFloat(navStyle.columnGap) || 0;
-  const linkGap = parseFloat(linksStyle.columnGap) || 0;
-  const moreWidth = moreMenu.offsetWidth;
-
-  // Calculate the width needed for all navigation links
-  function getLinksWidth() {
-    let width = 0;
-
-    Array.from(navLinks.children).forEach(link => {
-      width += link.getBoundingClientRect().width;
+    // Restore all links before measuring
+    originalLinks.forEach(link => {
+      navLinks.appendChild(link);
     });
 
-    width += Math.max(0, navLinks.children.length - 1) * linkGap;
+    moreMenu.classList.remove("active");
 
-    return width;
+    // Measure available navigation space
+    const availableWidth = nav.clientWidth;
+    const moreWidth = moreButton.getBoundingClientRect().width;
+
+    const navGap = parseFloat(
+      getComputedStyle(nav).columnGap
+    ) || 0;
+
+    const linkGap = parseFloat(
+      getComputedStyle(navLinks).columnGap
+    ) || 0;
+
+    // Calculate the exact width needed by the remaining links
+    function calculateWidth() {
+      let total = 0;
+
+      Array.from(navLinks.children).forEach(link => {
+        total += link.getBoundingClientRect().width;
+      });
+
+      total += Math.max(0, navLinks.children.length - 1) * linkGap;
+
+      return total;
+    }
+
+    // Keep moving the last tab until everything fits
+    while (navLinks.children.length > 1) {
+
+      const linksWidth = calculateWidth();
+
+      // Include the More button in the available space calculation
+      if (linksWidth + navGap + moreWidth <= availableWidth) {
+        break;
+      }
+
+      // Move the entire last tab into More
+      const lastLink = navLinks.lastElementChild;
+      moreDropdown.prepend(lastLink);
+    }
+
+    // Display More if it contains any links
+    if (moreDropdown.children.length > 0) {
+      moreMenu.classList.add("active");
+    }
   }
 
-  // Move links into More until every remaining word fits
-  while (
-    navLinks.children.length > 1 &&
-    getLinksWidth() + navGap + moreWidth > navWidth
-  ) {
-    const lastLink = navLinks.lastElementChild;
-    moreDropdown.prepend(lastLink);
-  }
+  // Dropdown functionality
+  moreButton.addEventListener("click", event => {
+    event.stopPropagation();
 
-  // Show More only when it contains links
-  if (moreDropdown.children.length > 0) {
-    moreMenu.classList.add("active");
-  }
-}
-
-  // Open and close dropdown
-  moreButton.addEventListener("click", () => {
     const isOpen = moreMenu.classList.toggle("open");
 
     moreButton.setAttribute("aria-expanded", isOpen);
@@ -148,16 +161,25 @@ function updateNavigation() {
     }
   });
 
-  // Recalculate on resizing
-  window.addEventListener("resize", updateNavigation);
+  // Recalculate whenever the navigation container changes size
+  const navObserver = new ResizeObserver(() => {
+    updateNavigation();
+  });
 
-  // Wait for page and fonts to load
+  navObserver.observe(nav);
+
+  // Initial calculation after the page loads
   window.addEventListener("load", updateNavigation);
 
+  // Recalculate after fonts finish loading
   if (document.fonts) {
     document.fonts.ready.then(updateNavigation);
   }
+
+  // Initial calculation
+  updateNavigation();
 </script>
+
 
 </body>
 </html>
