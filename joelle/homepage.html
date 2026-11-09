@@ -46,18 +46,93 @@
   </div>
     <h1 class="site-name">Joelle Cook</h1>
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="#">Home</a>
-      <a href="#printmaking">Printmaking</a>
-      <a href="#">Digital Work</a>
-      <a href="#">Installations</a>
-      <a href="#">Ceramics</a>
-      <a href="#">Exhibitions</a>
-      <a href="#">About</a>
-      <a href="#">CV</a>
-    </nav>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#printmaking">Printmaking</a>
+    <a href="#">Digital Work</a>
+    <a href="#">Installations</a>
+    <a href="#">Ceramics</a>
+    <a href="#">Exhibitions</a>
+    <a href="#">About</a>
+    <a href="#">CV</a>
+  </div>
+
+  <div class="more-menu">
+    <button class="more-button" type="button"
+            aria-expanded="false" aria-haspopup="true">
+      More <span class="dropdown-arrow">▼</span>
+    </button>
+
+    <div class="more-dropdown">
+      <!-- Overflowing navigation links will appear here -->
+    </div>
+  </div>
+</nav>
      
   </header>
   <span class="C9DxTc " style="color: #000000; font-family: 'Open Sans', Arial; font-size: 12.0pt; font-weight: 400; vertical-align: baseline;">© 2026 Joelle Cook. All Rights Reserved. </span>
   <span class="C9DxTc " style="color: #000000; font-family: 'Open Sans', Arial; font-size: 12.0pt; font-variant: normal; font-weight: 400; vertical-align: baseline;">This work may not be used to train AI.</span>
+<script>
+  const nav = document.querySelector(".site-nav");
+  const navLinks = document.querySelector(".nav-links");
+  const moreMenu = document.querySelector(".more-menu");
+  const moreDropdown = document.querySelector(".more-dropdown");
+  const moreButton = document.querySelector(".more-button");
+
+  // Save the original navigation links
+  const originalLinks = Array.from(navLinks.children);
+
+  function updateNavigation() {
+    // Close the dropdown when resizing
+    moreMenu.classList.remove("open");
+
+    // Restore all links to the main navigation
+    originalLinks.forEach(link => navLinks.appendChild(link));
+
+    moreMenu.classList.remove("active");
+
+    const availableWidth = navLinks.parentElement.clientWidth;
+    const moreWidth = moreButton.offsetWidth + 24;
+
+    // Move links into More until everything fits
+    while (navLinks.scrollWidth > availableWidth - moreWidth &&
+           navLinks.children.length > 1) {
+
+      const lastLink = navLinks.lastElementChild;
+
+      moreDropdown.prepend(lastLink);
+      moreMenu.classList.add("active");
+    }
+
+    // Hide More if no links need to be moved
+    if (moreDropdown.children.length === 0) {
+      moreMenu.classList.remove("active");
+    }
+  }
+
+  // Toggle dropdown
+  moreButton.addEventListener("click", () => {
+    const isOpen = moreMenu.classList.toggle("open");
+    moreButton.setAttribute("aria-expanded", isOpen);
+  });
+
+  // Close dropdown when clicking elsewhere
+  document.addEventListener("click", event => {
+    if (!moreMenu.contains(event.target)) {
+      moreMenu.classList.remove("open");
+      moreButton.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // Recalculate when the window changes size
+  window.addEventListener("resize", updateNavigation);
+
+  // Initial calculation after page loads
+  window.addEventListener("load", updateNavigation);
+
+  // Recalculate if fonts finish loading
+  document.fonts.ready.then(updateNavigation);
+</script>
+
 </body>
 </html>
