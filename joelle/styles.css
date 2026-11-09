@@ -15,21 +15,16 @@
 }
 .site-nav {
   display: flex;
-  align-items: center;
   flex-wrap: nowrap;
-  gap: 20px;
-  margin-top: 18px;
   width: 100%;
-  position: relative;
+  gap: 20px;
 }
 
 .nav-links {
   display: flex;
-  align-items: center;
   flex-wrap: nowrap;
-  gap: 24px;
   flex: 0 0 auto;
-  white-space: nowrap;
+  gap: 24px;
 }
 
 .nav-links a,
@@ -48,7 +43,6 @@
 
 /* More menu */
 .more-menu {
-  position: relative;
   display: block;
   flex-shrink: 0;
   visibility: hidden;
@@ -57,7 +51,6 @@
 .more-menu.active {
   visibility: visible;
 }
-
 .more-button {
   background: none;
   border: none;
