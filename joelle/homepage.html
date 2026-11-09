@@ -79,44 +79,52 @@
   const moreDropdown = document.querySelector(".more-dropdown");
   const moreButton = document.querySelector(".more-button");
 
-  // Save the original navigation links
+  // Keep a copy of the original links
   const originalLinks = Array.from(navLinks.children);
 
   function updateNavigation() {
-    // Close the dropdown when resizing
+    // Close dropdown during resizing
     moreMenu.classList.remove("open");
+    moreButton.setAttribute("aria-expanded", "false");
 
-    // Restore all links to the main navigation
-    originalLinks.forEach(link => navLinks.appendChild(link));
+    // Restore every link to its original position
+    originalLinks.forEach(link => {
+      navLinks.appendChild(link);
+    });
 
+    // Hide More visually, but keep its width measurable
     moreMenu.classList.remove("active");
 
-    const availableWidth = navLinks.parentElement.clientWidth;
-    const moreWidth = moreButton.offsetWidth + 24;
+    const navWidth = nav.clientWidth;
+    const moreWidth = moreMenu.offsetWidth;
 
-    // Move links into More until everything fits
-    while (navLinks.scrollWidth > availableWidth - moreWidth &&
-           navLinks.children.length > 1) {
+    const navGap = parseFloat(
+      getComputedStyle(nav).columnGap
+    );
 
+    // Move the last link into More until everything fits
+    while (
+      navLinks.children.length > 1 &&
+      navLinks.scrollWidth + navGap + moreWidth > navWidth
+    ) {
       const lastLink = navLinks.lastElementChild;
-
       moreDropdown.prepend(lastLink);
-      moreMenu.classList.add("active");
     }
 
-    // Hide More if no links need to be moved
-    if (moreDropdown.children.length === 0) {
-      moreMenu.classList.remove("active");
+    // Only show More if it contains links
+    if (moreDropdown.children.length > 0) {
+      moreMenu.classList.add("active");
     }
   }
 
-  // Toggle dropdown
+  // Open and close dropdown
   moreButton.addEventListener("click", () => {
     const isOpen = moreMenu.classList.toggle("open");
+
     moreButton.setAttribute("aria-expanded", isOpen);
   });
 
-  // Close dropdown when clicking elsewhere
+  // Close dropdown when clicking outside
   document.addEventListener("click", event => {
     if (!moreMenu.contains(event.target)) {
       moreMenu.classList.remove("open");
@@ -124,14 +132,15 @@
     }
   });
 
-  // Recalculate when the window changes size
+  // Recalculate on resizing
   window.addEventListener("resize", updateNavigation);
 
-  // Initial calculation after page loads
+  // Wait for page and fonts to load
   window.addEventListener("load", updateNavigation);
 
-  // Recalculate if fonts finish loading
-  document.fonts.ready.then(updateNavigation);
+  if (document.fonts) {
+    document.fonts.ready.then(updateNavigation);
+  }
 </script>
 
 </body>
