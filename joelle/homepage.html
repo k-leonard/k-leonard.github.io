@@ -99,7 +99,8 @@
     moreMenu.classList.remove("active");
 
     // Measure available navigation space
-    const availableWidth = nav.clientWidth;
+    const availableWidth =
+  nav.clientWidth - navGap - moreWidth;
     const moreWidth = moreButton.getBoundingClientRect().width;
 
     const navGap = parseFloat(
@@ -124,7 +125,10 @@
     }
 
     // Keep moving the last tab until everything fits
-    while (navLinks.children.length > 1) {
+    while (
+  navLinks.children.length > 1 &&
+  calculateWidth() > availableWidth
+) {
 
       const linksWidth = calculateWidth();
 
