@@ -1,29 +1,46 @@
 .site-header {
-  display: flex;         /* Aligns logo and text side-by-side */
-  align-items: center;   /* Centers them vertically relative to each other */
-  gap: 15px;             /* Adds clean spacing between the logo and text */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 30px clamp(20px, 6vw, 80px);
+  background: var(--soft);
+  border-bottom: 1px solid #e5e5e5;
 }
 
-.header-logo {
-  height: 100px;          /* Set a fixed height that fits your header */
-  width: 100px;           /* Auto width prevents the logo from being squished */
-  flex-shrink: 0;        /* Prevents Flexbox from squeezing the image */
+.logo-container {
+  flex-shrink: 0;
+}
+
+.logo-container img {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
 }
 
 .site-name {
-  margin: 0;             /* Removes default margin to prevent alignment issues */
-}
-.site-nav {
-  display: flex;
-  flex-wrap: nowrap;
-  width: 100%;
-  gap: 20px;
+  margin: 0;
+  font: 400 clamp(28px, 4vw, 42px)/1.2 "Oswald", sans-serif;
+  letter-spacing: .04em;
 }
 
+.site-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
+  gap: 20px;
+  margin-top: 8px;
+  position: relative;
+}
 .nav-links {
   display: flex;
+  align-items: center;
   flex-wrap: nowrap;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   gap: 24px;
 }
 
@@ -43,6 +60,7 @@
 
 /* More menu */
 .more-menu {
+  position: relative;
   display: block;
   flex-shrink: 0;
   visibility: hidden;
@@ -51,6 +69,7 @@
 .more-menu.active {
   visibility: visible;
 }
+
 .more-button {
   background: none;
   border: none;
@@ -63,7 +82,7 @@
   margin-left: 3px;
 }
 
-/* Dropdown contents */
+/* Dropdown */
 .more-dropdown {
   display: none;
   position: absolute;
@@ -90,14 +109,13 @@
 .more-dropdown a:hover {
   background: var(--soft);
 }
-
 @media (max-width: 600px) {
   .site-header {
     padding: 24px 18px;
   }
 
   .site-nav {
-    gap: 16px;
+    gap: 12px;
   }
 
   .nav-links {
