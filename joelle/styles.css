@@ -16,24 +16,29 @@
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 24px;
+  flex-wrap: nowrap;
+  gap: 20px;
   margin-top: 18px;
+  width: 100%;
   position: relative;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 24px;
-  min-width: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
-.site-nav a,
+.nav-links a,
 .more-button {
   color: var(--ink);
   text-decoration: none;
   font: 400 16px "Oswald", sans-serif;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .site-nav a:hover,
@@ -41,15 +46,16 @@
   color: var(--muted);
 }
 
-/* More dropdown */
+/* More menu */
 .more-menu {
   position: relative;
-  display: none;
+  display: block;
   flex-shrink: 0;
+  visibility: hidden;
 }
 
 .more-menu.active {
-  display: block;
+  visibility: visible;
 }
 
 .more-button {
@@ -64,16 +70,17 @@
   margin-left: 3px;
 }
 
+/* Dropdown contents */
 .more-dropdown {
   display: none;
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
   min-width: 170px;
   background: var(--paper);
   border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 10px rgba(0,0,0,.1);
-  z-index: 100;
+  box-shadow: 0 4px 10px rgba(0,0,0,.12);
+  z-index: 1000;
   padding: 8px 0;
 }
 
@@ -91,7 +98,6 @@
   background: var(--soft);
 }
 
-/* Mobile spacing */
 @media (max-width: 600px) {
   .site-header {
     padding: 24px 18px;
