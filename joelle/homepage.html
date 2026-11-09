@@ -85,40 +85,53 @@
   // Keep a copy of the original links
   const originalLinks = Array.from(navLinks.children);
 
-  function updateNavigation() {
-    // Close dropdown during resizing
-    moreMenu.classList.remove("open");
-    moreButton.setAttribute("aria-expanded", "false");
+function updateNavigation() {
+  // Close dropdown during resizing
+  moreMenu.classList.remove("open");
+  moreButton.setAttribute("aria-expanded", "false");
 
-    // Restore every link to its original position
-    originalLinks.forEach(link => {
-      navLinks.appendChild(link);
+  // Restore all links to their original positions
+  originalLinks.forEach(link => {
+    navLinks.appendChild(link);
+  });
+
+  moreMenu.classList.remove("active");
+
+  const navWidth = nav.clientWidth;
+  const navStyle = getComputedStyle(nav);
+  const linksStyle = getComputedStyle(navLinks);
+
+  const navGap = parseFloat(navStyle.columnGap) || 0;
+  const linkGap = parseFloat(linksStyle.columnGap) || 0;
+  const moreWidth = moreMenu.offsetWidth;
+
+  // Calculate the width needed for all navigation links
+  function getLinksWidth() {
+    let width = 0;
+
+    Array.from(navLinks.children).forEach(link => {
+      width += link.getBoundingClientRect().width;
     });
 
-    // Hide More visually, but keep its width measurable
-    moreMenu.classList.remove("active");
+    width += Math.max(0, navLinks.children.length - 1) * linkGap;
 
-    const navWidth = nav.clientWidth;
-    const moreWidth = moreMenu.offsetWidth;
-
-    const navGap = parseFloat(
-      getComputedStyle(nav).columnGap
-    );
-
-    // Move the last link into More until everything fits
-    while (
-      navLinks.children.length > 1 &&
-      navLinks.scrollWidth + navGap + moreWidth > navWidth
-    ) {
-      const lastLink = navLinks.lastElementChild;
-      moreDropdown.prepend(lastLink);
-    }
-
-    // Only show More if it contains links
-    if (moreDropdown.children.length > 0) {
-      moreMenu.classList.add("active");
-    }
+    return width;
   }
+
+  // Move links into More until every remaining word fits
+  while (
+    navLinks.children.length > 1 &&
+    getLinksWidth() + navGap + moreWidth > navWidth
+  ) {
+    const lastLink = navLinks.lastElementChild;
+    moreDropdown.prepend(lastLink);
+  }
+
+  // Show More only when it contains links
+  if (moreDropdown.children.length > 0) {
+    moreMenu.classList.add("active");
+  }
+}
 
   // Open and close dropdown
   moreButton.addEventListener("click", () => {
